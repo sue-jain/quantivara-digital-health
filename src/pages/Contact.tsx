@@ -113,6 +113,13 @@ const Contact = () => {
     }
   ];
 
+  const officeLocations = [
+    { city: 'Mumbai', region: 'Western India', focus: 'Corporate Headquarters' },
+    { city: 'Delhi NCR', region: 'Northern India', focus: 'Government Relations' },
+    { city: 'Bangalore', region: 'Southern India', focus: 'Technology Center' },
+    { city: 'Kolkata', region: 'Eastern India', focus: 'Rural Healthcare Hub' }
+  ];
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -325,11 +332,11 @@ const Contact = () => {
                 <h3 className="font-heading font-bold text-xl mb-4">Response Time</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold">< 24 hrs</div>
+                    <div className="text-2xl font-bold">{"< 24 hrs"}</div>
                     <p className="text-blue-100 text-sm">Demo Scheduling</p>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">< 2 hrs</div>
+                    <div className="text-2xl font-bold">{"< 2 hrs"}</div>
                     <p className="text-blue-100 text-sm">Email Response</p>
                   </div>
                 </div>
@@ -382,12 +389,7 @@ const Contact = () => {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {[
-                { city: 'Mumbai', region: 'Western India', focus: 'Corporate Headquarters' },
-                { city: 'Delhi NCR', region: 'Northern India', focus: 'Government Relations' },
-                { city: 'Bangalore', region: 'Southern India', focus: 'Technology Center' },
-                { city: 'Kolkata', region: 'Eastern India', focus: 'Rural Healthcare Hub' }
-              ].map((office, index) => (
+              {officeLocations.map((office, index) => (
                 <div key={index} className="text-center space-y-2">
                   <div className="w-12 h-12 bg-gradient-to-r from-healthcare-blue-500 to-healthcare-green-500 rounded-full flex items-center justify-center mx-auto text-white font-bold">
                     {office.city.slice(0, 1)}
