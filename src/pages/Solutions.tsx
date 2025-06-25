@@ -9,11 +9,16 @@ import {
   Pill, 
   FlaskConical, 
   MapPin,
-  CheckCircle2,
-  ArrowRight,
+  Smartphone,
+  Brain,
   Shield,
   Clock,
-  TrendingUp
+  CheckCircle2,
+  ArrowRight,
+  Heart,
+  FileText,
+  Calendar,
+  MessageSquare
 } from 'lucide-react';
 
 const Solutions = () => {
@@ -22,116 +27,144 @@ const Solutions = () => {
       id: 'doctors',
       icon: Stethoscope,
       title: 'For Doctors',
-      subtitle: 'Digital prescription generation & patient management',
-      description: 'Transform your practice with AI-powered tools that work on just your smartphone',
-      gradient: 'from-healthcare-blue-500 to-healthcare-blue-600',
+      subtitle: 'Digital Practice Management',
+      description: 'Transform your practice with AI-powered tools that work on your smartphone',
+      color: 'from-healthcare-blue-500 to-healthcare-blue-600',
       features: [
-        'Digital prescription generation from handwritten notes',
-        'Complete patient history access across visits',
-        'AI-assisted diagnosis support and recommendations',
-        'Legal protection with digital audit trails',
-        'No laptop or printer required - mobile-only',
+        'AI handwriting recognition for instant digital prescriptions',
+        'Patient history access across all healthcare providers', 
+        'AI-assisted diagnosis support and drug interaction alerts',
+        'Legal protection with tamper-proof digital records',
+        'No laptop or printer required - works entirely on mobile',
         'Offline capability for areas with poor connectivity',
-        'Integration with labs and pharmacies',
-        'Automatic follow-up reminders'
+        'Multi-language support for patient communication',
+        'Integrated billing and insurance claim processing'
       ],
       benefits: [
-        { icon: Clock, text: '70% reduction in prescription time' },
-        { icon: Shield, text: 'Legal protection with digital records' },
-        { icon: TrendingUp, text: 'Better patient outcomes tracking' }
+        { metric: '75%', label: 'Time Saved on Documentation' },
+        { metric: '90%', label: 'Reduction in Prescription Errors' },
+        { metric: '99.9%', label: 'Uptime Guarantee' },
+        { metric: '20+', label: 'Languages Supported' }
       ]
     },
     {
       id: 'patients',
       icon: Users,
       title: 'For Patients',
-      subtitle: 'Unified health records & telemedicine access',
-      description: 'Access quality healthcare anywhere in India through your smartphone',
-      gradient: 'from-healthcare-green-500 to-healthcare-green-600',
+      subtitle: 'Unified Health Records',
+      description: 'Access your complete health information anytime, anywhere on your phone',
+      color: 'from-healthcare-green-500 to-healthcare-green-600',
       features: [
-        'Unified health records accessible on phone',
-        'Telemedicine consultations with specialists',
-        'Medicine home delivery to rural areas',
-        'Price comparison for medications',
-        'Appointment scheduling across providers',
-        'Health reminders and follow-up alerts',
-        'Insurance claim assistance',
-        'Multi-language support'
+        'Unified health records accessible on smartphone',
+        'Telemedicine consultations with doctors across India',
+        'Medicine home delivery to your doorstep',
+        'Price comparison for medications across pharmacies',
+        'Appointment scheduling with preferred doctors',
+        'Lab report access and sharing capabilities',
+        'Health reminders and medication alerts',
+        'Emergency medical information readily available'
       ],
       benefits: [
-        { icon: MapPin, text: 'No travel required for consultations' },
-        { icon: TrendingUp, text: '50% cost reduction in healthcare' },
-        { icon: Clock, text: '24/7 access to health records' }
+        { metric: '100km', label: 'Average Travel Distance Saved' },
+        { metric: '50%', label: 'Reduction in Healthcare Costs' },
+        { metric: '24/7', label: 'Access to Health Records' },
+        { metric: '30%', label: 'Faster Prescription Delivery' }
       ]
     },
     {
       id: 'pharmacies',
       icon: Pill,
       title: 'For Pharmacies',
-      subtitle: 'Digital prescription receipt & inventory management',
-      description: 'Streamline operations with digital prescriptions and smart inventory',
-      gradient: 'from-healthcare-orange-500 to-healthcare-orange-600',
+      subtitle: 'Smart Inventory Management',
+      description: 'Streamline operations with digital prescription management and inventory optimization',
+      color: 'from-healthcare-orange-500 to-healthcare-orange-600',
       features: [
-        'Digital prescription receipt and processing',
-        'Automated inventory management and alerts',
-        'Reduced errors from handwriting interpretation',
-        'Stock optimization based on demand patterns',
-        'Patient medication history tracking',
-        'Integration with doctor and lab systems',
-        'Automated insurance claim processing',
-        'Real-time drug interaction warnings'
+        'Digital prescription receipt and verification',
+        'Smart inventory management with demand forecasting',
+        'Significant reduction in errors from handwriting misinterpretation',
+        'Stock optimization based on prescription patterns',
+        'Patient medication history for better counseling',
+        'Integration with insurance providers for claims',
+        'Automated reorder alerts for low-stock medicines',
+        'Analytics dashboard for business insights'
       ],
       benefits: [
-        { icon: CheckCircle2, text: '90% reduction in prescription errors' },
-        { icon: TrendingUp, text: '30% increase in operational efficiency' },
-        { icon: Shield, text: 'Compliance with regulatory requirements' }
+        { metric: '95%', label: 'Reduction in Prescription Errors' },
+        { metric: '40%', label: 'Inventory Optimization' },
+        { metric: '60%', label: 'Faster Prescription Processing' },
+        { metric: '25%', label: 'Increase in Customer Satisfaction' }
       ]
     },
     {
       id: 'labs',
       icon: FlaskConical,
       title: 'For Labs',
-      subtitle: 'Seamless result sharing & digital reporting',
-      description: 'Connect with the entire healthcare ecosystem for better patient care',
-      gradient: 'from-purple-500 to-purple-600',
+      subtitle: 'Digital Result Management',
+      description: 'Seamless integration for test ordering, processing, and result delivery',
+      color: 'from-purple-500 to-purple-600',
       features: [
-        'Seamless result sharing with doctors and patients',
-        'Digital order processing and tracking',
-        'Quality control and result validation',
-        'Automated report distribution',
-        'Integration with hospital management systems',
+        'Seamless digital test ordering from doctors',
+        'Automated result sharing with patients and doctors',
+        'Quality tracking and compliance monitoring',
+        'Integrated report generation and distribution',
         'Real-time status updates for patients',
-        'Historical data analysis and trends',
-        'Regulatory compliance reporting'
+        'Integration with hospital and clinic systems',
+        'Automated billing and insurance processing',
+        'Analytics for operational efficiency'
       ],
       benefits: [
-        { icon: Clock, text: '60% faster result delivery' },
-        { icon: CheckCircle2, text: 'Zero manual report distribution' },
-        { icon: TrendingUp, text: 'Improved patient satisfaction' }
+        { metric: '80%', label: 'Faster Report Delivery' },
+        { metric: '99.5%', label: 'Accuracy in Test Results' },
+        { metric: '70%', label: 'Reduction in Manual Work' },
+        { metric: '45%', label: 'Improvement in Turnaround Time' }
       ]
     },
     {
       id: 'rural',
       icon: MapPin,
-      title: 'Rural Healthcare',
-      subtitle: 'Offline-first design for remote areas',
-      description: 'Bringing advanced healthcare technology to every village in India',
-      gradient: 'from-emerald-500 to-emerald-600',
+      title: 'For Rural Healthcare',
+      subtitle: 'Bridging the Healthcare Gap',
+      description: 'Specially designed for rural areas with limited infrastructure and connectivity',
+      color: 'from-teal-500 to-teal-600',
       features: [
-        'Offline-first design for poor connectivity areas',
-        'Mobile-only operation - no laptops needed',
-        'Multi-language interface in regional languages',
+        'Offline-first design that works without internet',
+        'Mobile-only operation - no computers required',
+        'Multi-language interface in local dialects',
         'Low-bandwidth optimization for slow networks',
         'Village-level healthcare worker support',
         'Telemedicine connections to urban specialists',
-        'Local health data storage and sync',
-        'Community health program integration'
+        'Medicine delivery to remote locations',
+        'Health education and awareness programs'
       ],
       benefits: [
-        { icon: MapPin, text: 'Reaches remote villages effectively' },
-        { icon: Users, text: 'Connects rural patients to specialists' },
-        { icon: Shield, text: 'Works without internet connectivity' }
+        { metric: '100%', label: 'Offline Functionality' },
+        { metric: '20+', label: 'Regional Languages' },
+        { metric: '90%', label: 'Reduction in Specialist Travel' },
+        { metric: '85%', label: 'Improvement in Rural Care Access' }
       ]
+    }
+  ];
+
+  const integrationFeatures = [
+    {
+      icon: Brain,
+      title: 'AI-Powered Intelligence',
+      description: 'Advanced machine learning for handwriting recognition, diagnosis support, and predictive analytics'
+    },
+    {
+      icon: Smartphone,
+      title: 'Mobile-First Design',
+      description: 'Optimized for smartphones - the primary digital device for most healthcare providers in India'
+    },
+    {
+      icon: Shield,
+      title: 'Security & Compliance',
+      description: 'HIPAA-equivalent protection, ABDM compliance, and end-to-end encryption for all data'
+    },
+    {
+      icon: Clock,
+      title: 'Real-Time Sync',
+      description: 'Instant synchronization across all healthcare stakeholders when connectivity is available'
     }
   ];
 
@@ -144,10 +177,10 @@ const Solutions = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <h1 className="text-4xl md:text-5xl font-heading font-bold text-gray-900">
-              Healthcare Solutions for Everyone
+              Healthcare Solutions for Every Stakeholder
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
-              Tailored solutions for doctors, patients, pharmacies, labs, and rural healthcare providers across India
+              Comprehensive digital healthcare platform designed for doctors, patients, pharmacies, labs, and rural healthcare providers across India
             </p>
             <div className="flex justify-center">
               <div className="w-24 h-1 bg-gradient-to-r from-healthcare-blue-600 to-healthcare-green-600 rounded-full"></div>
@@ -161,69 +194,53 @@ const Solutions = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-6">
-              Complete Healthcare Ecosystem
+              Tailored Solutions for Every Healthcare Need
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our platform connects every stakeholder in the healthcare system, creating seamless experiences for all
+              Our platform adapts to serve all participants in India's healthcare ecosystem
             </p>
           </div>
 
-          {/* Solutions Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            {solutions.slice(0, 3).map((solution, index) => (
-              <div 
-                key={solution.id}
-                className="bg-white border border-gray-200 rounded-3xl p-8 hover:shadow-xl transition-all duration-300 group cursor-pointer"
-                onClick={() => document.getElementById(solution.id)?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                <div className={`w-16 h-16 bg-gradient-to-r ${solution.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+            {solutions.slice(0, 3).map((solution) => (
+              <div key={solution.id} className="bg-white border border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-all duration-300">
+                <div className={`w-16 h-16 bg-gradient-to-r ${solution.color} rounded-2xl flex items-center justify-center mb-6`}>
                   <solution.icon className="h-8 w-8 text-white" />
                 </div>
-
-                <h3 className="font-heading font-bold text-2xl text-gray-900 mb-3">
+                <h3 className="font-heading font-bold text-2xl text-gray-900 mb-2">
                   {solution.title}
                 </h3>
                 <p className="text-healthcare-blue-600 font-medium mb-4">
                   {solution.subtitle}
                 </p>
-                <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                <p className="text-gray-600 mb-6 leading-relaxed">
                   {solution.description}
                 </p>
-
-                <div className="flex items-center text-healthcare-blue-600 font-medium">
-                  <span>Learn More</span>
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
-                </div>
+                <Button variant="outline" className="w-full">
+                  Learn More
+                </Button>
               </div>
             ))}
           </div>
 
-          {/* Rural Healthcare & Labs */}
           <div className="grid md:grid-cols-2 gap-8">
-            {solutions.slice(3).map((solution, index) => (
-              <div 
-                key={solution.id}
-                className="bg-white border border-gray-200 rounded-3xl p-8 hover:shadow-xl transition-all duration-300 group cursor-pointer"
-                onClick={() => document.getElementById(solution.id)?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                <div className={`w-16 h-16 bg-gradient-to-r ${solution.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+            {solutions.slice(3).map((solution) => (
+              <div key={solution.id} className="bg-white border border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-all duration-300">
+                <div className={`w-16 h-16 bg-gradient-to-r ${solution.color} rounded-2xl flex items-center justify-center mb-6`}>
                   <solution.icon className="h-8 w-8 text-white" />
                 </div>
-
-                <h3 className="font-heading font-bold text-2xl text-gray-900 mb-3">
+                <h3 className="font-heading font-bold text-2xl text-gray-900 mb-2">
                   {solution.title}
                 </h3>
                 <p className="text-healthcare-blue-600 font-medium mb-4">
                   {solution.subtitle}
                 </p>
-                <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                <p className="text-gray-600 mb-6 leading-relaxed">
                   {solution.description}
                 </p>
-
-                <div className="flex items-center text-healthcare-blue-600 font-medium">
-                  <span>Learn More</span>
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
-                </div>
+                <Button variant="outline" className="w-full">
+                  Learn More
+                </Button>
               </div>
             ))}
           </div>
@@ -232,71 +249,68 @@ const Solutions = () => {
 
       {/* Detailed Solutions */}
       {solutions.map((solution, index) => (
-        <section 
-          key={solution.id}
-          id={solution.id}
-          className={`py-20 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-        >
+        <section key={solution.id} className={`py-20 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
           <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              <div className={`space-y-8 ${index % 2 === 1 ? 'lg:order-2' : ''}`}>
-                <div>
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className={`w-16 h-16 bg-gradient-to-r ${solution.gradient} rounded-2xl flex items-center justify-center`}>
-                      <solution.icon className="h-8 w-8 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900">
-                        {solution.title}
-                      </h2>
-                      <p className="text-lg text-healthcare-blue-600 font-medium">
-                        {solution.subtitle}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-lg text-gray-700 leading-relaxed">
-                    {solution.description}
-                  </p>
-                </div>
-
-                {/* Key Benefits */}
-                <div>
-                  <h3 className="font-heading font-bold text-xl text-gray-900 mb-4">
-                    Key Benefits
-                  </h3>
-                  <div className="grid gap-4">
-                    {solution.benefits.map((benefit, idx) => (
-                      <div key={idx} className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-healthcare-green-100 rounded-full flex items-center justify-center">
-                          <benefit.icon className="h-5 w-5 text-healthcare-green-600" />
-                        </div>
-                        <span className="text-gray-700 font-medium">{benefit.text}</span>
+            <div className="max-w-6xl mx-auto">
+              <div className="grid lg:grid-cols-2 gap-16 items-center">
+                <div className={`space-y-8 ${index % 2 === 1 ? 'order-2' : ''}`}>
+                  <div>
+                    <div className="flex items-center space-x-4 mb-6">
+                      <div className={`w-16 h-16 bg-gradient-to-r ${solution.color} rounded-2xl flex items-center justify-center`}>
+                        <solution.icon className="h-8 w-8 text-white" />
                       </div>
-                    ))}
+                      <div>
+                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900">
+                          {solution.title}
+                        </h2>
+                        <p className="text-xl text-gray-600">{solution.subtitle}</p>
+                      </div>
+                    </div>
+                    <p className="text-lg text-gray-600 leading-relaxed mb-8">
+                      {solution.description}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-heading font-bold text-gray-900 mb-6">Key Features</h3>
+                    <div className="space-y-3">
+                      {solution.features.map((feature, idx) => (
+                        <div key={idx} className="flex items-start space-x-3">
+                          <CheckCircle2 className="h-5 w-5 text-healthcare-green-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-gray-700">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-6">
+                    <Button size="lg" className={`bg-gradient-to-r ${solution.color} text-white hover:opacity-90`} asChild>
+                      <Link to="/contact">
+                        Request Demo
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
                   </div>
                 </div>
 
-                <Button size="lg" className={`bg-gradient-to-r ${solution.gradient} hover:opacity-90`} asChild>
-                  <Link to="/contact">
-                    Get Started
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-
-              <div className={`${index % 2 === 1 ? 'lg:order-1' : ''}`}>
-                <div className="bg-white rounded-3xl p-8 shadow-lg">
-                  <h3 className="font-heading font-bold text-xl text-gray-900 mb-6">
-                    Complete Feature Set
-                  </h3>
-                  <ul className="space-y-4">
-                    {solution.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start space-x-3">
-                        <CheckCircle2 className="h-5 w-5 text-healthcare-green-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-700 text-sm leading-relaxed">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <div className={`${index % 2 === 1 ? 'order-1' : ''}`}>
+                  <div className="bg-white rounded-3xl p-8 shadow-2xl">
+                    <h4 className="text-xl font-heading font-bold text-gray-900 mb-6 text-center">
+                      Impact Metrics
+                    </h4>
+                    <div className="grid grid-cols-2 gap-6">
+                      {solution.benefits.map((benefit, idx) => (
+                        <div key={idx} className="text-center">
+                          <div className={`text-3xl font-bold bg-gradient-to-r ${solution.color} bg-clip-text text-transparent`}>
+                            {benefit.metric}
+                          </div>
+                          <p className="text-gray-600 text-sm mt-1">
+                            {benefit.label}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -304,73 +318,117 @@ const Solutions = () => {
         </section>
       ))}
 
-      {/* Integration Overview */}
+      {/* Integration Features */}
       <section className="py-20 bg-gradient-to-r from-healthcare-blue-900 to-healthcare-green-900 text-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-heading font-bold mb-6">
-              Seamless Integration Across All Stakeholders
+              Seamless Integration Across All Solutions
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Our platform creates a unified ecosystem where all healthcare providers work together seamlessly
+              Our platform ensures all healthcare stakeholders work together seamlessly
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center space-y-4">
-              <div className="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center mx-auto">
-                <Stethoscope className="h-10 w-10 text-white" />
+            {integrationFeatures.map((feature, index) => (
+              <div key={index} className="text-center space-y-4">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto">
+                  <feature.icon className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="font-heading font-bold text-lg">
+                  {feature.title}
+                </h3>
+                <p className="text-blue-100 text-sm leading-relaxed">
+                  {feature.description}
+                </p>
               </div>
-              <h3 className="font-heading font-bold text-lg">Doctors</h3>
-              <p className="text-blue-100 text-sm">
-                Digital prescriptions and patient management
-              </p>
-            </div>
-
-            <div className="text-center space-y-4">
-              <div className="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center mx-auto">
-                <Users className="h-10 w-10 text-white" />
-              </div>
-              <h3 className="font-heading font-bold text-lg">Patients</h3>
-              <p className="text-blue-100 text-sm">
-                Unified health records and telemedicine access
-              </p>
-            </div>
-
-            <div className="text-center space-y-4">
-              <div className="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center mx-auto">
-                <Pill className="h-10 w-10 text-white" />
-              </div>
-              <h3 className="font-heading font-bold text-lg">Pharmacies</h3>
-              <p className="text-blue-100 text-sm">
-                Digital prescription processing and inventory
-              </p>
-            </div>
-
-            <div className="text-center space-y-4">
-              <div className="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center mx-auto">
-                <FlaskConical className="h-10 w-10 text-white" />
-              </div>
-              <h3 className="font-heading font-bold text-lg">Labs</h3>
-              <p className="text-blue-100 text-sm">
-                Seamless result sharing and reporting
-              </p>
-            </div>
+            ))}
           </div>
 
           <div className="mt-16 text-center">
-            <Button size="lg" variant="outline" className="bg-white text-healthcare-blue-900 hover:bg-gray-100" asChild>
-              <Link to="/technology">
-                Explore Integration Details
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            <div className="bg-white/10 rounded-3xl p-8 max-w-4xl mx-auto">
+              <h3 className="text-2xl font-heading font-bold mb-4">Complete Healthcare Ecosystem</h3>
+              <p className="text-blue-100 mb-6">
+                From prescription creation to medicine delivery, lab tests to insurance claims - 
+                everything connected through one intelligent platform.
+              </p>
+              <div className="flex items-center justify-center space-x-4 text-sm">
+                <div className="flex items-center space-x-2">
+                  <Heart className="h-4 w-4" />
+                  <span>Doctor Prescribes</span>
+                </div>
+                <ArrowRight className="h-4 w-4" />
+                <div className="flex items-center space-x-2">
+                  <FileText className="h-4 w-4" />
+                  <span>AI Digitizes</span>
+                </div>
+                <ArrowRight className="h-4 w-4" />
+                <div className="flex items-center space-x-2">
+                  <Pill className="h-4 w-4" />
+                  <span>Pharmacy Fulfills</span>
+                </div>
+                <ArrowRight className="h-4 w-4" />
+                <div className="flex items-center space-x-2">
+                  <Users className="h-4 w-4" />
+                  <span>Patient Receives</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Success Stories */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-6">
+              Success Stories from Our Users
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Real impact across different healthcare stakeholders
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                quote: "Quantivara transformed my rural practice. I can now serve patients with the same efficiency as urban hospitals, all from my smartphone.",
+                author: "Dr. Prasenjit",
+                role: "Surgeon, Kolkata",
+                avatar: "👨‍⚕️"
+              },
+              {
+                quote: "No more carrying folders of medical records. Everything is accessible on my phone, and my family can access it during emergencies.",
+                author: "Priya",
+                role: "Patient, Hyderabad", 
+                avatar: "👩‍💼"
+              },
+              {
+                quote: "Prescription errors dropped by 95% after implementing Quantivara. Our customers are much more satisfied with our service.",
+                author: "Raj Pharmacy",
+                role: "Pharmacy Chain Owner",
+                avatar: "💊"
+              }
+            ].map((story, index) => (
+              <div key={index} className="bg-white border border-gray-200 rounded-2xl p-8 shadow-lg">
+                <div className="text-4xl mb-4">{story.avatar}</div>
+                <blockquote className="text-gray-700 leading-relaxed mb-6">
+                  "{story.quote}"
+                </blockquote>
+                <div>
+                  <div className="font-semibold text-gray-900">{story.author}</div>
+                  <div className="text-healthcare-blue-600 text-sm">{story.role}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Call to Action */}
-      <section className="py-20">
+      <section className="py-20 bg-gradient-to-br from-healthcare-blue-50 to-healthcare-green-50">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto space-y-8">
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900">

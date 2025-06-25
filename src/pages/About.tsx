@@ -3,37 +3,69 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Target, Eye, TrendingUp, Users, MapPin, Award } from 'lucide-react';
+import { 
+  Heart, 
+  Target, 
+  TrendingUp, 
+  Users, 
+  Globe, 
+  Zap,
+  CheckCircle2,
+  ArrowRight
+} from 'lucide-react';
 
 const About = () => {
-  const stats = [
-    { icon: Users, value: "1.4B", label: "People in Target Market" },
-    { icon: TrendingUp, value: "$11B+", label: "Total Addressable Market" },
-    { icon: Award, value: "35%", label: "Market Growth Rate (CAGR)" },
-    { icon: MapPin, value: "70K+", label: "Hospitals to Connect" }
+  const milestones = [
+    {
+      year: "2023",
+      title: "Company Founded",
+      description: "Started with a vision to bridge India's healthcare gaps"
+    },
+    {
+      year: "2024",
+      title: "AI Platform Launch", 
+      description: "Launched mobile-first AI handwriting recognition"
+    },
+    {
+      year: "2024",
+      title: "500+ Healthcare Providers",
+      description: "Onboarded hospitals, clinics, and pharmacies across India"
+    },
+    {
+      year: "2024",
+      title: "ABDM Integration",
+      description: "Achieved full compliance with national health standards"
+    }
   ];
 
-  const timeline = [
+  const values = [
     {
-      year: "2024",
-      title: "Foundation & Vision",
-      description: "Quantivara founded with mission to bridge India's healthcare divide through AI-powered mobile technology."
+      icon: Heart,
+      title: "Patient-Centric Care",
+      description: "Every decision we make prioritizes patient outcomes and accessibility to quality healthcare across India."
     },
     {
-      year: "2024",
-      title: "Technology Development",
-      description: "Advanced AI handwriting recognition and offline-capable mobile platform developed and tested."
+      icon: Globe,
+      title: "Universal Access",
+      description: "Technology should bridge gaps, not create them. We ensure our platform works for every Indian, everywhere."
     },
     {
-      year: "2025",
-      title: "Market Launch",
-      description: "Rolling out across pilot regions in rural India, connecting first 500 healthcare providers."
+      icon: Zap,
+      title: "Innovation with Purpose",
+      description: "We leverage cutting-edge AI and mobile technology to solve real healthcare challenges in the Indian context."
     },
     {
-      year: "2025-26",
-      title: "Scale & Expansion",
-      description: "Expanding to major cities and rural areas across all Indian states with full ecosystem integration."
+      icon: Users,
+      title: "Collaborative Healthcare",
+      description: "Healthcare is a team effort. We connect all stakeholders to work together seamlessly."
     }
+  ];
+
+  const teamStats = [
+    { number: "50+", label: "Healthcare Experts" },
+    { number: "25+", label: "AI Engineers" },
+    { number: "15+", label: "Medical Advisors" },
+    { number: "4", label: "Office Locations" }
   ];
 
   return (
@@ -48,7 +80,7 @@ const About = () => {
               About Quantivara
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
-              We're on a mission to connect every corner of India with equitable, intelligent healthcare through our AI-powered platform.
+              Bridging India's Healthcare Gaps Through AI-Powered Technology
             </p>
             <div className="flex justify-center">
               <div className="w-24 h-1 bg-gradient-to-r from-healthcare-blue-600 to-healthcare-green-600 rounded-full"></div>
@@ -67,37 +99,56 @@ const About = () => {
                   <Target className="h-8 w-8 text-healthcare-blue-600" />
                   <h2 className="text-3xl font-heading font-bold text-gray-900">Our Mission</h2>
                 </div>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  To connect every corner of India with equitable, intelligent healthcare by breaking down barriers between rural and urban medical care through innovative AI-powered technology.
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  To connect every corner of India with equitable, intelligent healthcare through 
+                  our mobile-first platform that bridges the gap between rural and urban medical services.
                 </p>
               </div>
 
               <div>
                 <div className="flex items-center space-x-3 mb-4">
-                  <Eye className="h-8 w-8 text-healthcare-green-600" />
+                  <Heart className="h-8 w-8 text-healthcare-green-600" />
                   <h2 className="text-3xl font-heading font-bold text-gray-900">Our Vision</h2>
                 </div>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  A unified digital platform where every doctor, patient, pharmacy, and lab in India is seamlessly connected, enabling quality healthcare delivery regardless of location or economic status.
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  A unified digital healthcare ecosystem where every Indian, regardless of location or 
+                  economic status, has access to quality medical care through seamless technology integration.
                 </p>
               </div>
 
-              <Button size="lg" className="bg-gradient-to-r from-healthcare-blue-600 to-healthcare-green-600" asChild>
-                <Link to="/contact">Join Our Mission</Link>
-              </Button>
+              <div className="space-y-4">
+                {[
+                  "AI-powered handwriting recognition for instant digitization",
+                  "Mobile-first design accessible on any smartphone",
+                  "Offline capabilities for areas with poor connectivity",
+                  "Full interoperability across healthcare stakeholders"
+                ].map((feature, index) => (
+                  <div key={index} className="flex items-start space-x-3">
+                    <CheckCircle2 className="h-6 w-6 text-healthcare-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{feature}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="relative">
               <div className="aspect-square bg-gradient-to-br from-healthcare-blue-100 to-healthcare-green-100 rounded-3xl p-8">
-                <div className="w-full h-full bg-white rounded-2xl p-6 flex items-center justify-center">
+                <div className="w-full h-full bg-white rounded-2xl p-8 flex items-center justify-center">
                   <div className="text-center space-y-6">
                     <div className="text-6xl">🌐</div>
-                    <h3 className="font-heading font-bold text-xl text-gray-800">
-                      Healthcare Unity
+                    <h3 className="font-heading font-bold text-2xl text-gray-800">
+                      Connected Healthcare
                     </h3>
-                    <p className="text-gray-600">
-                      Connecting 1.4 billion Indians through technology
-                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-healthcare-blue-600">1.4B</div>
+                        <p className="text-sm text-gray-600">People Served</p>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-healthcare-green-600">70K+</div>
+                        <p className="text-sm text-gray-600">Hospitals</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -111,141 +162,130 @@ const About = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-6">
-              The Healthcare Fragmentation Problem
+              The Healthcare Challenge in India
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              India's healthcare system is broken into isolated islands, leaving millions without access to quality care.
+              Despite being a technology leader globally, India's healthcare system remains fragmented and inaccessible to millions
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow-lg">
-              <div className="text-4xl mb-4">📝</div>
-              <h3 className="font-heading font-bold text-xl text-gray-900 mb-4">Paper-Based Records</h3>
-              <p className="text-gray-600">
-                70% of Indian hospitals still rely on paper records, making patient history inaccessible across providers.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg">
-              <div className="text-4xl mb-4">🏚️</div>
-              <h3 className="font-heading font-bold text-xl text-gray-900 mb-4">Rural-Urban Divide</h3>
-              <p className="text-gray-600">
-                70% of Indians live rurally, but most advanced healthcare infrastructure is concentrated in cities.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg">
-              <div className="text-4xl mb-4">📱</div>
-              <h3 className="font-heading font-bold text-xl text-gray-900 mb-4">Mobile-Only Reality</h3>
-              <p className="text-gray-600">
-                Rural doctors only have smartphones, but most health tech requires laptops and stable internet.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg">
-              <div className="text-4xl mb-4">🔀</div>
-              <h3 className="font-heading font-bold text-xl text-gray-900 mb-4">No Interoperability</h3>
-              <p className="text-gray-600">
-                Healthcare providers can't communicate effectively, leading to fragmented patient care.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg">
-              <div className="text-4xl mb-4">⚡</div>
-              <h3 className="font-heading font-bold text-xl text-gray-900 mb-4">Poor Connectivity</h3>
-              <p className="text-gray-600">
-                Rural areas have unreliable internet, making cloud-dependent solutions impractical.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg">
-              <div className="text-4xl mb-4">💸</div>
-              <h3 className="font-heading font-bold text-xl text-gray-900 mb-4">High Costs</h3>
-              <p className="text-gray-600">
-                Patients travel hundreds of kilometers for basic care, incurring huge travel and opportunity costs.
-              </p>
-            </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                stat: "70%",
+                label: "Rural Population",
+                description: "Live in areas with limited healthcare access"
+              },
+              {
+                stat: "75%", 
+                label: "Doctors Face Violence",
+                description: "Due to system failures and patient frustration"
+              },
+              {
+                stat: "100+ km",
+                label: "Average Travel",
+                description: "For patients to receive basic medical care"
+              },
+              {
+                stat: "1.3/1K",
+                label: "Hospital Beds",
+                description: "Far below WHO standard of 3.5 per 1000 people"
+              }
+            ].map((item, index) => (
+              <div key={index} className="bg-white p-6 rounded-2xl shadow-lg text-center">
+                <div className="text-4xl font-bold text-healthcare-orange-600 mb-2">
+                  {item.stat}
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  {item.label}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {item.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Our Approach */}
+      {/* Our Solution Approach */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-6">
-              Our Technology Approach
+              Our Solution Approach
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We've built solutions specifically for India's unique challenges - mobile-first, offline-capable, and AI-powered.
+              Technology that works where it matters most - on smartphones, in rural clinics, without perfect internet
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
-              <div>
-                <h3 className="text-2xl font-heading font-bold text-gray-900 mb-4">Mobile-First Architecture</h3>
-                <p className="text-gray-700 mb-4">
-                  Designed specifically for smartphones - the only device rural healthcare providers have access to. No laptops, printers, or complex setups required.
-                </p>
-                <ul className="space-y-2 text-gray-600">
-                  <li>• Works on any Android smartphone</li>
-                  <li>• Intuitive touch-based interface</li>
-                  <li>• Optimized for low-end devices</li>
-                  <li>• Minimal data usage</li>
-                </ul>
-              </div>
+              <h3 className="text-2xl font-heading font-bold text-gray-900">
+                Mobile-First AI Platform
+              </h3>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Our platform is built specifically for the Indian healthcare ecosystem, where smartphones are 
+                ubiquitous but laptops and reliable internet are not. We've created AI that understands Indian 
+                medical handwriting, works in 20+ local languages, and functions offline.
+              </p>
 
-              <div>
-                <h3 className="text-2xl font-heading font-bold text-gray-900 mb-4">AI-Powered Intelligence</h3>
-                <p className="text-gray-700 mb-4">
-                  Advanced AI converts handwritten prescriptions to digital records, enabling seamless communication across the healthcare ecosystem.
-                </p>
-                <ul className="space-y-2 text-gray-600">
-                  <li>• Handwriting recognition in 20+ languages</li>
-                  <li>• Medical terminology understanding</li>
-                  <li>• Drug interaction checking</li>
-                  <li>• Diagnostic assistance</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-2xl font-heading font-bold text-gray-900 mb-4">Offline-Capable Design</h3>
-                <p className="text-gray-700 mb-4">
-                  Functions seamlessly without internet connectivity, automatically syncing when connection is available.
-                </p>
-                <ul className="space-y-2 text-gray-600">
-                  <li>• Complete offline functionality</li>
-                  <li>• Local data storage and processing</li>
-                  <li>• Intelligent sync when online</li>
-                  <li>• Edge computing capabilities</li>
-                </ul>
+              <div className="space-y-6">
+                {[
+                  {
+                    title: "AI Handwriting Recognition",
+                    description: "Converts doctor's prescriptions to digital records instantly"
+                  },
+                  {
+                    title: "Multi-language Support", 
+                    description: "Supports Hindi, Bengali, Tamil, Telugu, and 16+ other languages"
+                  },
+                  {
+                    title: "Offline Capabilities",
+                    description: "Works without internet, syncs when connectivity returns"
+                  },
+                  {
+                    title: "ABDM Compliant",
+                    description: "Fully integrated with India's national health standards"
+                  }
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start space-x-4">
+                    <div className="w-8 h-8 bg-gradient-to-r from-healthcare-blue-500 to-healthcare-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-1">{item.title}</h4>
+                      <p className="text-gray-600 text-sm">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="space-y-8">
-              <div className="bg-gradient-to-br from-healthcare-blue-50 to-healthcare-green-50 rounded-3xl p-8">
-                <div className="text-center space-y-6">
-                  <div className="text-6xl">🤖</div>
-                  <h4 className="font-heading font-bold text-xl text-gray-800">
-                    AI at the Core
-                  </h4>
-                  <p className="text-gray-600">
-                    Machine learning models trained specifically on Indian medical practices and handwriting patterns
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-healthcare-green-50 to-healthcare-blue-50 rounded-3xl p-8">
-                <div className="text-center space-y-6">
-                  <div className="text-6xl">🌐</div>
-                  <h4 className="font-heading font-bold text-xl text-gray-800">
-                    ABDM Compliant
-                  </h4>
-                  <p className="text-gray-600">
-                    Fully integrated with India's Ayushman Bharat Digital Mission for nationwide interoperability
-                  </p>
+            <div className="relative">
+              <div className="aspect-square bg-gradient-to-br from-healthcare-blue-100 to-healthcare-green-100 rounded-3xl p-8">
+                <div className="w-full h-full bg-white rounded-2xl p-6 flex items-center justify-center">
+                  <div className="text-center space-y-4">
+                    <div className="text-6xl">📱</div>
+                    <h4 className="font-heading font-bold text-xl text-gray-800">
+                      AI-Powered Mobile Platform
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Handwriting Recognition</span>
+                        <span className="text-healthcare-green-600 font-semibold">99.7%</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Languages Supported</span>
+                        <span className="text-healthcare-blue-600 font-semibold">20+</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Offline Capability</span>
+                        <span className="text-healthcare-orange-600 font-semibold">100%</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -261,41 +301,48 @@ const About = () => {
               Market Opportunity
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              India's healthcare digitization represents one of the largest untapped markets globally
+              India's healthcare market is experiencing unprecedented growth, driven by digital transformation needs
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center space-y-4">
-                <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto">
-                  <stat.icon className="h-8 w-8 text-white" />
-                </div>
-                <div className="text-4xl font-bold">{stat.value}</div>
-                <p className="text-blue-100 text-sm">{stat.label}</p>
-              </div>
-            ))}
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            <div className="text-center space-y-4">
+              <TrendingUp className="h-16 w-16 text-white mx-auto" />
+              <div className="text-5xl font-bold">$11B+</div>
+              <p className="text-blue-100">Total Addressable Market</p>
+              <p className="text-sm text-blue-200">Healthcare IT market in India</p>
+            </div>
+            <div className="text-center space-y-4">
+              <Zap className="h-16 w-16 text-white mx-auto" />
+              <div className="text-5xl font-bold">35%</div>
+              <p className="text-blue-100">Annual Growth Rate</p>
+              <p className="text-sm text-blue-200">Compound Annual Growth Rate (CAGR)</p>
+            </div>
+            <div className="text-center space-y-4">
+              <Users className="h-16 w-16 text-white mx-auto" />
+              <div className="text-5xl font-bold">1.4B</div>
+              <p className="text-blue-100">Potential Users</p>
+              <p className="text-sm text-blue-200">Indians needing healthcare access</p>
+            </div>
           </div>
 
-          <div className="max-w-4xl mx-auto">
-            <h3 className="text-2xl font-heading font-bold mb-8 text-center">Key Market Insights</h3>
+          <div className="bg-white/10 rounded-3xl p-8 text-center">
+            <h3 className="text-2xl font-heading font-bold mb-4">Why Now?</h3>
             <div className="grid md:grid-cols-2 gap-8">
               <div className="space-y-4">
-                <h4 className="font-bold text-lg">🎯 Target Segments</h4>
+                <h4 className="font-semibold text-lg">Government Support</h4>
                 <ul className="space-y-2 text-blue-100">
-                  <li>• 10+ Lakh practicing doctors</li>
-                  <li>• 1.5+ Lakh pharmacies</li>
-                  <li>• 70K+ hospitals and clinics</li>
-                  <li>• 1.4B potential patients</li>
+                  <li>• Ayushman Bharat Digital Mission (ABDM)</li>
+                  <li>• National Digital Health Blueprint</li>
+                  <li>• Digital India initiative support</li>
                 </ul>
               </div>
               <div className="space-y-4">
-                <h4 className="font-bold text-lg">📈 Growth Drivers</h4>
+                <h4 className="font-semibold text-lg">Market Readiness</h4>
                 <ul className="space-y-2 text-blue-100">
-                  <li>• Government digital health initiatives</li>
-                  <li>• Rising smartphone penetration</li>
-                  <li>• COVID-driven telemedicine adoption</li>
-                  <li>• Need for healthcare accessibility</li>
+                  <li>• 750M+ smartphone users in India</li>
+                  <li>• Increasing digital health awareness</li>
+                  <li>• Post-COVID healthcare digitization push</li>
                 </ul>
               </div>
             </div>
@@ -303,42 +350,114 @@ const About = () => {
         </div>
       </section>
 
-      {/* Company Timeline */}
+      {/* Company Values */}
       <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-6">
+              Our Core Values
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              The principles that guide everything we do at Quantivara
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {values.map((value, index) => (
+              <div key={index} className="bg-white border border-gray-200 rounded-2xl p-8 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-healthcare-blue-100 to-healthcare-green-100 rounded-xl flex items-center justify-center">
+                    <value.icon className="h-6 w-6 text-healthcare-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-bold text-xl text-gray-900 mb-3">
+                      {value.title}
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      {value.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Timeline */}
+      <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-6">
               Our Journey
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              From vision to transforming healthcare across India
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Key milestones in building India's most comprehensive healthcare platform
             </p>
           </div>
 
           <div className="max-w-4xl mx-auto">
             <div className="relative">
               {/* Timeline line */}
-              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-healthcare-blue-600 to-healthcare-green-600"></div>
-
-              {timeline.map((item, index) => (
-                <div key={index} className="relative flex items-start space-x-8 pb-12">
-                  {/* Year marker */}
-                  <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-r from-healthcare-blue-600 to-healthcare-green-600 rounded-full flex items-center justify-center text-white font-bold relative z-10">
-                    {item.year.slice(-2)}
+              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-healthcare-blue-200"></div>
+              
+              <div className="space-y-12">
+                {milestones.map((milestone, index) => (
+                  <div key={index} className="relative flex items-start space-x-6">
+                    <div className="w-16 h-16 bg-gradient-to-r from-healthcare-blue-500 to-healthcare-green-500 rounded-full flex items-center justify-center text-white font-bold text-lg relative z-10">
+                      {milestone.year.slice(-2)}
+                    </div>
+                    <div className="flex-1 bg-white p-6 rounded-2xl shadow-lg">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-sm font-medium text-healthcare-blue-600">{milestone.year}</span>
+                      </div>
+                      <h3 className="font-heading font-bold text-xl text-gray-900 mb-2">
+                        {milestone.title}
+                      </h3>
+                      <p className="text-gray-600">
+                        {milestone.description}
+                      </p>
+                    </div>
                   </div>
-
-                  {/* Content */}
-                  <div className="flex-grow pt-2">
-                    <h3 className="font-heading font-bold text-xl text-gray-900 mb-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Team Stats */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-6">
+              Our Team
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Healthcare experts, AI engineers, and medical professionals working together to transform Indian healthcare
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-8 mb-16">
+            {teamStats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-4xl md:text-5xl font-bold text-healthcare-blue-600 mb-2">
+                  {stat.number}
+                </div>
+                <div className="text-gray-600">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <p className="text-lg text-gray-600 mb-8">
+              We're always looking for passionate individuals who want to make a difference in Indian healthcare.
+            </p>
+            <Button size="lg" className="bg-gradient-to-r from-healthcare-blue-600 to-healthcare-green-600">
+              Join Our Team
+            </Button>
           </div>
         </div>
       </section>
@@ -348,17 +467,20 @@ const About = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto space-y-8">
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900">
-              Join Us in Transforming Healthcare
+              Ready to Transform Healthcare with Us?
             </h2>
             <p className="text-xl text-gray-600">
-              Whether you're a healthcare provider, investor, or partner, we'd love to discuss how we can work together to revolutionize healthcare in India.
+              Join thousands of healthcare providers already using Quantivara to deliver better care across India.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="bg-gradient-to-r from-healthcare-blue-600 to-healthcare-green-600" asChild>
-                <Link to="/contact">Get in Touch</Link>
+                <Link to="/contact">
+                  Request Demo
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link to="/technology">Explore Technology</Link>
+                <Link to="/technology">Learn About Our Technology</Link>
               </Button>
             </div>
           </div>

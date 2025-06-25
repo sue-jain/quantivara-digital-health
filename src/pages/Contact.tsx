@@ -325,11 +325,11 @@ const Contact = () => {
                 <h3 className="font-heading font-bold text-xl mb-4">Response Time</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold">< 24 hrs</div>
+                    <div className="text-2xl font-bold">&lt; 24 hrs</div>
                     <p className="text-blue-100 text-sm">Demo Scheduling</p>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">< 2 hrs</div>
+                    <div className="text-2xl font-bold">&lt; 2 hrs</div>
                     <p className="text-blue-100 text-sm">Email Response</p>
                   </div>
                 </div>
