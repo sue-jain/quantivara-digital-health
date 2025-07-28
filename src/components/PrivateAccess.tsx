@@ -13,7 +13,7 @@ export function PrivateAccess({ onAuthenticated }: PrivateAccessProps) {
   const [error, setError] = useState('');
 
   // Simple password - change this to whatever you want
-  const SITE_PASSWORD = 'quantivara2024';
+  const SITE_PASSWORD = 'NmptGd3qAja?X7gY';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
