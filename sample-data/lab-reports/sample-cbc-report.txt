@@ -1,0 +1,49 @@
+LABCORP LABORATORY RESULTS
+==========================
+
+Patient: John Smith
+DOB: 03/15/1975
+Account #: 12345678
+Specimen ID: 2024011501
+
+Physician: Dr. Sarah Johnson, MD
+Date Collected: 01/16/2024
+Date Reported: 01/17/2024
+
+COMPLETE BLOOD COUNT (CBC) WITH DIFFERENTIAL
+
+Test Name                     Result      Reference Range    Flag
+----------------------------------------------------------------
+White Blood Cell Count        6.8         4.0-11.0 K/uL      
+Red Blood Cell Count          3.9         4.2-5.4 M/uL       L
+Hemoglobin                    10.2        13.5-17.5 g/dL     L
+Hematocrit                    30.8        41.0-53.0 %        L
+Mean Corpuscular Volume       79          80-100 fL          L
+Mean Corpuscular Hemoglobin   26.2        27.0-33.0 pg       L
+MCH Concentration             33.1        32.0-36.0 g/dL     
+Platelet Count                285         140-400 K/uL       
+RDW-CV                        15.8        11.0-15.0 %        H
+
+DIFFERENTIAL (Auto)
+Neutrophils %                 62          50-70 %            
+Lymphocytes %                 28          20-40 %            
+Monocytes %                   8           2-10 %             
+Eosinophils %                 2           1-4 %              
+Basophils %                   0           0-2 %              
+
+Neutrophils Absolute          4.2         2.0-7.0 K/uL       
+Lymphocytes Absolute          1.9         1.0-3.0 K/uL       
+Monocytes Absolute            0.5         0.2-1.0 K/uL       
+Eosinophils Absolute          0.1         0.0-0.4 K/uL       
+Basophils Absolute            0.0         0.0-0.2 K/uL       
+
+INTERPRETATION:
+Findings consistent with microcytic anemia. 
+Iron deficiency anemia should be considered.
+Recommend iron studies and clinical correlation.
+
+Lab Director: Dr. Michael Chen, MD
+Date: 01/17/2024
+
+L = Low, H = High
+Normal values may vary between laboratories.

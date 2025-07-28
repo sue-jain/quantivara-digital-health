@@ -1,0 +1,52 @@
+SAMPLE PRESCRIPTION #1
+========================
+
+Dr. Sarah Johnson, MD
+Internal Medicine
+123 Medical Center Drive
+New York, NY 10001
+Phone: (555) 123-4567
+License: NY123456
+
+Date: January 15, 2024
+
+Patient Information:
+Name: John Smith
+DOB: 03/15/1975 (Age: 48)
+Address: 456 Oak Street, New York, NY 10002
+Phone: (555) 987-6543
+
+Chief Complaint: Fatigue, weakness for 2 weeks
+
+Assessment:
+- Possible iron deficiency anemia
+- Rule out other causes of fatigue
+
+Plan:
+1. Lab work ordered:
+   - Complete Blood Count (CBC) with differential
+   - Comprehensive Metabolic Panel (CMP)
+   - Iron studies (serum iron, TIBC, ferritin)
+   - Vitamin B12 and folate levels
+   - Thyroid function tests (TSH, Free T4)
+
+2. Medications:
+   - Ferrous sulfate 325mg PO daily with vitamin C
+   - Take on empty stomach, 1 hour before meals
+   - May cause dark stools (normal side effect)
+
+3. Follow-up:
+   - Return in 2 weeks with lab results
+   - Sooner if symptoms worsen
+
+Instructions:
+- Avoid antacids 2 hours before/after iron supplement
+- Increase iron-rich foods in diet
+- Return to ED if severe weakness, chest pain, or shortness of breath
+
+Refills: 0
+Next appointment: January 29, 2024
+
+Dr. Sarah Johnson, MD
+Electronic signature
+Date: 01/15/2024

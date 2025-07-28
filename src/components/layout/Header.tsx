@@ -58,6 +58,9 @@ const Header = () => {
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-4">
             <Button variant="outline" asChild>
+              <Link to="/processor">Try AI Processor</Link>
+            </Button>
+            <Button asChild>
               <Link to="/contact">Request Demo</Link>
             </Button>
           </div>
@@ -94,7 +97,12 @@ const Header = () => {
                 {item.label}
               </Link>
             ))}
-            <div className="pt-4 border-t">
+            <div className="pt-4 border-t space-y-2">
+              <Button variant="outline" className="w-full" asChild>
+                <Link to="/processor" onClick={() => setIsMenuOpen(false)}>
+                  Try AI Processor
+                </Link>
+              </Button>
               <Button className="w-full" asChild>
                 <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
                   Request Demo

@@ -13,6 +13,7 @@ import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import { PrivateAccess } from "./components/PrivateAccess";
+import DocumentProcessorPage from "./pages/DocumentProcessorPage";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => {
             <Route path="/solutions" element={<Solutions />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/processor" element={<DocumentProcessorPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
