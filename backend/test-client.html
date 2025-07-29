@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantivara WebSocket Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .demo-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #e8ecef;
+            border-radius: 8px;
+        }
+        .demo-section h3 {
+            color: #34495e;
+            margin-bottom: 15px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.processing {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .log {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .metric-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .metric-label {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group select, .input-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 Quantivara AI Processing Demo</h1>
+        
+        <div class="demo-section">
+            <h3>📡 WebSocket Connection</h3>
+            <div id="connectionStatus" class="status disconnected">Disconnected</div>
+            <button id="connectBtn" onclick="connect()">Connect to WebSocket</button>
+            <button id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
+        </div>
+
+        <div class="demo-section">
+            <h3>📄 Document Processing Demo</h3>
+            <div class="input-group">
+                <label>Document Type:</label>
+                <select id="documentType">
+                    <option value="prescription">Prescription</option>
+                    <option value="lab_report">Lab Report</option>
+                    <option value="ecg_report">ECG Report</option>
+                    <option value="radiology_report">Radiology Report</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>File Name:</label>
+                <input type="text" id="fileName" value="sample_document.pdf" />
+            </div>
+            <button id="processBtn" onclick="startProcessing()" disabled>Start AI Processing</button>
+            
+            <div id="processingStatus" class="status" style="display: none;"></div>
+            <div class="progress-bar" style="display: none;" id="progressContainer">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div id="processingMessage" style="margin: 10px 0; font-weight: bold;"></div>
+        </div>
+
+        <div class="demo-section">
+            <h3>📊 Live Analytics</h3>
+            <button id="analyticsBtn" onclick="getLiveAnalytics()" disabled>Get Live Analytics</button>
+            <button id="subscribeBtn" onclick="subscribeToUpdates()" disabled>Subscribe to Updates</button>
+            
+            <div class="metrics" id="metricsContainer">
+                <div class="metric-card">
+                    <div class="metric-value" id="processingDocs">0</div>
+                    <div class="metric-label">Currently Processing</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="completedDocs">0</div>
+                    <div class="metric-label">Completed Today</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="avgAccuracy">94%</div>
+                    <div class="metric-label">Average Accuracy</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="dailyRevenue">₹0</div>
+                    <div class="metric-label">Daily Revenue</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>📝 Live Message Log</h3>
+            <div id="messageLog" class="log"></div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let sessionId = null;
+
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('messageLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#3498db',
+                success: '#2ecc71',
+                error: '#e74c3c',
+                warning: '#f39c12'
+            };
+            
+            logElement.innerHTML += `<div style="color: ${colors[type]};">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function connect() {
+            if (ws) return;
+
+            const wsUrl = 'ws://localhost:3001/ws';
+            log(`Connecting to ${wsUrl}...`, 'info');
+            
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                log('✅ Connected to Quantivara WebSocket server!', 'success');
+                document.getElementById('connectionStatus').textContent = 'Connected';
+                document.getElementById('connectionStatus').className = 'status connected';
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('disconnectBtn').disabled = false;
+                document.getElementById('processBtn').disabled = false;
+                document.getElementById('analyticsBtn').disabled = false;
+                document.getElementById('subscribeBtn').disabled = false;
+            };
+
+            ws.onmessage = function(event) {
+                const message = JSON.parse(event.data);
+                log(`📨 Received: ${message.type}`, 'info');
+                
+                switch(message.type) {
+                    case 'connection_established':
+                        sessionId = message.data.sessionId;
+                        log(`🔗 Session ID: ${sessionId}`, 'success');
+                        break;
+                        
+                    case 'document_processing_update':
+                        handleProcessingUpdate(message.data);
+                        break;
+                        
+                    case 'live_analytics_update':
+                        handleAnalyticsUpdate(message.data);
+                        break;
+                        
+                    case 'network_update':
+                    case 'revenue_update':
+                    case 'processing_queue_update':
+                        log(`📊 Live update: ${JSON.stringify(message.data)}`, 'info');
+                        break;
+                        
+                    default:
+                        log(`📄 ${JSON.stringify(message, null, 2)}`, 'info');
+                }
+            };
+
+            ws.onclose = function() {
+                log('❌ Disconnected from WebSocket server', 'error');
+                document.getElementById('connectionStatus').textContent = 'Disconnected';
+                document.getElementById('connectionStatus').className = 'status disconnected';
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('disconnectBtn').disabled = true;
+                document.getElementById('processBtn').disabled = true;
+                document.getElementById('analyticsBtn').disabled = true;
+                document.getElementById('subscribeBtn').disabled = true;
+                ws = null;
+            };
+
+            ws.onerror = function(error) {
+                log(`❌ WebSocket error: ${error.message || 'Connection failed'}`, 'error');
+            };
+        }
+
+        function disconnect() {
+            if (ws) {
+                ws.close();
+            }
+        }
+
+        function startProcessing() {
+            if (!ws) return;
+
+            const documentType = document.getElementById('documentType').value;
+            const fileName = document.getElementById('fileName').value;
+            
+            // Use demo patient and provider IDs from our seeded data
+            const message = {
+                type: 'start_document_processing',
+                data: {
+                    patientId: '1',
+                    providerId: '1',
+                    documentType: documentType,
+                    fileName: fileName
+                }
+            };
+
+            ws.send(JSON.stringify(message));
+            log(`🚀 Started processing ${documentType}: ${fileName}`, 'success');
+            
+            document.getElementById('processingStatus').style.display = 'block';
+            document.getElementById('processingStatus').className = 'status processing';
+            document.getElementById('processingStatus').textContent = 'Processing Started...';
+            document.getElementById('progressContainer').style.display = 'block';
+        }
+
+        function handleProcessingUpdate(data) {
+            const statusElement = document.getElementById('processingStatus');
+            const progressElement = document.getElementById('progressFill');
+            const messageElement = document.getElementById('processingMessage');
+            
+            statusElement.textContent = `Status: ${data.status.toUpperCase()} (${data.progress}%)`;
+            progressElement.style.width = `${data.progress}%`;
+            messageElement.textContent = data.message;
+            
+            if (data.status === 'completed') {
+                statusElement.className = 'status connected';
+                log(`✅ Processing completed! Accuracy: ${data.accuracy}%`, 'success');
+                log(`📊 Processing time: ${data.processingTime}ms`, 'info');
+                
+                if (data.extractedData) {
+                    log(`📄 Extracted data: ${JSON.stringify(data.extractedData, null, 2)}`, 'info');
+                }
+            } else if (data.status === 'error') {
+                statusElement.className = 'status disconnected';
+                log(`❌ Processing failed: ${data.message}`, 'error');
+            }
+        }
+
+        function getLiveAnalytics() {
+            if (!ws) return;
+
+            const message = {
+                type: 'get_live_analytics'
+            };
+
+            ws.send(JSON.stringify(message));
+            log('📊 Requested live analytics', 'info');
+        }
+
+        function handleAnalyticsUpdate(data) {
+            document.getElementById('processingDocs').textContent = data.currentlyProcessing;
+            document.getElementById('completedDocs').textContent = data.completedToday;
+            document.getElementById('avgAccuracy').textContent = data.averageAccuracy;
+            document.getElementById('dailyRevenue').textContent = data.dailyRevenue;
+            
+            log(`📊 Analytics updated - Processing: ${data.currentlyProcessing}, Completed: ${data.completedToday}`, 'success');
+        }
+
+        function subscribeToUpdates() {
+            if (!ws) return;
+
+            const subscriptions = ['network_effects', 'revenue_stream', 'processing_queue'];
+            
+            subscriptions.forEach(sub => {
+                const message = {
+                    type: 'subscribe_to_updates',
+                    data: {
+                        subscriptionType: sub
+                    }
+                };
+                ws.send(JSON.stringify(message));
+            });
+            
+            log('📡 Subscribed to live updates', 'success');
+        }
+
+        function clearLog() {
+            document.getElementById('messageLog').innerHTML = '';
+        }
+
+        // Auto-connect on page load
+        window.onload = function() {
+            log('🏥 Quantivara WebSocket Demo Client Ready', 'info');
+            log('Click "Connect to WebSocket" to start the demo', 'info');
+        };
+    </script>
+</body>
+</html>
