@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, FileText, Camera, X, Loader2, CheckCircle, Stethoscope, Building, Heart, ImageIcon, Leaf, ClipboardList } from 'lucide-react';
+import { Upload, FileText, Camera, X, Loader2, CheckCircle, Stethoscope, Building, Heart, ImageIcon, Leaf, ClipboardList, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,19 +11,29 @@ import PrescriptionResult from '@/components/results/PrescriptionResult';
 import LabReportResult from '@/components/results/LabReportResult';
 import ECGResult from '@/components/results/ECGResult';
 import DemoSummary from '@/components/demo/DemoSummary';
+import documentService from '@/services/documents';
+import webSocketService from '@/services/websocket';
 
 interface UploadedFile {
   id: string;
   file: File;
   preview: string;
   status: 'pending' | 'processing' | 'completed' | 'error';
+  progress?: number;
   result?: any;
+  error?: string;
 }
 
 const DocumentProcessor: React.FC = () => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [processing, setProcessing] = useState(false);
+  const [wsConnected, setWsConnected] = useState(false);
   const { toast } = useToast();
+  
+  // Demo mode configuration
+  const DEMO_MODE = import.meta.env.VITE_ENABLE_DEMO_MODE === 'true';
+  const DEMO_PATIENT_ID = 'demo-patient-001';
+  const DEMO_PROVIDER_ID = 'demo-provider-001';
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map(file => ({
@@ -50,6 +60,35 @@ const DocumentProcessor: React.FC = () => {
     multiple: true
   });
 
+  // Initialize WebSocket connection on mount
+  useEffect(() => {
+    if (import.meta.env.VITE_ENABLE_WEBSOCKET === 'true') {
+      webSocketService.connect({
+        onOpen: () => {
+          setWsConnected(true);
+          console.log('WebSocket connected for real-time processing');
+        },
+        onClose: () => {
+          setWsConnected(false);
+          console.log('WebSocket disconnected');
+        },
+        onError: (error) => {
+          console.error('WebSocket error:', error);
+          toast({
+            title: "Connection Error",
+            description: "Real-time updates unavailable. Using standard processing.",
+            variant: "destructive"
+          });
+        }
+      });
+    }
+    
+    return () => {
+      webSocketService.disconnect();
+      documentService.cleanup();
+    };
+  }, [toast]);
+  
   const removeFile = (id: string) => {
     setUploadedFiles(prev => prev.filter(f => f.id !== id));
   };
@@ -73,7 +112,7 @@ const DocumentProcessor: React.FC = () => {
     setUploadedFiles(prev => 
       prev.map(f => 
         f.status === 'pending' 
-          ? { ...f, status: 'processing' as const }
+          ? { ...f, status: 'processing' as const, progress: 0 }
           : f
       )
     );
@@ -81,25 +120,15 @@ const DocumentProcessor: React.FC = () => {
     // Process only the pending files
     for (let i = 0; i < pendingFiles.length; i++) {
       const file = pendingFiles[i];
+      const documentType = documentService.detectDocumentType(file.file.name);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Update individual file status
-      setUploadedFiles(prev => 
-        prev.map(f => 
-          f.id === file.id 
-            ? { 
-                ...f, 
-                status: 'completed' as const,
-                result: {
-                  type: detectDocumentType(file.file.name),
-                  extractedData: mockExtractedData(file.file.name)
-                }
-              }
-            : f
-        )
-      );
+      if (DEMO_MODE || !wsConnected) {
+        // Demo mode or WebSocket not connected - use simulated processing
+        await simulateProcessing(file, documentType);
+      } else {
+        // Real WebSocket processing
+        await processWithWebSocket(file, documentType);
+      }
     }
     
     setProcessing(false);
@@ -109,9 +138,100 @@ const DocumentProcessor: React.FC = () => {
       description: `${pendingFiles.length} new document(s) processed successfully`,
     });
   };
+  
+  const simulateProcessing = async (file: UploadedFile, documentType: string) => {
+    // Simulate processing steps
+    const steps = [
+      { progress: 20, message: "Analyzing document structure..." },
+      { progress: 40, message: "Extracting text content..." },
+      { progress: 60, message: "Applying AI models..." },
+      { progress: 80, message: "Validating results..." },
+      { progress: 100, message: "Processing complete!" }
+    ];
+    
+    for (const step of steps) {
+      setUploadedFiles(prev => 
+        prev.map(f => 
+          f.id === file.id 
+            ? { ...f, progress: step.progress }
+            : f
+        )
+      );
+      await new Promise(resolve => setTimeout(resolve, 600));
+    }
+    
+    // Update with final result
+    setUploadedFiles(prev => 
+      prev.map(f => 
+        f.id === file.id 
+          ? { 
+              ...f, 
+              status: 'completed' as const,
+              progress: 100,
+              result: {
+                type: documentType,
+                extractedData: mockExtractedData(file.file.name)
+              }
+            }
+          : f
+      )
+    );
+  };
+  
+  const processWithWebSocket = async (file: UploadedFile, documentType: string) => {
+    return new Promise<void>((resolve) => {
+      // Start processing via WebSocket
+      documentService.startProcessing(
+        file.id,
+        DEMO_PATIENT_ID,
+        DEMO_PROVIDER_ID,
+        documentType,
+        file.file.name,
+        (update) => {
+          if (update.status === 'processing') {
+            setUploadedFiles(prev => 
+              prev.map(f => 
+                f.id === file.id 
+                  ? { ...f, progress: update.progress || 0 }
+                  : f
+              )
+            );
+          } else if (update.status === 'completed') {
+            setUploadedFiles(prev => 
+              prev.map(f => 
+                f.id === file.id 
+                  ? { 
+                      ...f, 
+                      status: 'completed' as const,
+                      progress: 100,
+                      result: update.result
+                    }
+                  : f
+              )
+            );
+            resolve();
+          } else if (update.status === 'error') {
+            setUploadedFiles(prev => 
+              prev.map(f => 
+                f.id === file.id 
+                  ? { 
+                      ...f, 
+                      status: 'error' as const,
+                      error: update.message
+                    }
+                  : f
+              )
+            );
+            resolve();
+          }
+        }
+      );
+    });
+  };
 
   const detectDocumentType = (filename: string): string => {
     const name = filename.toLowerCase();
+    if (name.includes('handwritten')) return 'Handwritten Prescription';
     if (name.includes('prescription') || name.includes('rx')) return 'Prescription';
     if (name.includes('lab') || name.includes('blood') || name.includes('pathology')) return 'Lab Report';
     if (name.includes('ecg') || name.includes('ekg') || name.includes('cardiac')) return 'ECG Report';
@@ -123,6 +243,56 @@ const DocumentProcessor: React.FC = () => {
 
   const mockExtractedData = (filename: string) => {
     const name = filename.toLowerCase();
+    
+    // Handwritten Prescription - Special Demo
+    if (name.includes('handwritten')) {
+      return {
+        documentType: "Handwritten Prescription",
+        patientInfo: {
+          name: "Anjali Verma",
+          age: "34 Years",
+          gender: "Female",
+          patientId: "PID-2024-HW-001"
+        },
+        doctorInfo: {
+          name: "Dr. Amit Kumar Singh, MBBS",
+          registration: "MCI-98765",
+          clinic: "Community Health Center, Sector 12"
+        },
+        diagnosis: ["Viral Fever", "Upper Respiratory Tract Infection"],
+        medications: [
+          {
+            name: "Paracetamol",
+            dosage: "650mg",
+            frequency: "Three times daily",
+            duration: "5 days",
+            instructions: "After food"
+          },
+          {
+            name: "Azithromycin",
+            dosage: "500mg",
+            frequency: "Once daily",
+            duration: "3 days",
+            instructions: "Empty stomach"
+          },
+          {
+            name: "Cetirizine",
+            dosage: "10mg",
+            frequency: "Once at night",
+            duration: "5 days",
+            instructions: "Before sleep"
+          }
+        ],
+        advice: [
+          "Complete rest for 3 days",
+          "Drink plenty of warm fluids",
+          "Avoid cold drinks and ice cream"
+        ],
+        followUp: "If symptoms persist after 3 days",
+        extractionAccuracy: "92%",
+        aiNotes: "Successfully extracted from handwritten Hindi-English mixed prescription"
+      };
+    }
     
     // Prescription Documents
     if (name.includes('prescription') || name.includes('rx')) {
@@ -481,10 +651,30 @@ const DocumentProcessor: React.FC = () => {
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">AI Document Processor</h1>
-        <p className="text-muted-foreground mb-4">
-          Upload medical documents for instant AI-powered data extraction
-        </p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">AI Document Processor</h1>
+            <p className="text-muted-foreground">
+              Upload medical documents for instant AI-powered data extraction
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {wsConnected ? (
+              <Badge variant="success" className="gap-1">
+                <Wifi className="h-3 w-3" />
+                Real-time Connected
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="gap-1">
+                <WifiOff className="h-3 w-3" />
+                Offline Mode
+              </Badge>
+            )}
+            {DEMO_MODE && (
+              <Badge variant="outline">Demo Mode</Badge>
+            )}
+          </div>
+        </div>
         
         {/* Demo Instructions */}
         <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4 mb-6">
@@ -513,6 +703,7 @@ const DocumentProcessor: React.FC = () => {
           <div className="flex flex-wrap gap-2">
             {[
               { name: 'Prescription', file: 'prescription-sample.txt' },
+              { name: 'Handwritten Rx', file: 'handwritten-prescription.jpg', special: true },
               { name: 'Lab Report', file: 'lab-report-sample.txt' },
               { name: 'ECG Report', file: 'ecg-sample.txt' },
               { name: 'X-Ray Report', file: 'xray-sample.txt' },
@@ -521,11 +712,12 @@ const DocumentProcessor: React.FC = () => {
             ].map((sample) => (
               <Button
                 key={sample.file}
-                variant="outline"
+                variant={sample.special ? "default" : "outline"}
                 size="sm"
                 onClick={() => {
                   // Create a mock file for demonstration
-                  const file = new File([sample.name], sample.file, { type: 'text/plain' });
+                  const fileType = sample.file.endsWith('.jpg') ? 'image/jpeg' : 'text/plain';
+                  const file = new File([sample.name], sample.file, { type: fileType });
                   const mockFiles = [{
                     id: Math.random().toString(36).substr(2, 9),
                     file,
@@ -535,12 +727,12 @@ const DocumentProcessor: React.FC = () => {
                   setUploadedFiles(prev => [...prev, ...mockFiles]);
                   toast({
                     title: "Sample file added",
-                    description: `${sample.name} ready for processing`,
+                    description: sample.special ? "Handwritten prescription ready for AI processing!" : `${sample.name} ready for processing`,
                   });
                 }}
-                className="text-xs"
+                className={sample.special ? "text-xs bg-primary hover:bg-primary/90" : "text-xs"}
               >
-                {sample.name}
+                {sample.special && "⭐ "}{sample.name}
               </Button>
             ))}
           </div>
@@ -608,9 +800,22 @@ const DocumentProcessor: React.FC = () => {
                     </p>
                     
                     {file.status === 'processing' && (
-                      <div className="flex items-center mt-2">
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        <span className="text-sm">Processing...</span>
+                      <div className="mt-2">
+                        <div className="flex items-center mb-1">
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          <span className="text-sm">Processing...</span>
+                        </div>
+                        {file.progress !== undefined && (
+                          <Progress value={file.progress} className="h-2" />
+                        )}
+                      </div>
+                    )}
+                    
+                    {file.status === 'error' && (
+                      <div className="mt-2">
+                        <Badge variant="destructive">
+                          Error: {file.error || 'Processing failed'}
+                        </Badge>
                       </div>
                     )}
                     

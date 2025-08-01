@@ -2,8 +2,16 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Heart } from 'lucide-react';
+import { Menu, X, Heart, Activity, Search, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -53,6 +61,38 @@ const Header = () => {
                 {item.label}
               </Link>
             ))}
+            
+            {/* Demo Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-1">
+                  Demo Features
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Investor Demo Features</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/demo/abha-lookup" className="flex items-center gap-2 cursor-pointer">
+                    <Search className="h-4 w-4" />
+                    ABHA ID Lookup
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/demo/analytics" className="flex items-center gap-2 cursor-pointer">
+                    <Activity className="h-4 w-4" />
+                    Real-time Analytics
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/processor" className="flex items-center gap-2 cursor-pointer">
+                    <Heart className="h-4 w-4" />
+                    AI Document Processor
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
           {/* Desktop CTA */}
@@ -98,16 +138,35 @@ const Header = () => {
               </Link>
             ))}
             <div className="pt-4 border-t space-y-2">
-              <Button variant="outline" className="w-full" asChild>
-                <Link to="/processor" onClick={() => setIsMenuOpen(false)}>
-                  Try AI Processor
-                </Link>
-              </Button>
-              <Button className="w-full" asChild>
-                <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
-                  Request Demo
-                </Link>
-              </Button>
+              <div className="px-3 py-2 text-sm font-semibold text-gray-500">Demo Features</div>
+              <Link
+                to="/demo/abha-lookup"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                ABHA ID Lookup
+              </Link>
+              <Link
+                to="/demo/analytics"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Real-time Analytics
+              </Link>
+              <Link
+                to="/processor"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                AI Document Processor
+              </Link>
+              <div className="pt-4 space-y-2">
+                <Button className="w-full" asChild>
+                  <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
+                    Request Demo
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         )}
