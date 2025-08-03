@@ -124,15 +124,15 @@ if [ ! -f ".env" ]; then
 fi
 
 # Start backend
-npm run dev > ../../demo/backend.log 2>&1 &
+npm run dev > ../demo/backend.log 2>&1 &
 BACKEND_PID=$!
-cd ../..
+cd ..
 
 # Wait for backend
 if wait_for_server $BACKEND_PORT "Backend"; then
     echo -e "${GREEN}✅ Backend API available at: ${BLUE}http://localhost:$BACKEND_PORT/api/v1${NC}"
 else
-    echo -e "${RED}❌ Backend failed to start. Check backend.log for errors.${NC}"
+    echo -e "${RED}❌ Backend failed to start. Check demo/backend.log for errors.${NC}"
     kill $BACKEND_PID 2>/dev/null
     exit 1
 fi
@@ -219,13 +219,13 @@ trap cleanup INT TERM
 # Keep script running and show logs
 echo ""
 echo -e "${BLUE}Monitoring servers... (Press Ctrl+C to stop)${NC}"
-echo -e "${YELLOW}Tip: Check 'backend.log' and 'frontend.log' if you see any issues${NC}"
+echo -e "${YELLOW}Tip: Check 'demo/backend.log' and 'frontend.log' if you see any issues${NC}"
 echo ""
 
 # Monitor processes
 while true; do
     if ! kill -0 $BACKEND_PID 2>/dev/null; then
-        echo -e "${RED}❌ Backend crashed! Check backend.log for errors${NC}"
+        echo -e "${RED}❌ Backend crashed! Check demo/backend.log for errors${NC}"
         cleanup
     fi
     if ! kill -0 $FRONTEND_PID 2>/dev/null; then
