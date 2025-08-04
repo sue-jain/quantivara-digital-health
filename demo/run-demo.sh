@@ -125,6 +125,8 @@ fi
 # Check if database needs setup
 echo -e "${BLUE}Checking database status...${NC}"
 echo -e "${YELLOW}Note: Using db:reset for consistent demo ABHA IDs${NC}"
+# FIX: Check specifically for demo ABHA IDs instead of just user count
+# Previous logic would skip reset if any users existed, even with random ABHA IDs
 DB_FILE="data/quantivara.db"
 NEEDS_SETUP=false
 NEEDS_SEED=false
@@ -141,12 +143,14 @@ else
         NEEDS_SETUP=true
         NEEDS_SEED=true
     else
-        USER_COUNT=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM users;" 2>/dev/null || echo "0")
-        if [ "$USER_COUNT" -eq "0" ]; then
-            echo -e "${YELLOW}Database exists but has no data. Will seed database...${NC}"
-            NEEDS_SEED=true
+        # Check specifically for demo ABHA IDs
+        DEMO_ABHA_COUNT=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM users WHERE abha_id IN ('12345678901234', '98765432109876', '45678901234567', '11112222333344', '55556666777788');" 2>/dev/null || echo "0")
+        
+        if [ "$DEMO_ABHA_COUNT" -eq "5" ]; then
+            echo -e "${GREEN}✅ Database is ready with demo ABHA IDs${NC}"
         else
-            echo -e "${GREEN}✅ Database is ready with $USER_COUNT users${NC}"
+            echo -e "${YELLOW}Database exists but missing demo ABHA IDs. Will reset for consistent demo...${NC}"
+            NEEDS_SEED=true
         fi
     fi
 fi
