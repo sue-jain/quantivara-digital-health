@@ -124,7 +124,7 @@ fi
 
 # Check if database needs setup
 echo -e "${BLUE}Checking database status...${NC}"
-echo -e "${YELLOW}Note: Using db:reset for consistent demo ABHA IDs${NC}"
+echo -e "${YELLOW}Note: Using db:add-demo to preserve existing data while ensuring demo ABHA IDs${NC}"
 # FIX: Check specifically for demo ABHA IDs instead of just user count
 # Previous logic would skip reset if any users existed, even with random ABHA IDs
 DB_FILE="data/quantivara.db"
@@ -165,14 +165,14 @@ if [ "$NEEDS_SETUP" = true ]; then
     echo -e "${GREEN}✅ Database schema created${NC}"
 fi
 
-# Reset database with consistent demo data
+# Add missing demo data (preserves existing data)
 if [ "$NEEDS_SEED" = true ]; then
-    echo -e "${BLUE}Resetting database with consistent demo data...${NC}"
-    npm run db:reset || {
-        echo -e "${RED}❌ Database reset failed${NC}"
+    echo -e "${BLUE}Adding missing demo data (preserving existing data)...${NC}"
+    npm run db:add-demo || {
+        echo -e "${RED}❌ Demo data addition failed${NC}"
         exit 1
     }
-    echo -e "${GREEN}✅ Database reset with consistent demo data${NC}"
+    echo -e "${GREEN}✅ Demo data added successfully${NC}"
 fi
 
 # Create .env if missing

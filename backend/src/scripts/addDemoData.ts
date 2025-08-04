@@ -25,9 +25,9 @@ const DEMO_HOSPITALS = [
   { name: 'Max Healthcare', tier: 'tier-1', fee: 8000000 },
 ];
 
-const resetDatabase = async () => {
+const addDemoData = async () => {
   try {
-    logger.info('🔄 Checking database for demo ABHA IDs...');
+    logger.info('🔍 Checking for missing demo data...');
     
     // Check which demo ABHA IDs already exist
     const existingDemoAbhas = db.prepare(`
@@ -151,16 +151,16 @@ const resetDatabase = async () => {
     logger.info('🎯 Ready for consistent demos!');
     
   } catch (error) {
-    logger.error('❌ Database reset failed:', error);
+    logger.error('❌ Demo data addition failed:', error);
     // Re-enable foreign key constraints even on error
     db.pragma('foreign_keys = ON');
     throw error;
   }
 };
 
-// Run reset if this file is executed directly
+// Run if this file is executed directly
 if (require.main === module) {
-  resetDatabase()
+  addDemoData()
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
@@ -168,4 +168,4 @@ if (require.main === module) {
     });
 }
 
-export { resetDatabase }; 
+export { addDemoData }; 
