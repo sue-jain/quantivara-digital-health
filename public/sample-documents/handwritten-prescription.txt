@@ -1,0 +1,37 @@
+HANDWRITTEN PRESCRIPTION SAMPLE
+==============================
+
+Patient: Anjali Verma
+Age: 34 Years, Female
+Date: 28-01-2024
+
+Doctor: Dr. Amit Kumar Singh, MBBS
+Reg No: MCI-98765
+Community Health Center, Sector 12
+
+DIAGNOSIS:
+- Viral Fever
+- Upper Respiratory Tract Infection
+
+MEDICATIONS:
+1. Tab. Paracetamol 650mg
+   TDS (Three times daily) x 5 days
+   After food
+
+2. Tab. Azithromycin 500mg
+   OD (Once daily) x 3 days
+   Empty stomach
+
+3. Tab. Cetirizine 10mg
+   HS (Once at night) x 5 days
+   Before sleep
+
+ADVICE:
+- Complete rest for 3 days
+- Drink plenty of warm fluids
+- Avoid cold drinks and ice cream
+
+Follow up if symptoms persist after 3 days.
+
+[This is a simulated handwritten prescription for demo purposes]
+[In production, this would be an actual scanned image of a handwritten prescription]

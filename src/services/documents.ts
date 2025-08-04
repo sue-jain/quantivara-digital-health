@@ -101,7 +101,7 @@ class DocumentService {
   }
   
   // Upload document via HTTP
-  async uploadDocument(data: DocumentUploadData): Promise<string> {
+  async uploadDocument(data: DocumentUploadData): Promise<any> {
     try {
       const response = await uploadFile(
         API_ENDPOINTS.documents.upload,
@@ -113,7 +113,8 @@ class DocumentService {
         }
       );
       
-      return response.data.documentId;
+      // Return the full response data, not just documentId
+      return response.data;
     } catch (error) {
       console.error('Error uploading document:', error);
       throw error;
