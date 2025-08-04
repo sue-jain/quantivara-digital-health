@@ -99,7 +99,7 @@ echo ""
 
 # Start Backend
 echo -e "${BLUE}Starting Backend Server...${NC}"
-cd backend 2>/dev/null || {
+cd ../backend 2>/dev/null || {
     echo -e "${RED}❌ Backend directory not found. Are you in the project root?${NC}"
     exit 1
 }
