@@ -16,7 +16,23 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/index.ts',
     '!src/scripts/**',
+    '!src/parser/test-parser.ts',
+    '!src/parser/index.ts',
   ],
+  coverageThreshold: {
+    global: {
+      branches: 97,
+      functions: 95,
+      lines: 93,
+      statements: 93
+    },
+    './src/parser/': {
+      branches: 97,
+      functions: 95,
+      lines: 93,
+      statements: 93
+    }
+  },
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],

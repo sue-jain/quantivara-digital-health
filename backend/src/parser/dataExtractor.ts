@@ -4,10 +4,10 @@ import { logger } from '../utils/logger';
 const PATTERNS = {
   // Patient information patterns
   patientName: [
-    /Patient\s*Name\s*[:]\s*([A-Za-z\s]+)/i,
-    /Name\s*[:]\s*([A-Za-z\s]+)/i,
-    /Patient\s*[:]\s*([A-Za-z\s]+)/i,
-    /Mr\.|Mrs\.|Ms\.|Dr\.\s+([A-Za-z\s]+)/i
+    /Patient\s*Name\s*[:]\s*([A-Za-z\s]+?)(?:\n|$)/i,
+    /Name\s*[:]\s*([A-Za-z\s]+?)(?:\n|$)/i,
+    /Patient\s*[:]\s*([A-Za-z\s]+?)(?:\n|$)/i,
+    /(?:Mr\.|Mrs\.|Ms\.|Dr\.)\s+([A-Za-z\s]+?)(?:\n|,|$)/i
   ],
   
   age: [
@@ -34,7 +34,7 @@ const PATTERNS = {
     hemoglobin: /Hemoglobin\s*[:]\s*([\d.]+)\s*(g\/dL|gm\/dl)?/i,
     glucose: /(?:Glucose|Blood\s*Sugar|FBS)\s*[:]\s*([\d.]+)\s*(mg\/dL|mg\/dl)?/i,
     cholesterol: /Total\s*Cholesterol\s*[:]\s*([\d.]+)\s*(mg\/dL|mg\/dl)?/i,
-    uricAcid: /Uric\s*Acid\s*[:]\s*([\d.]+)\s*(mg\/dL|mg\/dl)?/i,
+    uricacid: /Uric\s*Acid\s*[:]\s*([\d.]+)\s*(mg\/dL|mg\/dl)?/i,
     tsh: /TSH\s*[:]\s*([\d.]+)\s*(mIU\/L|μIU\/ml)?/i,
     t3: /T3\s*[:]\s*([\d.]+)\s*(ng\/dL|ng\/dl)?/i,
     t4: /T4\s*[:]\s*([\d.]+)\s*(μg\/dL|ug\/dl)?/i,
@@ -43,7 +43,7 @@ const PATTERNS = {
   // Prescription patterns
   medications: /(?:Rx|Prescription|Medicines?)[\s\S]*?(?=\n\n|$)/i,
   diagnosis: /(?:Diagnosis|Clinical\s*Diagnosis|Provisional\s*Diagnosis)\s*[:]\s*([^\n]+)/i,
-  doctorName: /Dr\.\s*([A-Za-z\s]+)(?:\n|,)/i,
+  doctorName: /Dr\.\s*([A-Za-z\s,]+?)(?:\n|$)/i,
 };
 
 export interface ExtractedData {
@@ -186,11 +186,11 @@ function extractLabResults(text: string): Record<string, any> {
   }
   
   // Try to extract any other test results in table format
-  const tablePattern = /([A-Za-z\s]+)\s+([\d.]+)\s+([A-Za-z\/]+)\s+([\d.-]+\s*-\s*[\d.-]+)/g;
+  const tablePattern = /([A-Za-z\s]+?)\s{2,}([\d.]+)\s+([A-Za-z\/]+)\s+([\d.-]+\s*-\s*[\d.-]+)/g;
   let match;
   while ((match = tablePattern.exec(text)) !== null) {
     const testName = match[1].trim().toLowerCase().replace(/\s+/g, '');
-    if (!results[testName]) {
+    if (!results[testName] && testName.length > 2) { // Skip headers like "Test Name"
       results[testName] = {
         value: match[2],
         unit: match[3],
@@ -206,7 +206,7 @@ function extractMedications(text: string): Array<{ name: string; dosage?: string
   const medications: Array<{ name: string; dosage?: string; frequency?: string }> = [];
   
   // Common medication pattern
-  const medPattern = /(?:Tab|Cap|Syp|Inj)\.?\s+([A-Za-z\s]+)\s+([\d.]+\s*(?:mg|ml|gm)?)\s*(?:-\s*)?([A-Za-z0-9\s-]*)/gi;
+  const medPattern = /(?:Tab|Cap|Syp|Inj)\.?\s+([A-Za-z\s]+?)\s+([\d.]+\s*(?:mg|ml|gm)?)\s*(?:-\s*)?([A-Za-z0-9\s-]*?)(?:\n|$)/gi;
   let match;
   
   while ((match = medPattern.exec(text)) !== null) {

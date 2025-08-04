@@ -78,14 +78,14 @@ export function formatExtractedData(data: ExtractedData, accuracy?: number): any
   };
   
   // Format based on document type
-  if (data.documentType === 'Lab Report' && data.labResults) {
+  if (data.documentType === 'Lab Report') {
     formatted.patientInfo = data.patientInfo;
     formatted.labInfo = {
       reportDate: data.date
     };
     
     // Convert lab results to array format
-    formatted.tests = Object.entries(data.labResults).map(([name, result]) => ({
+    formatted.tests = Object.entries(data.labResults || {}).map(([name, result]) => ({
       name: formatTestName(name),
       value: result.value,
       unit: result.unit,
