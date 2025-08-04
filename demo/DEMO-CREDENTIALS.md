@@ -18,10 +18,10 @@ npm install && npm run dev
 
 ## Demo URLs
 
-- **Main App**: http://localhost:5173
-- **ABHA ID Lookup**: http://localhost:5173/demo/abha-lookup
-- **Document Processor**: http://localhost:5173/processor
-- **Analytics Dashboard**: http://localhost:5173/demo/analytics
+- **Main App**: http://localhost:8080
+- **ABHA ID Lookup**: http://localhost:8080/demo/abha-lookup
+- **Document Processor**: http://localhost:8080/processor
+- **Analytics Dashboard**: http://localhost:8080/demo/analytics
 
 ## Test ABHA IDs
 
