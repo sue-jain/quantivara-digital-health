@@ -17,11 +17,13 @@ const ABHALookup: React.FC = () => {
   const [lookupTime, setLookupTime] = useState<number | null>(null);
   const { toast } = useToast();
   
-  // Demo ABHA IDs for testing
+  // Demo ABHA IDs for testing - using fixed demo data
   const demoAbhaIds = [
     { id: '12345678901234', name: 'Ramesh Kumar', condition: 'Diabetes, Hypertension' },
     { id: '98765432109876', name: 'Priya Sharma', condition: 'Asthma, Allergies' },
     { id: '45678901234567', name: 'Suresh Patel', condition: 'Heart Disease' },
+    { id: '11112222333344', name: 'Ashok Gupta', condition: 'Hypertension' },
+    { id: '55556666777788', name: 'Meera Singh', condition: 'Thyroid Disorders' },
   ];
   
   const handleLookup = async () => {
