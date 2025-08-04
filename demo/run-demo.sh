@@ -99,10 +99,19 @@ echo ""
 
 # Start Backend
 echo -e "${BLUE}Starting Backend Server...${NC}"
-cd ../backend 2>/dev/null || {
-    echo -e "${RED}❌ Backend directory not found. Are you in the project root?${NC}"
+
+# Determine the correct path to backend directory
+# Check if we're in demo directory or project root
+if [ -d "../backend" ]; then
+    # We're in demo directory
+    cd ../backend
+elif [ -d "backend" ]; then
+    # We're in project root
+    cd backend
+else
+    echo -e "${RED}❌ Backend directory not found. Please run from project root or demo directory.${NC}"
     exit 1
-}
+fi
 
 # Install dependencies if needed
 if [ ! -d "node_modules" ]; then
@@ -111,6 +120,55 @@ if [ ! -d "node_modules" ]; then
         echo -e "${RED}❌ Failed to install backend dependencies${NC}"
         exit 1
     }
+fi
+
+# Check if database needs setup
+echo -e "${BLUE}Checking database status...${NC}"
+echo -e "${YELLOW}Note: Using db:reset for consistent demo ABHA IDs${NC}"
+DB_FILE="data/quantivara.db"
+NEEDS_SETUP=false
+NEEDS_SEED=false
+
+# Check if database file exists
+if [ ! -f "$DB_FILE" ]; then
+    echo -e "${YELLOW}Database file not found. Will setup database...${NC}"
+    NEEDS_SETUP=true
+    NEEDS_SEED=true
+else
+    # Check if database has data by querying users table
+    if ! sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM users;" > /dev/null 2>&1; then
+        echo -e "${YELLOW}Database exists but tables may be missing. Will setup database...${NC}"
+        NEEDS_SETUP=true
+        NEEDS_SEED=true
+    else
+        USER_COUNT=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM users;" 2>/dev/null || echo "0")
+        if [ "$USER_COUNT" -eq "0" ]; then
+            echo -e "${YELLOW}Database exists but has no data. Will seed database...${NC}"
+            NEEDS_SEED=true
+        else
+            echo -e "${GREEN}✅ Database is ready with $USER_COUNT users${NC}"
+        fi
+    fi
+fi
+
+# Setup database if needed
+if [ "$NEEDS_SETUP" = true ]; then
+    echo -e "${BLUE}Setting up database schema...${NC}"
+    npm run db:setup || {
+        echo -e "${RED}❌ Database setup failed${NC}"
+        exit 1
+    }
+    echo -e "${GREEN}✅ Database schema created${NC}"
+fi
+
+# Reset database with consistent demo data
+if [ "$NEEDS_SEED" = true ]; then
+    echo -e "${BLUE}Resetting database with consistent demo data...${NC}"
+    npm run db:reset || {
+        echo -e "${RED}❌ Database reset failed${NC}"
+        exit 1
+    }
+    echo -e "${GREEN}✅ Database reset with consistent demo data${NC}"
 fi
 
 # Create .env if missing
@@ -126,7 +184,15 @@ fi
 # Start backend
 npm run dev > ../demo/backend.log 2>&1 &
 BACKEND_PID=$!
-cd ..
+
+# Return to project root (whether we came from demo/ or root)
+if [ -d "../demo" ]; then
+    # We came from demo directory
+    cd ..
+else
+    # We came from project root
+    cd ..
+fi
 
 # Wait for backend
 if wait_for_server $BACKEND_PORT "Backend"; then
@@ -188,9 +254,11 @@ echo "  • Document Processor: http://localhost:$FRONTEND_PORT/processor"
 echo "  • Analytics Dashboard: http://localhost:$FRONTEND_PORT/demo/analytics"
 echo ""
 echo -e "${BLUE}Test ABHA IDs:${NC}"
-echo "  • 1234-5678-9012-34 (Diabetes patient)"
-echo "  • 9876-5432-1098-76 (Allergy patient)"
-echo "  • 4567-8901-2345-67 (Heart patient)"
+echo "  • 1234-5678-9012-34 (Ramesh Kumar - Diabetes)"
+echo "  • 9876-5432-1098-76 (Priya Sharma - Asthma)"
+echo "  • 4567-8901-2345-67 (Suresh Patel - Heart Disease)"
+echo "  • 1111-2222-3333-44 (Ashok Gupta - Hypertension)"
+echo "  • 5555-6666-7777-88 (Meera Singh - Thyroid)"
 echo ""
 echo -e "${YELLOW}Press Ctrl+C to stop all servers${NC}"
 echo "========================================"
