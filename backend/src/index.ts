@@ -14,6 +14,7 @@ import { logger } from './utils/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { notFoundHandler } from './middleware/notFoundHandler';
 import { webSocketManager } from './websocket/server';
+import initDatabase from './scripts/initDatabase';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -38,6 +39,13 @@ const io = new SocketIOServer(server, {
 });
 
 const PORT = process.env.PORT || 3001;
+
+// Initialize database on startup
+try {
+  initDatabase();
+} catch (error) {
+  logger.error('Database initialization failed:', error);
+}
 
 // Security middleware
 app.use(helmet({

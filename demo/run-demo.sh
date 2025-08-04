@@ -99,7 +99,7 @@ echo ""
 
 # Start Backend
 echo -e "${BLUE}Starting Backend Server...${NC}"
-cd ../backend 2>/dev/null || {
+cd backend 2>/dev/null || {
     echo -e "${RED}❌ Backend directory not found. Are you in the project root?${NC}"
     exit 1
 }
@@ -124,9 +124,9 @@ if [ ! -f ".env" ]; then
 fi
 
 # Start backend
-npm run dev > ../../demo/backend.log 2>&1 &
+npm run dev > ../backend.log 2>&1 &
 BACKEND_PID=$!
-cd ../..
+cd ..
 
 # Wait for backend
 if wait_for_server $BACKEND_PORT "Backend"; then
