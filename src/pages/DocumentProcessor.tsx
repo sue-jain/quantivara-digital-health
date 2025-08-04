@@ -133,7 +133,30 @@ const DocumentProcessor: React.FC = () => {
         });
         
         // Update with real results
-        if (uploadResult) {
+        if (uploadResult && uploadResult.extractedData) {
+          const extractedData = uploadResult.extractedData;
+          setUploadedFiles(prev => 
+            prev.map(f => 
+              f.id === file.id 
+                ? { 
+                    ...f, 
+                    status: 'completed' as const,
+                    progress: 100,
+                    result: {
+                      type: extractedData.documentType || uploadResult.documentType || documentType,
+                      extractedData: extractedData
+                    }
+                  }
+                : f
+            )
+          );
+          
+          toast({
+            title: "Document processed",
+            description: `Successfully extracted data from ${file.file.name}`,
+          });
+        } else {
+          // Fallback to mock data if real upload doesn't return extracted data
           setUploadedFiles(prev => 
             prev.map(f => 
               f.id === file.id 
@@ -146,11 +169,6 @@ const DocumentProcessor: React.FC = () => {
                 : f
             )
           );
-          
-          toast({
-            title: "Document processed",
-            description: `Successfully extracted data from ${file.file.name}`,
-          });
         }
       } catch (error) {
         console.log('Real upload failed, falling back to simulation');
