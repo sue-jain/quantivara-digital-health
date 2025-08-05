@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import { PrivateAccess } from "./components/PrivateAccess";
 import DocumentProcessorPage from "./pages/DocumentProcessorPage";
 import ABHALookup from "./pages/ABHALookup";
+import PatientLookup from "./pages/PatientLookup";
 import AnalyticsDashboard from "./pages/AnalyticsDashboard";
 
 const queryClient = new QueryClient();
@@ -65,6 +66,7 @@ const App = () => {
             <Route path="/contact" element={<Contact />} />
             <Route path="/processor" element={<DocumentProcessorPage />} />
             <Route path="/demo/abha-lookup" element={<ABHALookup />} />
+            <Route path="/demo/patient-lookup" element={<PatientLookup />} />
             <Route path="/demo/analytics" element={<AnalyticsDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
