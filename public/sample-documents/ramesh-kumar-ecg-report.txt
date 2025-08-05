@@ -1,0 +1,70 @@
+ELECTROCARDIOGRAM (ECG) REPORT
+==============================
+
+Patient: Ramesh Kumar
+Age: 52 Years, Male
+Test ID: ECG-2024-001
+Date: 05-08-2024
+
+Hospital: Max Healthcare
+Department: Cardiology
+Report Date: 05-08-2024
+
+CLINICAL INDICATION:
+- Type 2 Diabetes Mellitus
+- Hypertension
+- Routine cardiac evaluation
+
+TECHNICAL QUALITY: Good
+
+ECG FINDINGS:
+=============
+
+1. Heart Rate: 88 bpm (Normal: 60-100)
+2. Rhythm: Sinus rhythm
+3. PR Interval: 0.18 seconds (Normal: 0.12-0.20)
+4. QRS Duration: 0.08 seconds (Normal: <0.12)
+5. QT Interval: 0.44 seconds (Normal: <0.44)
+
+AXIS:
+- QRS Axis: +30 degrees (Normal: -30 to +90)
+- T Wave Axis: +15 degrees
+
+CHAMBER ENLARGEMENT:
+- Left Atrial Enlargement: Present
+- Left Ventricular Hypertrophy: Present
+- Right Ventricular Hypertrophy: Absent
+
+CONDUCTION ABNORMALITIES:
+- No significant conduction delays
+- No bundle branch blocks
+
+ST-T WAVE CHANGES:
+- ST Depression: Present in leads II, III, aVF
+- T Wave Inversion: Present in leads V4-V6
+- ST Elevation: None
+
+Q WAVES:
+- No pathological Q waves
+
+ARRHYTHMIAS:
+- No significant arrhythmias detected
+- Occasional premature atrial contractions
+
+CONCLUSION:
+===========
+1. Sinus rhythm with normal rate
+2. Left atrial enlargement
+3. Left ventricular hypertrophy
+4. Non-specific ST-T wave changes
+5. No evidence of acute ischemia
+6. Changes consistent with long-standing hypertension
+
+RECOMMENDATIONS:
+- Continue antihypertensive therapy
+- Regular cardiac monitoring
+- Lifestyle modifications
+- Follow-up in 6 months
+
+[This is a simulated ECG report for Ramesh Kumar - Diabetes/Hypertension patient]
+[Patient information extracted for ABHA ID mapping] 

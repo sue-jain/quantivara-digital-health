@@ -158,6 +158,24 @@ router.get('/:abhaId/profile', asyncHandler(async (req: Request, res: Response) 
       throw new AppError('Patient not found with this ABHA ID', 404, 'PATIENT_NOT_FOUND');
     }
 
+    // Query linked documents using ABHA ID
+    const documentsQuery = `
+      SELECT 
+        id, document_type, file_name, created_at, extraction_accuracy, 
+        extracted_data, status, provider_id
+      FROM medical_documents 
+      WHERE abha_id = ?
+      AND id IN (
+        SELECT MAX(id) 
+        FROM medical_documents 
+        WHERE abha_id = ? 
+        GROUP BY file_name
+      )
+      ORDER BY created_at DESC
+    `;
+    
+    const documents = db.prepare(documentsQuery).all(abhaId, abhaId) as any[];
+    
     // Parse JSON fields
     const profileData = {
       abhaId: patient.abha_id,
@@ -177,6 +195,16 @@ router.get('/:abhaId/profile', asyncHandler(async (req: Request, res: Response) 
         allergies: patient.allergies ? JSON.parse(patient.allergies) : [],
         currentMedications: patient.current_medications ? JSON.parse(patient.current_medications) : []
       },
+      linkedDocuments: documents.map(doc => ({
+        id: doc.id,
+        type: doc.document_type,
+        fileName: doc.file_name,
+        uploadedAt: doc.created_at,
+        accuracy: doc.extraction_accuracy ? `${doc.extraction_accuracy}%` : null,
+        status: doc.status,
+        extractedData: doc.extracted_data ? JSON.parse(doc.extracted_data) : null
+      })),
+      totalDocuments: documents.length,
       responseTime: `${Date.now() - startTime}ms`
     };
 
@@ -214,13 +242,26 @@ router.get('/:abhaId/emergency-profile', asyncHandler(async (req: Request, res: 
       SELECT 
         u.first_name, u.last_name, u.date_of_birth, u.gender, u.phone,
         p.blood_group, p.emergency_contact, p.medical_conditions, p.allergies, p.current_medications,
-        (SELECT COUNT(*) FROM medical_documents md WHERE md.patient_id = p.id) as total_documents,
+        (SELECT COUNT(DISTINCT file_name) FROM medical_documents md WHERE md.abha_id = u.abha_id) as total_documents,
         (SELECT json_group_array(json_object(
           'type', document_type,
           'date', created_at,
+          'fileName', file_name,
           'provider', (SELECT name FROM healthcare_providers WHERE id = provider_id),
           'accuracy', extraction_accuracy
-        )) FROM medical_documents md WHERE md.patient_id = p.id ORDER BY created_at DESC LIMIT 5) as recent_documents
+        )) FROM (
+          SELECT document_type, created_at, file_name, provider_id, extraction_accuracy
+          FROM medical_documents md 
+          WHERE md.abha_id = u.abha_id 
+          AND md.id IN (
+            SELECT MAX(id) 
+            FROM medical_documents 
+            WHERE abha_id = u.abha_id 
+            GROUP BY file_name
+          )
+          ORDER BY created_at DESC 
+          LIMIT 5
+        )) as recent_documents
       FROM users u 
       LEFT JOIN patients p ON u.id = p.user_id 
       WHERE u.abha_id = ?

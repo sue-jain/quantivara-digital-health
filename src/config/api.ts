@@ -170,7 +170,7 @@ export async function uploadFile(
   additionalData?: Record<string, any>
 ): Promise<ApiResponse> {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('document', file);
   
   if (additionalData) {
     Object.entries(additionalData).forEach(([key, value]) => {

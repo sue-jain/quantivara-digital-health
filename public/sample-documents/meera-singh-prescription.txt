@@ -1,0 +1,55 @@
+ENDOCRINOLOGY PRESCRIPTION
+==========================
+
+Patient: Meera Singh
+Age: 42 Years, Female
+Date: 05-08-2024
+
+Doctor: Dr. Priya Sharma, MD (Endocrinology)
+Reg No: MCI-34567
+Thyroid Care Center, Sector 8, Noida
+
+DIAGNOSIS:
+- Hypothyroidism (Primary)
+- Autoimmune Thyroiditis
+- Vitamin D Deficiency
+- Iron Deficiency Anemia
+
+MEDICATIONS:
+1. Tab. Levothyroxine 100mcg
+   Once daily x 30 days
+   Morning on empty stomach
+   Instructions: Take 30 minutes before breakfast
+
+2. Tab. Calcium Carbonate 500mg
+   Twice daily x 30 days
+   With meals
+   Instructions: For bone health
+
+3. Tab. Vitamin D3 1000 IU
+   Once daily x 30 days
+   With breakfast
+   Instructions: For vitamin D deficiency
+
+4. Tab. Ferrous Sulfate 325mg
+   Twice daily x 30 days
+   With meals
+   Instructions: For iron deficiency
+
+5. Tab. Selenium 100mcg
+   Once daily x 30 days
+   With breakfast
+   Instructions: For thyroid support
+
+ADVICE:
+- Regular thyroid function monitoring
+- Iron-rich diet (leafy greens, red meat)
+- Sun exposure 15 minutes daily
+- Avoid soy products (interferes with thyroid)
+- Regular exercise for metabolism
+- Stress management
+
+Follow-up: After 45 days for thyroid function test
+
+[This is a simulated prescription for Meera Singh - Thyroid patient]
+[Patient information extracted for ABHA ID mapping] 

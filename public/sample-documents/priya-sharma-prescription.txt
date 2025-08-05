@@ -1,0 +1,43 @@
+HANDWRITTEN PRESCRIPTION
+========================
+
+Patient: Priya Sharma
+Age: 38 Years, Female
+Date: 05-08-2024
+
+Doctor: Dr. Meera Patel, MD (Cardiology)
+Reg No: MCI-54321
+Cardiac Care Center, Sector 18, Noida
+
+DIAGNOSIS:
+- Hypertension
+- Hyperlipidemia
+- Pre-diabetes
+
+MEDICATIONS:
+1. Tab. Amlodipine 5mg
+   Once daily x 30 days
+   Morning with breakfast
+
+2. Tab. Atorvastatin 20mg
+   Once daily x 30 days
+   Evening after dinner
+
+3. Tab. Metformin 500mg
+   Twice daily (1-0-1) x 30 days
+   With meals
+
+4. Tab. Aspirin 75mg
+   Once daily x 30 days
+   Morning
+
+ADVICE:
+- Low salt diet
+- Regular exercise 30 minutes daily
+- Monitor blood pressure weekly
+- Avoid smoking and alcohol
+
+Follow up after 30 days for lipid profile and blood pressure check.
+
+[This is a simulated handwritten prescription for Priya Sharma]
+[Patient information extracted for ABHA ID mapping] 

@@ -328,7 +328,7 @@ const ABHALookup: React.FC = () => {
                           <div className="flex items-center gap-3">
                             <FileText className="h-4 w-4 text-gray-600" />
                             <div>
-                              <p className="font-medium">{doc.type}</p>
+                              <p className="font-medium">{doc.fileName || doc.type}</p>
                               <p className="text-sm text-muted-foreground">
                                 {doc.provider} • {new Date(doc.date).toLocaleDateString()}
                               </p>

@@ -39,3 +39,4 @@ backend/create-test-*.js
 backend/COMPREHENSIVE-TEST-REPORT.md
 coverage/
 *.coverage
+uploads/

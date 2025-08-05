@@ -56,7 +56,8 @@ const DocumentProcessor: React.FC = () => {
     onDrop,
     accept: {
       'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
-      'application/pdf': ['.pdf']
+      'application/pdf': ['.pdf'],
+      'text/plain': ['.txt']
     },
     multiple: true
   });
@@ -125,6 +126,9 @@ const DocumentProcessor: React.FC = () => {
       
       // Try real upload first
       try {
+        console.log('🔍 Attempting to upload document:', file.file.name);
+        console.log('🔍 Document type:', documentType);
+        
         const uploadResult = await documentService.uploadDocument({
           file: file.file,
           patientId: DEMO_PATIENT_ID,
@@ -711,6 +715,22 @@ const DocumentProcessor: React.FC = () => {
     return completedFiles.length > 0 ? completedFiles[0].result.type : '';
   };
 
+  const sampleDocuments = [
+    // Special documents with ⭐ (starred) - grouped together
+    { name: 'handwritten-prescription.txt', label: 'Handwritten Prescription', special: true },
+    { name: 'ramesh-kumar-prescription.txt', label: 'Ramesh Kumar - Diabetes Prescription', special: true },
+    { name: 'ramesh-kumar-lab-report.txt', label: 'Ramesh Kumar - Diabetes Lab Report', special: true },
+    { name: 'ramesh-kumar-ecg-report.txt', label: 'Ramesh Kumar - Diabetes ECG Report', special: true },
+    
+    // Original demo documents
+    { name: 'prescription-sample.txt', label: 'Demo Prescription' },
+    { name: 'lab-report-sample.txt', label: 'Demo Lab Report' },
+    { name: 'ecg-sample.txt', label: 'Demo ECG Report' },
+    { name: 'xray-sample.txt', label: 'Demo X-Ray Report' },
+    { name: 'ayurveda-sample.txt', label: 'Demo AYUSH Prescription' },
+    { name: 'discharge-sample.txt', label: 'Demo Discharge Summary' }
+  ];
+
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-8">
@@ -764,43 +784,36 @@ const DocumentProcessor: React.FC = () => {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <h3 className="font-semibold text-blue-900 mb-2">Try with Sample Documents:</h3>
           <div className="flex flex-wrap gap-2">
-            {[
-              { name: 'Prescription', file: 'prescription-sample.txt' },
-              { name: 'Handwritten Rx', file: 'handwritten-prescription.jpg', special: true },
-              { name: 'Lab Report', file: 'lab-report-sample.txt' },
-              { name: 'ECG Report', file: 'ecg-sample.txt' },
-              { name: 'X-Ray Report', file: 'xray-sample.txt' },
-              { name: 'Ayurvedic Rx', file: 'ayurveda-sample.txt' },
-              { name: 'Discharge Summary', file: 'discharge-sample.txt' }
-            ].map((sample) => (
+            {sampleDocuments.map((sample) => (
               <Button
-                key={sample.file}
+                key={sample.name}
                 variant={sample.special ? "default" : "outline"}
                 size="sm"
                 onClick={async () => {
                   // Create a mock file for demonstration
-                  const fileType = sample.file.endsWith('.jpg') ? 'image/jpeg' : 'text/plain';
+                  const fileType = sample.name.endsWith('.jpg') ? 'image/jpeg' : 
+                                  sample.name.endsWith('.txt') ? 'text/plain' : 'text/plain';
                   
-                  if (sample.special && sample.file.endsWith('.jpg')) {
-                    // For handwritten prescription, try to load the actual image
+                  if (sample.special && (sample.name.endsWith('.jpg') || sample.name.endsWith('.txt'))) {
+                    // For handwritten prescription, try to load the actual file
                     try {
-                      const response = await fetch(`/sample-documents/${sample.file}`);
+                      const response = await fetch(`/sample-documents/${sample.name}`);
                       const blob = await response.blob();
-                      const file = new File([blob], sample.file, { type: 'image/jpeg' });
+                      const file = new File([blob], sample.name, { type: fileType });
                       const mockFiles = [{
                         id: Math.random().toString(36).substr(2, 9),
                         file,
-                        preview: URL.createObjectURL(blob),
+                        preview: sample.name.endsWith('.jpg') ? URL.createObjectURL(blob) : '',
                         status: 'pending' as const
                       }];
                       setUploadedFiles(prev => [...prev, ...mockFiles]);
                       toast({
-                        title: "Handwritten prescription loaded!",
-                        description: "Real handwritten prescription ready for AI processing - 92% accuracy!",
+                        title: sample.special ? "Special document loaded!" : "Sample file loaded!",
+                        description: `${sample.label} ready for AI processing`,
                       });
                     } catch (error) {
                       // Fallback to mock file if image not found
-                      const file = new File([sample.name], sample.file, { type: fileType });
+                      const file = new File([sample.label], sample.name, { type: fileType });
                       const mockFiles = [{
                         id: Math.random().toString(36).substr(2, 9),
                         file,
@@ -810,11 +823,11 @@ const DocumentProcessor: React.FC = () => {
                       setUploadedFiles(prev => [...prev, ...mockFiles]);
                       toast({
                         title: "Sample file added",
-                        description: "Handwritten prescription ready for AI processing!",
+                        description: `${sample.label} ready for processing`,
                       });
                     }
                   } else {
-                    const file = new File([sample.name], sample.file, { type: fileType });
+                    const file = new File([sample.label], sample.name, { type: fileType });
                     const mockFiles = [{
                       id: Math.random().toString(36).substr(2, 9),
                       file,
@@ -824,13 +837,13 @@ const DocumentProcessor: React.FC = () => {
                     setUploadedFiles(prev => [...prev, ...mockFiles]);
                     toast({
                       title: "Sample file added",
-                      description: `${sample.name} ready for processing`,
+                      description: `${sample.label} ready for processing`,
                     });
                   }
                 }}
                 className={sample.special ? "text-xs bg-primary hover:bg-primary/90" : "text-xs"}
               >
-                {sample.special && "⭐ "}{sample.name}
+                {sample.special && "⭐ "}{sample.label}
               </Button>
             ))}
           </div>
@@ -855,7 +868,7 @@ const DocumentProcessor: React.FC = () => {
                   Drag & drop medical documents here, or click to select
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Supports prescriptions, lab reports, ECG reports (PNG, JPG, PDF)
+                  Supports prescriptions, lab reports, ECG reports (PNG, JPG, PDF, TXT)
                 </p>
               </>
             )}

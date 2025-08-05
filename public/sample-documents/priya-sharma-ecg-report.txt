@@ -1,0 +1,76 @@
+ELECTROCARDIOGRAM (ECG) REPORT
+==============================
+
+Patient: Priya Sharma
+Age: 38 Years, Female
+Test ID: ECG-2024-002
+Date: 05-08-2024
+
+Hospital: Apollo Health Center
+Department: Cardiology
+Report Date: 05-08-2024
+
+CLINICAL INDICATION:
+- Bronchial Asthma
+- Respiratory distress evaluation
+- Cardiac assessment
+
+TECHNICAL QUALITY: Good
+
+ECG FINDINGS:
+=============
+
+1. Heart Rate: 95 bpm (Normal: 60-100)
+2. Rhythm: Sinus rhythm
+3. PR Interval: 0.16 seconds (Normal: 0.12-0.20)
+4. QRS Duration: 0.08 seconds (Normal: <0.12)
+5. QT Interval: 0.42 seconds (Normal: <0.44)
+
+AXIS:
+- QRS Axis: +45 degrees (Normal: -30 to +90)
+- T Wave Axis: +40 degrees
+
+CHAMBER ENLARGEMENT:
+- Right Atrial Enlargement: Present
+- Right Ventricular Hypertrophy: Present
+- Left Ventricular Hypertrophy: Absent
+
+CONDUCTION ABNORMALITIES:
+- No significant conduction delays
+- No bundle branch blocks
+
+ST-T WAVE CHANGES:
+- ST Depression: Present in leads II, III, aVF, V1-V3
+- T Wave Inversion: Present in leads V1-V3
+- ST Elevation: None
+
+Q WAVES:
+- No pathological Q waves
+
+ARRHYTHMIAS:
+- Sinus tachycardia
+- No significant arrhythmias detected
+
+PULMONARY HYPERTENSION SIGNS:
+- P wave amplitude >2.5 mm in lead II
+- Right axis deviation
+- R/S ratio <1 in V1
+
+CONCLUSION:
+===========
+1. Sinus tachycardia
+2. Right atrial enlargement
+3. Right ventricular hypertrophy
+4. ST-T changes in inferior and right precordial leads
+5. Findings consistent with pulmonary hypertension
+6. Changes secondary to chronic respiratory disease
+
+RECOMMENDATIONS:
+- Continue asthma management
+- Monitor for pulmonary hypertension
+- Echocardiogram for pulmonary pressure assessment
+- Regular respiratory function monitoring
+- Follow-up in 3 months
+
+[This is a simulated ECG report for Priya Sharma - Asthma patient]
+[Patient information extracted for ABHA ID mapping] 
