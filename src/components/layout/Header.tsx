@@ -74,6 +74,13 @@ const Header = () => {
                 <DropdownMenuLabel>Investor Demo Features</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
+                  <Link to="/demo" className="flex items-center gap-2 cursor-pointer font-medium">
+                    <Activity className="h-4 w-4" />
+                    Demo Hub
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
                   <Link to="/demo/abha-lookup" className="flex items-center gap-2 cursor-pointer">
                     <Search className="h-4 w-4" />
                     ABHA ID Lookup
@@ -145,6 +152,13 @@ const Header = () => {
             ))}
             <div className="pt-4 border-t space-y-2">
               <div className="px-3 py-2 text-sm font-semibold text-gray-500">Demo Features</div>
+              <Link
+                to="/demo"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Demo Hub
+              </Link>
               <Link
                 to="/demo/abha-lookup"
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50"

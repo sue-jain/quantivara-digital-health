@@ -17,6 +17,7 @@ import DocumentProcessorPage from "./pages/DocumentProcessorPage";
 import ABHALookup from "./pages/ABHALookup";
 import PatientLookup from "./pages/PatientLookup";
 import AnalyticsDashboard from "./pages/AnalyticsDashboard";
+import DemoHub from "./pages/DemoHub";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +66,7 @@ const App = () => {
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/processor" element={<DocumentProcessorPage />} />
+            <Route path="/demo" element={<DemoHub />} />
             <Route path="/demo/abha-lookup" element={<ABHALookup />} />
             <Route path="/demo/patient-lookup" element={<PatientLookup />} />
             <Route path="/demo/analytics" element={<AnalyticsDashboard />} />

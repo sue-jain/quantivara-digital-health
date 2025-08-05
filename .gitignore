@@ -29,3 +29,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Test files and coverage
+backend/coverage/
+backend/test-*.js
+backend/test-*.html
+backend/test-*.txt
+backend/create-test-*.js
+backend/COMPREHENSIVE-TEST-REPORT.md
+coverage/
+*.coverage
