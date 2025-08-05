@@ -37,6 +37,7 @@ export const API_ENDPOINTS = {
   
   // Patient endpoints
   patients: {
+    lookupAbhaId: '/patients/lookup/abha-id',
     profile: (abhaId: string) => `/patients/${abhaId}/profile`,
     emergencyProfile: (abhaId: string) => `/patients/${abhaId}/emergency-profile`,
     timeline: (abhaId: string) => `/patients/${abhaId}/timeline`,

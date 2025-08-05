@@ -5,7 +5,136 @@ import { logMedicalAccess, performanceLogger } from '../utils/logger';
 
 const router = express.Router();
 
-// ABHA ID lookup - Critical for emergency demo
+// Debug route to check available patients
+router.get('/debug/patients', asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const debugQuery = `
+      SELECT 
+        u.first_name, u.last_name, u.date_of_birth, u.abha_id, u.role
+      FROM users u 
+      WHERE u.role = 'patient'
+      LIMIT 10
+    `;
+    
+    const patients = db.prepare(debugQuery).all() as any[];
+    
+    res.json({
+      success: true,
+      message: 'Available patients for testing',
+      data: patients
+    });
+    
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching patients',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+}));
+
+// NEW: Name + DOB lookup - Returns ABHA ID (MUST BE BEFORE PARAMETERIZED ROUTES)
+router.get('/lookup/abha-id', asyncHandler(async (req: Request, res: Response) => {
+  const startTime = Date.now();
+  const { firstName, lastName, dateOfBirth } = req.query;
+  
+  // Validate required parameters
+  if (!firstName || !lastName || !dateOfBirth) {
+    throw new AppError('Missing required parameters: firstName, lastName, dateOfBirth', 400, 'MISSING_PARAMETERS');
+  }
+  
+  // Normalize input for better performance and UX
+  const normalizedFirstName = firstName.toString().trim();
+  const normalizedLastName = lastName.toString().trim();
+  const normalizedDateOfBirth = dateOfBirth.toString();
+  
+  try {
+    // Try exact match first (fastest)
+    let lookupQuery = `
+      SELECT 
+        u.id as user_id, u.abha_id, u.first_name, u.last_name, u.date_of_birth, 
+        u.gender, u.phone, u.email, u.role
+      FROM users u 
+      WHERE u.first_name = ? 
+        AND u.last_name = ? 
+        AND u.date_of_birth = ?
+        AND u.role = 'patient'
+    `;
+    
+    let patient = db.prepare(lookupQuery).get(
+      normalizedFirstName,
+      normalizedLastName,
+      normalizedDateOfBirth
+    ) as any;
+    
+    // If exact match fails, try case-insensitive (slower but more user-friendly)
+    if (!patient) {
+      lookupQuery = `
+        SELECT 
+          u.id as user_id, u.abha_id, u.first_name, u.last_name, u.date_of_birth, 
+          u.gender, u.phone, u.email, u.role
+        FROM users u 
+        WHERE LOWER(u.first_name) = LOWER(?) 
+          AND LOWER(u.last_name) = LOWER(?) 
+          AND u.date_of_birth = ?
+          AND u.role = 'patient'
+      `;
+      
+      patient = db.prepare(lookupQuery).get(
+        normalizedFirstName,
+        normalizedLastName,
+        normalizedDateOfBirth
+      ) as any;
+    }
+    
+    if (!patient) {
+      throw new AppError('Patient not found with the provided details', 404, 'PATIENT_NOT_FOUND');
+    }
+
+    // Log lookup access for audit
+    logMedicalAccess('system', patient.user_id, 'name_dob_lookup', {
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      lookupMethod: 'name_dob'
+    });
+
+    const lookupData = {
+      abhaId: patient.abha_id,
+      patientInfo: {
+        name: `${patient.first_name} ${patient.last_name}`,
+        dateOfBirth: patient.date_of_birth,
+        gender: patient.gender,
+        phone: patient.phone,
+        email: patient.email
+      },
+      responseTime: `${Date.now() - startTime}ms`
+    };
+
+    performanceLogger.info({
+      operation: 'name_dob_lookup',
+      duration: Date.now() - startTime,
+      success: true,
+      lookupMethod: 'name_dob'
+    });
+
+    res.json({
+      success: true,
+      message: 'Patient found successfully',
+      data: lookupData
+    });
+    
+  } catch (error) {
+    performanceLogger.info({
+      operation: 'name_dob_lookup',
+      duration: Date.now() - startTime,
+      success: false,
+      lookupMethod: 'name_dob'
+    });
+    throw error;
+  }
+}));
+
+// EXISTING: ABHA ID lookup - Critical for emergency demo (UNCHANGED)
 router.get('/:abhaId/profile', asyncHandler(async (req: Request, res: Response) => {
   const startTime = Date.now();
   const { abhaId } = req.params;

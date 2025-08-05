@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Heart, Activity, Search, ChevronDown } from 'lucide-react';
+import { Menu, X, Heart, Activity, Search, ChevronDown, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -80,6 +80,12 @@ const Header = () => {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
+                  <Link to="/demo/patient-lookup" className="flex items-center gap-2 cursor-pointer">
+                    <User className="h-4 w-4" />
+                    Patient Lookup
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to="/demo/analytics" className="flex items-center gap-2 cursor-pointer">
                     <Activity className="h-4 w-4" />
                     Real-time Analytics
@@ -145,6 +151,13 @@ const Header = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 ABHA ID Lookup
+              </Link>
+              <Link
+                to="/demo/patient-lookup"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Patient Lookup
               </Link>
               <Link
                 to="/demo/analytics"

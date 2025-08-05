@@ -36,6 +36,18 @@ export interface PatientProfile {
   responseTime: string;
 }
 
+export interface PatientLookupResult {
+  abhaId: string;
+  patientInfo: {
+    name: string;
+    dateOfBirth: string;
+    gender: string;
+    phone: string;
+    email: string;
+  };
+  responseTime: string;
+}
+
 export interface EmergencyProfile {
   patient: {
     name: string;
@@ -80,7 +92,34 @@ export interface MedicalTimeline {
 }
 
 class PatientService {
-  // Get patient profile by ABHA ID
+  // NEW: Lookup ABHA ID by name and DOB
+  async lookupAbhaIdByNameAndDOB(
+    firstName: string, 
+    lastName: string, 
+    dateOfBirth: string
+  ): Promise<PatientLookupResult> {
+    const startTime = Date.now();
+    
+    try {
+      const params = new URLSearchParams({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        dateOfBirth: dateOfBirth
+      });
+      
+      const response = await apiClient<PatientLookupResult>(
+        `${API_ENDPOINTS.patients.lookupAbhaId}?${params.toString()}`
+      );
+      
+      console.log(`ABHA ID lookup by name/DOB completed in ${Date.now() - startTime}ms`);
+      return response.data;
+    } catch (error) {
+      console.error('Error looking up ABHA ID by name and DOB:', error);
+      throw error;
+    }
+  }
+
+  // EXISTING: Get patient profile by ABHA ID (UNCHANGED)
   async getPatientProfile(abhaId: string): Promise<PatientProfile> {
     const startTime = Date.now();
     
@@ -97,7 +136,7 @@ class PatientService {
     }
   }
   
-  // Emergency profile lookup (3-second demo)
+  // EXISTING: Emergency profile lookup (UNCHANGED)
   async getEmergencyProfile(abhaId: string): Promise<EmergencyProfile> {
     const startTime = Date.now();
     
@@ -121,7 +160,7 @@ class PatientService {
     }
   }
   
-  // Get patient medical timeline
+  // EXISTING: Get patient medical timeline (UNCHANGED)
   async getMedicalTimeline(abhaId: string): Promise<MedicalTimeline> {
     try {
       const response = await apiClient<MedicalTimeline>(
@@ -135,13 +174,13 @@ class PatientService {
     }
   }
   
-  // Format ABHA ID for display
+  // EXISTING: Format ABHA ID for display (UNCHANGED)
   formatAbhaId(abhaId: string): string {
     // Format as XXXX-XXXX-XXXX-XX
     return abhaId.replace(/(\d{4})(\d{4})(\d{4})(\d{2})/, '$1-$2-$3-$4');
   }
   
-  // Validate ABHA ID format
+  // EXISTING: Validate ABHA ID format (UNCHANGED)
   validateAbhaId(abhaId: string): boolean {
     // Remove any hyphens or spaces
     const cleanedId = abhaId.replace(/[-\s]/g, '');
@@ -150,9 +189,29 @@ class PatientService {
     return /^\d{14}$/.test(cleanedId);
   }
   
-  // Clean ABHA ID for API calls
+  // EXISTING: Clean ABHA ID for API calls (UNCHANGED)
   cleanAbhaId(abhaId: string): string {
     return abhaId.replace(/[-\s]/g, '');
+  }
+
+  // NEW: Validate date of birth format
+  validateDateOfBirth(dateOfBirth: string): boolean {
+    // Check if it's a valid date in YYYY-MM-DD format
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateOfBirth)) return false;
+    
+    const date = new Date(dateOfBirth);
+    return !isNaN(date.getTime()) && date.toISOString().split('T')[0] === dateOfBirth;
+  }
+
+  // NEW: Format date for display
+  formatDateOfBirth(dateOfBirth: string): string {
+    const date = new Date(dateOfBirth);
+    return date.toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   }
 }
 

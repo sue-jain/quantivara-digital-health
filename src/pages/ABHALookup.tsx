@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Search, Loader2, AlertCircle, CheckCircle, User, Phone, Calendar, Heart, Pill, FileText, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Search, Loader2, AlertCircle, CheckCircle, User, Phone, Calendar, Heart, Pill, FileText, Clock, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,13 +11,27 @@ import { useToast } from '@/hooks/use-toast';
 import patientService, { EmergencyProfile } from '@/services/patients';
 
 const ABHALookup: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [abhaId, setAbhaId] = useState('');
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<EmergencyProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lookupTime, setLookupTime] = useState<number | null>(null);
   const { toast } = useToast();
-  
+
+  // Handle URL parameter for ABHA ID
+  useEffect(() => {
+    const urlAbhaId = searchParams.get('abhaId');
+    if (urlAbhaId) {
+      setAbhaId(patientService.formatAbhaId(urlAbhaId));
+      // Automatically trigger lookup after a short delay
+      setTimeout(() => {
+        handleLookupWithId(urlAbhaId);
+      }, 100);
+    }
+  }, [searchParams]);
+
   // Demo ABHA IDs for testing - using fixed demo data
   const demoAbhaIds = [
     { id: '12345678901234', name: 'Ramesh Kumar', condition: 'Diabetes, Hypertension' },
@@ -26,8 +41,8 @@ const ABHALookup: React.FC = () => {
     { id: '55556666777788', name: 'Meera Singh', condition: 'Thyroid Disorders' },
   ];
   
-  const handleLookup = async () => {
-    const cleanedId = patientService.cleanAbhaId(abhaId);
+  const handleLookupWithId = async (id: string) => {
+    const cleanedId = patientService.cleanAbhaId(id);
     
     if (!patientService.validateAbhaId(cleanedId)) {
       setError('Please enter a valid 14-digit ABHA ID');
@@ -63,6 +78,10 @@ const ABHALookup: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const handleLookup = async () => {
+    await handleLookupWithId(abhaId);
+  };
   
   const handleDemoClick = (demoId: string) => {
     setAbhaId(patientService.formatAbhaId(demoId));
@@ -71,10 +90,32 @@ const ABHALookup: React.FC = () => {
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">ABHA ID Emergency Lookup</h1>
-        <p className="text-muted-foreground mb-4">
-          Lightning-fast patient information retrieval for emergency situations
-        </p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">ABHA ID Emergency Lookup</h1>
+            <p className="text-muted-foreground mb-4">
+              Lightning-fast patient information retrieval for emergency situations
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => navigate('/demo/patient-lookup')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <User className="h-4 w-4" />
+              Back to Patient Lookup
+            </Button>
+            <Button
+              onClick={() => navigate('/')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Home className="h-4 w-4" />
+              Back to Home
+            </Button>
+          </div>
+        </div>
         
         {/* Demo Alert */}
         <Alert className="mb-6 bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
