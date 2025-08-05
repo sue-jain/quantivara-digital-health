@@ -40,3 +40,4 @@ backend/COMPREHENSIVE-TEST-REPORT.md
 coverage/
 *.coverage
 uploads/
+backend/eng.traineddata
