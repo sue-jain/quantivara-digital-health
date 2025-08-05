@@ -12,11 +12,11 @@ const DEMO_ABHA_IDS = [
 ];
 
 const DEMO_PATIENTS = [
-  { abhaId: '12345678901234', firstName: 'Ramesh', lastName: 'Kumar', gender: 'Male', conditions: ['Type 2 Diabetes Mellitus', 'Hypertension'] },
-  { abhaId: '98765432109876', firstName: 'Priya', lastName: 'Sharma', gender: 'Female', conditions: ['Asthma'] },
-  { abhaId: '45678901234567', firstName: 'Suresh', lastName: 'Patel', gender: 'Male', conditions: ['Coronary Artery Disease'] },
-  { abhaId: '11112222333344', firstName: 'Ashok', lastName: 'Gupta', gender: 'Male', conditions: ['Hypertension'] },
-  { abhaId: '55556666777788', firstName: 'Meera', lastName: 'Singh', gender: 'Female', conditions: ['Thyroid Disorders'] },
+  { abhaId: '12345678901234', firstName: 'Ramesh', lastName: 'Kumar', gender: 'Male', dateOfBirth: '1975-03-15', conditions: ['Type 2 Diabetes Mellitus', 'Hypertension'] },
+  { abhaId: '98765432109876', firstName: 'Priya', lastName: 'Sharma', gender: 'Female', dateOfBirth: '1988-07-22', conditions: ['Asthma'] },
+  { abhaId: '45678901234567', firstName: 'Suresh', lastName: 'Patel', gender: 'Male', dateOfBirth: '1965-11-08', conditions: ['Coronary Artery Disease'] },
+  { abhaId: '11112222333344', firstName: 'Ashok', lastName: 'Gupta', gender: 'Male', dateOfBirth: '1980-01-30', conditions: ['Hypertension'] },
+  { abhaId: '55556666777788', firstName: 'Meera', lastName: 'Singh', gender: 'Female', dateOfBirth: '1992-09-14', conditions: ['Thyroid Disorders'] },
 ];
 
 const DEMO_HOSPITALS = [
@@ -113,7 +113,7 @@ const addDemoData = async () => {
         await bcrypt.hash('demo123', 10),
         patient.firstName,
         patient.lastName,
-        '1990-01-01',
+        patient.dateOfBirth,
         patient.gender,
         'patient'
       );

@@ -72,11 +72,7 @@ const PatientLookup: React.FC = () => {
     }
   };
 
-  const handleDemoData = () => {
-    setFirstName('Pooja');
-    setLastName('Jain');
-    setDateOfBirth('1966-05-22');
-  };
+
 
   const handleAbhaIdClick = (abhaId: string) => {
     // Navigate to the existing ABHA lookup page with the ABHA ID
@@ -169,13 +165,53 @@ const PatientLookup: React.FC = () => {
                   </>
                 )}
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleDemoData}
+            </div>
+
+            {/* Demo Patient Dropdown */}
+            <div className="mt-4">
+              <p className="text-sm text-muted-foreground mb-2">Quick demo patients:</p>
+              <select 
+                className="w-full p-2 border rounded-md bg-white text-gray-900 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                style={{ 
+                  backgroundColor: 'white !important', 
+                  color: '#111827 !important',
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'none',
+                  appearance: 'none'
+                }}
+                onChange={(e) => {
+                  const selectedValue = e.target.value;
+                  if (selectedValue === 'ramesh') {
+                    setFirstName('Ramesh');
+                    setLastName('Kumar');
+                    setDateOfBirth('1975-03-15');
+                  } else if (selectedValue === 'priya') {
+                    setFirstName('Priya');
+                    setLastName('Sharma');
+                    setDateOfBirth('1988-07-22');
+                  } else if (selectedValue === 'suresh') {
+                    setFirstName('Suresh');
+                    setLastName('Patel');
+                    setDateOfBirth('1965-11-08');
+                  } else if (selectedValue === 'ashok') {
+                    setFirstName('Ashok');
+                    setLastName('Gupta');
+                    setDateOfBirth('1980-01-30');
+                  } else if (selectedValue === 'meera') {
+                    setFirstName('Meera');
+                    setLastName('Singh');
+                    setDateOfBirth('1992-09-14');
+                  }
+                }}
                 disabled={loading}
               >
-                Demo Data
-              </Button>
+                <option value="">Select a demo patient...</option>
+                <option value="ramesh">Ramesh Kumar (1975-03-15) - Diabetes</option>
+                <option value="priya">Priya Sharma (1988-07-22) - Asthma</option>
+                <option value="suresh">Suresh Patel (1965-11-08) - Heart Disease</option>
+                <option value="ashok">Ashok Gupta (1980-01-30) - Hypertension</option>
+                <option value="meera">Meera Singh (1992-09-14) - Thyroid</option>
+              </select>
             </div>
 
             {error && (

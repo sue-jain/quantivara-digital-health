@@ -32,14 +32,7 @@ const ABHALookup: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Demo ABHA IDs for testing - using fixed demo data
-  const demoAbhaIds = [
-    { id: '12345678901234', name: 'Ramesh Kumar', condition: 'Diabetes, Hypertension' },
-    { id: '98765432109876', name: 'Priya Sharma', condition: 'Asthma, Allergies' },
-    { id: '45678901234567', name: 'Suresh Patel', condition: 'Heart Disease' },
-    { id: '11112222333344', name: 'Ashok Gupta', condition: 'Hypertension' },
-    { id: '55556666777788', name: 'Meera Singh', condition: 'Thyroid Disorders' },
-  ];
+
   
   const handleLookupWithId = async (id: string) => {
     const cleanedId = patientService.cleanAbhaId(id);
@@ -83,9 +76,7 @@ const ABHALookup: React.FC = () => {
     await handleLookupWithId(abhaId);
   };
   
-  const handleDemoClick = (demoId: string) => {
-    setAbhaId(patientService.formatAbhaId(demoId));
-  };
+
   
   return (
     <div className="container mx-auto p-6 max-w-6xl">
@@ -167,23 +158,32 @@ const ABHALookup: React.FC = () => {
             </Button>
           </div>
           
-          {/* Demo ABHA IDs */}
+          {/* Demo ABHA IDs Dropdown */}
           <div className="mt-4">
             <p className="text-sm text-muted-foreground mb-2">Try with demo ABHA IDs:</p>
-            <div className="flex flex-wrap gap-2">
-              {demoAbhaIds.map((demo) => (
-                <Button
-                  key={demo.id}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDemoClick(demo.id)}
-                  disabled={loading}
-                >
-                  <span className="font-mono text-xs mr-2">{patientService.formatAbhaId(demo.id)}</span>
-                  <span className="text-xs text-muted-foreground">({demo.name})</span>
-                </Button>
-              ))}
-            </div>
+            <select 
+              className="w-full p-2 border rounded-md bg-white text-gray-900 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              style={{ 
+                backgroundColor: 'white !important', 
+                color: '#111827 !important',
+                WebkitAppearance: 'none',
+                MozAppearance: 'none',
+                appearance: 'none'
+              }}
+              onChange={(e) => {
+                if (e.target.value) {
+                  setAbhaId(patientService.formatAbhaId(e.target.value));
+                }
+              }}
+              disabled={loading}
+            >
+              <option value="">Select a demo ABHA ID...</option>
+              <option value="12345678901234">1234-5678-9012-34 (Ramesh - Diabetes)</option>
+              <option value="98765432109876">9876-5432-1098-76 (Priya - Asthma)</option>
+              <option value="45678901234567">4567-8901-2345-67 (Suresh - Heart)</option>
+              <option value="11112222333344">1111-2222-3333-44 (Ashok - Hypertension)</option>
+              <option value="55556666777788">5555-6666-7777-88 (Meera - Thyroid)</option>
+            </select>
           </div>
         </CardContent>
       </Card>
