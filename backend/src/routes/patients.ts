@@ -43,24 +43,49 @@ router.get('/lookup/abha-id', asyncHandler(async (req: Request, res: Response) =
     throw new AppError('Missing required parameters: firstName, lastName, dateOfBirth', 400, 'MISSING_PARAMETERS');
   }
   
+  // Normalize input for better performance and UX
+  const normalizedFirstName = firstName.toString().trim();
+  const normalizedLastName = lastName.toString().trim();
+  const normalizedDateOfBirth = dateOfBirth.toString();
+  
   try {
-    // Query patient by name and DOB
-    const lookupQuery = `
+    // Try exact match first (fastest)
+    let lookupQuery = `
       SELECT 
         u.id as user_id, u.abha_id, u.first_name, u.last_name, u.date_of_birth, 
         u.gender, u.phone, u.email, u.role
       FROM users u 
-      WHERE LOWER(u.first_name) = LOWER(?) 
-        AND LOWER(u.last_name) = LOWER(?) 
+      WHERE u.first_name = ? 
+        AND u.last_name = ? 
         AND u.date_of_birth = ?
         AND u.role = 'patient'
     `;
     
-    const patient = db.prepare(lookupQuery).get(
-      firstName.toString().trim(),
-      lastName.toString().trim(),
-      dateOfBirth.toString()
+    let patient = db.prepare(lookupQuery).get(
+      normalizedFirstName,
+      normalizedLastName,
+      normalizedDateOfBirth
     ) as any;
+    
+    // If exact match fails, try case-insensitive (slower but more user-friendly)
+    if (!patient) {
+      lookupQuery = `
+        SELECT 
+          u.id as user_id, u.abha_id, u.first_name, u.last_name, u.date_of_birth, 
+          u.gender, u.phone, u.email, u.role
+        FROM users u 
+        WHERE LOWER(u.first_name) = LOWER(?) 
+          AND LOWER(u.last_name) = LOWER(?) 
+          AND u.date_of_birth = ?
+          AND u.role = 'patient'
+      `;
+      
+      patient = db.prepare(lookupQuery).get(
+        normalizedFirstName,
+        normalizedLastName,
+        normalizedDateOfBirth
+      ) as any;
+    }
     
     if (!patient) {
       throw new AppError('Patient not found with the provided details', 404, 'PATIENT_NOT_FOUND');

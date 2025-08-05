@@ -100,6 +100,12 @@ CREATE TABLE IF NOT EXISTS revenue_events (
     FOREIGN KEY (provider_id) REFERENCES healthcare_providers(id)
 );
 
+-- Performance Indexes for Users Table
+CREATE INDEX IF NOT EXISTS idx_users_name_dob ON users(first_name, last_name, date_of_birth);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_users_abha_id ON users(abha_id);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_documents_patient ON medical_documents(patient_id);
 CREATE INDEX IF NOT EXISTS idx_documents_provider ON medical_documents(provider_id);
