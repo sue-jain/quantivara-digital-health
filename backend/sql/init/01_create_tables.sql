@@ -128,6 +128,7 @@ CREATE TABLE medical_documents (
     extracted_data JSONB, -- AI extracted medical data
     original_language VARCHAR(10) DEFAULT 'en',
     urgency urgency_level DEFAULT 'routine',
+    abha_id VARCHAR(14), -- ABHA ID for direct linking
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -136,6 +137,7 @@ CREATE INDEX idx_documents_patient ON medical_documents(patient_id);
 CREATE INDEX idx_documents_provider ON medical_documents(provider_id);
 CREATE INDEX idx_documents_type ON medical_documents(document_type);
 CREATE INDEX idx_documents_status ON medical_documents(status);
+CREATE INDEX idx_documents_abha_id ON medical_documents(abha_id);
 CREATE INDEX idx_documents_created ON medical_documents(created_at);
 
 -- Prescriptions (detailed breakdown)
