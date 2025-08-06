@@ -29,6 +29,25 @@ const addDemoData = async () => {
   try {
     logger.info('🔍 Checking for missing demo data...');
     
+    // Check if abha_id column exists in medical_documents table
+    const tableInfo = db.prepare("PRAGMA table_info(medical_documents)").all() as any[];
+    const hasAbhaIdColumn = tableInfo.some(col => col.name === 'abha_id');
+    
+    if (!hasAbhaIdColumn) {
+      logger.info('🔧 Adding abha_id column to medical_documents table...');
+      db.exec(`
+        ALTER TABLE medical_documents 
+        ADD COLUMN abha_id TEXT
+      `);
+      
+      // Create index for abha_id column
+      db.exec(`
+        CREATE INDEX IF NOT EXISTS idx_documents_abha_id ON medical_documents(abha_id)
+      `);
+      
+      logger.info('✅ Successfully added abha_id column to medical_documents table');
+    }
+    
     // Check which demo ABHA IDs already exist
     const existingDemoAbhas = db.prepare(`
       SELECT abha_id FROM users 

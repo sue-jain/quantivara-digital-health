@@ -3,8 +3,9 @@ import multer from 'multer';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { asyncHandler } from '../middleware/errorHandler';
-import { documentProcessor } from '../services/documentProcessor';
+import { documentProcessor, DocumentProcessor } from '../services/documentProcessor';
 import { logger } from '../utils/logger';
+import { db } from '../config/sqlite';
 
 const router = express.Router();
 
@@ -188,12 +189,41 @@ router.post('/demo-abha-linking', asyncHandler(async (req: Request, res: Respons
     logger.info(`🧪 Demo ABHA linking test for: ${documentType}`);
     logger.info(`👤 Patient name: ${patientName || 'auto-extracted'}`);
     
-    const result = await documentProcessor.processDocument(
+    // Process the document normally
+    let result = await documentProcessor.processDocument(
       mockFile,
       'demo-patient-001', // Original demo ID
       'demo-provider-001',
       documentType
     );
+    
+    // If patientName is provided, override the extracted patient name for demo purposes
+    if (patientName && result.extractedData?.patientInfo) {
+      result.extractedData.patientInfo.name = patientName;
+      
+      // Re-run ABHA ID lookup with the provided patient name
+      const demoAbhaIds = ['12345678901234', '98765432109876', '45678901234567', '11112222333344', '55556666777788'];
+      const query = `
+        SELECT abha_id FROM users 
+        WHERE first_name = ? AND last_name = ? AND role = 'patient'
+        ORDER BY CASE 
+          WHEN abha_id IN (${demoAbhaIds.map(() => '?').join(',')}) THEN 0 
+          ELSE 1 
+        END, abha_id
+      `;
+      
+      const nameParts = patientName.trim().split(' ');
+      if (nameParts.length >= 2) {
+        const firstName = nameParts[0];
+        const lastName = nameParts[nameParts.length - 1];
+        
+        const patient = db.prepare(query).get(firstName, lastName, ...demoAbhaIds) as any;
+        if (patient && patient.abha_id) {
+          result.linkedAbhaId = patient.abha_id;
+          logger.info(`✅ Found ABHA ID ${patient.abha_id} for patient: ${patientName}`);
+        }
+      }
+    }
     
     const demoResult = {
       documentId: result.documentId,

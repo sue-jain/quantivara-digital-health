@@ -82,13 +82,20 @@ export class DocumentProcessor {
       const firstName = nameParts[0];
       const lastName = nameParts[nameParts.length - 1];
       
-      // Query database for patient with ABHA ID
+      // Demo ABHA IDs for preference
+      const demoAbhaIds = ['12345678901234', '98765432109876', '45678901234567', '11112222333344', '55556666777788'];
+      
+      // Query database for patient with ABHA ID, prioritizing demo ABHA IDs
       const query = `
         SELECT abha_id FROM users 
         WHERE first_name = ? AND last_name = ? AND role = 'patient'
+        ORDER BY CASE 
+          WHEN abha_id IN (${demoAbhaIds.map(() => '?').join(',')}) THEN 0 
+          ELSE 1 
+        END, abha_id
       `;
       
-      const patient = db.prepare(query).get(firstName, lastName) as any;
+      const patient = db.prepare(query).get(firstName, lastName, ...demoAbhaIds) as any;
       
       if (patient && patient.abha_id) {
         logger.info(`✅ Found ABHA ID ${patient.abha_id} for patient: ${patientName}`);

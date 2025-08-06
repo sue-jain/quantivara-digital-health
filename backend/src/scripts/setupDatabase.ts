@@ -118,6 +118,7 @@ const createTables = () => {
         extracted_data TEXT, -- JSON string
         original_language TEXT DEFAULT 'en',
         urgency TEXT DEFAULT 'routine',
+        abha_id TEXT, -- ABHA ID for direct linking
         created_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now'))
       );
@@ -211,6 +212,7 @@ const createTables = () => {
       CREATE INDEX IF NOT EXISTS idx_documents_patient ON medical_documents(patient_id);
       CREATE INDEX IF NOT EXISTS idx_documents_type ON medical_documents(document_type);
       CREATE INDEX IF NOT EXISTS idx_documents_status ON medical_documents(status);
+      CREATE INDEX IF NOT EXISTS idx_documents_abha_id ON medical_documents(abha_id);
       
       CREATE INDEX IF NOT EXISTS idx_revenue_entity ON revenue_events(entity_type, entity_id);
       CREATE INDEX IF NOT EXISTS idx_revenue_created ON revenue_events(created_at);

@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS medical_documents (
     extraction_accuracy REAL,
     extracted_data TEXT,
     original_text TEXT,
+    abha_id TEXT, -- ABHA ID for direct linking
     uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -111,4 +112,5 @@ CREATE INDEX IF NOT EXISTS idx_documents_patient ON medical_documents(patient_id
 CREATE INDEX IF NOT EXISTS idx_documents_provider ON medical_documents(provider_id);
 CREATE INDEX IF NOT EXISTS idx_documents_type ON medical_documents(document_type);
 CREATE INDEX IF NOT EXISTS idx_documents_status ON medical_documents(status);
+CREATE INDEX IF NOT EXISTS idx_documents_abha_id ON medical_documents(abha_id);
 CREATE INDEX IF NOT EXISTS idx_documents_created ON medical_documents(created_at);

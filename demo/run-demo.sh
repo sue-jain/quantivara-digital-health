@@ -124,9 +124,7 @@ fi
 
 # Check if database needs setup
 echo -e "${BLUE}Checking database status...${NC}"
-echo -e "${YELLOW}Note: Using db:add-demo to preserve existing data while ensuring demo ABHA IDs${NC}"
-# FIX: Check specifically for demo ABHA IDs instead of just user count
-# Previous logic would skip reset if any users existed, even with random ABHA IDs
+echo -e "${YELLOW}Note: Using db:add-demo to ensure consistent demo ABHA IDs are always present${NC}"
 DB_FILE="data/quantivara.db"
 NEEDS_SETUP=false
 NEEDS_SEED=false
@@ -137,20 +135,27 @@ if [ ! -f "$DB_FILE" ]; then
     NEEDS_SETUP=true
     NEEDS_SEED=true
 else
-    # Check if database has data by querying users table
-    if ! sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM users;" > /dev/null 2>&1; then
-        echo -e "${YELLOW}Database exists but tables may be missing. Will setup database...${NC}"
+    # Check if database has the abha_id column in medical_documents table
+    if ! sqlite3 "$DB_FILE" "SELECT abha_id FROM medical_documents LIMIT 1;" > /dev/null 2>&1; then
+        echo -e "${YELLOW}Database exists but missing abha_id column. Will setup database...${NC}"
         NEEDS_SETUP=true
         NEEDS_SEED=true
     else
-        # Check specifically for demo ABHA IDs
-        DEMO_ABHA_COUNT=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM users WHERE abha_id IN ('12345678901234', '98765432109876', '45678901234567', '11112222333344', '55556666777788');" 2>/dev/null || echo "0")
-        
-        if [ "$DEMO_ABHA_COUNT" -eq "5" ]; then
-            echo -e "${GREEN}✅ Database is ready with demo ABHA IDs${NC}"
-        else
-            echo -e "${YELLOW}Database exists but missing demo ABHA IDs. Will reset for consistent demo...${NC}"
+        # Check if database has data by querying users table
+        if ! sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM users;" > /dev/null 2>&1; then
+            echo -e "${YELLOW}Database exists but tables may be missing. Will setup database...${NC}"
+            NEEDS_SETUP=true
             NEEDS_SEED=true
+        else
+            # Check specifically for demo ABHA IDs
+            DEMO_ABHA_COUNT=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM users WHERE abha_id IN ('12345678901234', '98765432109876', '45678901234567', '11112222333344', '55556666777788');" 2>/dev/null || echo "0")
+            
+            if [ "$DEMO_ABHA_COUNT" -eq "5" ]; then
+                echo -e "${GREEN}✅ Database is ready with demo ABHA IDs${NC}"
+            else
+                echo -e "${YELLOW}Database exists but missing demo ABHA IDs. Will reset for consistent demo...${NC}"
+                NEEDS_SEED=true
+            fi
         fi
     fi
 fi
