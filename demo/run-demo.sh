@@ -19,6 +19,12 @@ BACKEND_PORT=3001
 FRONTEND_PORT=8080
 SITE_PASSWORD="NmptGd3qAja?X7gY"
 
+# Check for fresh start flag (keeping for future use but not implementing reset)
+FRESH_START=false
+if [[ "$1" == "--fresh" ]]; then
+    echo -e "${YELLOW}🔄 Fresh start flag detected but reset not implemented - continuing with normal setup${NC}"
+fi
+
 # Function to check if port is in use
 check_port() {
     if lsof -Pi :$1 -sTCP:LISTEN -t >/dev/null ; then
@@ -142,8 +148,9 @@ else
         NEEDS_SEED=true
     else
         # Check if database has data by querying users table
-        if ! sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM users;" > /dev/null 2>&1; then
-            echo -e "${YELLOW}Database exists but tables may be missing. Will setup database...${NC}"
+        USER_COUNT=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM users;" 2>/dev/null || echo "0")
+        if [ "$USER_COUNT" -eq "0" ]; then
+            echo -e "${YELLOW}Database exists but has no users. Will setup database...${NC}"
             NEEDS_SETUP=true
             NEEDS_SEED=true
         else
@@ -153,7 +160,7 @@ else
             if [ "$DEMO_ABHA_COUNT" -eq "5" ]; then
                 echo -e "${GREEN}✅ Database is ready with demo ABHA IDs${NC}"
             else
-                echo -e "${YELLOW}Database exists but missing demo ABHA IDs. Will reset for consistent demo...${NC}"
+                echo -e "${YELLOW}Database exists but missing demo ABHA IDs. Will add missing demo data...${NC}"
                 NEEDS_SEED=true
             fi
         fi

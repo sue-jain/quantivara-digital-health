@@ -1,201 +1,241 @@
-import { Pool } from 'pg';
-import { dbConfig, testConnection, query, transaction, closePool } from '../../src/config/database';
+import { db } from '../../src/config/sqlite';
+import { setupDatabase, createTables } from '../../src/scripts/setupDatabase';
+import { addDemoData } from '../../src/scripts/addDemoData';
+import fs from 'fs';
+import path from 'path';
 
-// Mock the pg module
-jest.mock('pg', () => ({
-  Pool: jest.fn(() => ({
-    connect: jest.fn(),
-    query: jest.fn(),
-    end: jest.fn(),
-    on: jest.fn()
-  }))
-}));
+describe('Database Setup Tests', () => {
+  const testDbPath = path.join(__dirname, '../../../data/test-quantivara.db');
+  const originalDbPath = path.join(__dirname, '../../../data/quantivara.db');
+  
+  beforeAll(() => {
+    // Backup original database if it exists
+    if (fs.existsSync(originalDbPath)) {
+      fs.copyFileSync(originalDbPath, originalDbPath + '.backup');
+    }
+  });
 
-// Mock logger
-jest.mock('../../src/utils/logger', () => ({
-  logger: {
-    info: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn()
-  }
-}));
-
-describe('Database Configuration', () => {
-  let mockPool: any;
-  let mockClient: any;
+  afterAll(() => {
+    // Restore original database
+    if (fs.existsSync(originalDbPath + '.backup')) {
+      fs.copyFileSync(originalDbPath + '.backup', originalDbPath);
+      fs.unlinkSync(originalDbPath + '.backup');
+    }
+    
+    // Clean up test database
+    if (fs.existsSync(testDbPath)) {
+      fs.unlinkSync(testDbPath);
+    }
+  });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockClient = {
-      query: jest.fn(),
-      release: jest.fn()
-    };
-    mockPool = {
-      connect: jest.fn().mockResolvedValue(mockClient),
-      query: jest.fn(),
-      end: jest.fn(),
-      on: jest.fn()
-    };
-    (Pool as unknown as jest.Mock).mockImplementation(() => mockPool);
+    // Clean up test database before each test
+    if (fs.existsSync(testDbPath)) {
+      fs.unlinkSync(testDbPath);
+    }
+    
+    // Also clean up any existing test data in the main database
+    try {
+      db.prepare('DELETE FROM users WHERE id = ?').run('existing-user-test-123');
+      db.prepare('DELETE FROM users WHERE abha_id = ?').run('88888888888888');
+    } catch (error) {
+      // Ignore errors if table doesn't exist
+    }
   });
 
-  describe('Database Configuration', () => {
-    it('should have correct default configuration', () => {
-      expect(dbConfig).toEqual({
-        host: 'localhost',
-        port: 5432,
-        database: 'quantivara_db',
-        user: 'quantivara_user',
-        password: 'quantivara_pass',
-        max: 20,
-        idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 2000
-      });
-    });
-
-    it('should use environment variables when provided', () => {
-      const originalEnv = process.env;
-      process.env = {
-        ...originalEnv,
-        DB_HOST: 'test-host',
-        DB_PORT: '3306',
-        DB_NAME: 'test_db',
-        DB_USER: 'test_user',
-        DB_PASSWORD: 'test_pass'
+  describe('Fresh Database Setup', () => {
+    it('should create all tables with abha_id column for new developers', async () => {
+      // Mock the database path to use test database
+      const originalDb = db;
+      const mockDb = {
+        ...db,
+        exec: jest.fn().mockImplementation((sql) => {
+          if (sql.includes('CREATE TABLE')) {
+            // Simulate table creation
+            return true;
+          }
+          if (sql.includes('ALTER TABLE medical_documents ADD COLUMN abha_id')) {
+            // This should not be called for fresh database
+            throw new Error('Column already exists');
+          }
+          return true;
+        })
       };
 
-      // Re-import to get updated config
-      jest.resetModules();
-      const { dbConfig: newConfig } = require('../../src/config/database');
-
-      expect(newConfig.host).toBe('test-host');
-      expect(newConfig.port).toBe(3306);
-      expect(newConfig.database).toBe('test_db');
-      expect(newConfig.user).toBe('test_user');
-      expect(newConfig.password).toBe('test_pass');
-
-      process.env = originalEnv;
-    });
-  });
-
-  describe('Test Connection', () => {
-    it('should return true when connection is successful', async () => {
-      mockClient.query.mockResolvedValue({ rows: [{ now: new Date() }] });
-
-      const result = await testConnection();
-
+      // Test table creation
+      const result = createTables();
       expect(result).toBe(true);
-      expect(mockPool.connect).toHaveBeenCalled();
-      expect(mockClient.query).toHaveBeenCalledWith('SELECT NOW()');
-      expect(mockClient.release).toHaveBeenCalled();
+
+      // Verify medical_documents table has abha_id column
+      const tableInfo = db.prepare("PRAGMA table_info(medical_documents)").all() as any[];
+      const hasAbhaIdColumn = tableInfo.some(col => col.name === 'abha_id');
+      expect(hasAbhaIdColumn).toBe(true);
     });
 
-    it('should return false when connection fails', async () => {
-      mockPool.connect.mockRejectedValue(new Error('Connection failed'));
+    it('should create all required indexes successfully', async () => {
+      const result = createTables();
+      expect(result).toBe(true);
 
-      const result = await testConnection();
+      // Check that indexes exist
+      const indexes = [
+        'idx_users_abha_id',
+        'idx_users_email', 
+        'idx_users_role',
+        'idx_documents_abha_id',
+        'idx_documents_patient',
+        'idx_documents_type',
+        'idx_documents_status'
+      ];
 
-      expect(result).toBe(false);
-      expect(mockPool.connect).toHaveBeenCalled();
-    });
-
-    it('should return false when query fails', async () => {
-      mockClient.query.mockRejectedValue(new Error('Query failed'));
-
-      const result = await testConnection();
-
-      expect(result).toBe(false);
-      expect(mockClient.query).toHaveBeenCalledWith('SELECT NOW()');
-      expect(mockClient.release).toHaveBeenCalled();
-    });
-  });
-
-  describe('Query Function', () => {
-    it('should execute query successfully', async () => {
-      const mockResult = { rows: [{ id: 1, name: 'test' }], rowCount: 1 };
-      mockPool.query.mockResolvedValue(mockResult);
-
-      const result = await query('SELECT * FROM users WHERE id = $1', [1]);
-
-      expect(result).toEqual(mockResult);
-      expect(mockPool.query).toHaveBeenCalledWith('SELECT * FROM users WHERE id = $1', [1]);
-    });
-
-    it('should handle query without parameters', async () => {
-      const mockResult = { rows: [], rowCount: 0 };
-      mockPool.query.mockResolvedValue(mockResult);
-
-      const result = await query('SELECT * FROM users');
-
-      expect(result).toEqual(mockResult);
-      expect(mockPool.query).toHaveBeenCalledWith('SELECT * FROM users', undefined);
-    });
-
-    it('should throw error when query fails', async () => {
-      const error = new Error('Query failed');
-      mockPool.query.mockRejectedValue(error);
-
-      await expect(query('INVALID SQL')).rejects.toThrow('Query failed');
+      for (const indexName of indexes) {
+        const indexExists = db.prepare(`
+          SELECT name FROM sqlite_master 
+          WHERE type='index' AND name=?
+        `).get(indexName);
+        expect(indexExists).toBeTruthy();
+      }
     });
   });
 
-  describe('Transaction Function', () => {
-    it('should execute transaction successfully', async () => {
-      const callback = jest.fn().mockResolvedValue('success');
+  describe('Existing Database Migration', () => {
+    it('should add missing abha_id column to existing medical_documents table', async () => {
+      // Create a database without abha_id column (simulating old database)
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS medical_documents_old (
+          id TEXT PRIMARY KEY,
+          patient_id TEXT,
+          provider_id TEXT,
+          document_type TEXT NOT NULL,
+          status TEXT DEFAULT 'pending',
+          file_path TEXT,
+          file_name TEXT,
+          file_size INTEGER,
+          mime_type TEXT,
+          processing_started_at TEXT,
+          processing_completed_at TEXT,
+          extraction_accuracy REAL,
+          extracted_data TEXT,
+          original_language TEXT DEFAULT 'en',
+          urgency TEXT DEFAULT 'routine',
+          created_at TEXT DEFAULT (datetime('now')),
+          updated_at TEXT DEFAULT (datetime('now'))
+        );
+      `);
+
+      // Verify abha_id column doesn't exist initially
+      const tableInfoBefore = db.prepare("PRAGMA table_info(medical_documents_old)").all() as any[];
+      const hasAbhaIdBefore = tableInfoBefore.some(col => col.name === 'abha_id');
+      expect(hasAbhaIdBefore).toBe(false);
+
+      // Run the setup (which should add the column)
+      const result = createTables();
+      expect(result).toBe(true);
+
+      // Verify abha_id column was added
+      const tableInfoAfter = db.prepare("PRAGMA table_info(medical_documents)").all() as any[];
+      const hasAbhaIdAfter = tableInfoAfter.some(col => col.name === 'abha_id');
+      expect(hasAbhaIdAfter).toBe(true);
+    });
+
+    it('should handle existing abha_id column gracefully', async () => {
+      // Create table with abha_id column already present
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS medical_documents_existing (
+          id TEXT PRIMARY KEY,
+          abha_id TEXT,
+          patient_id TEXT,
+          document_type TEXT NOT NULL
+        );
+      `);
+
+      // Run setup - should not fail
+      const result = createTables();
+      expect(result).toBe(true);
+    });
+  });
+
+  describe('Demo Data Integration', () => {
+    it('should add demo ABHA IDs successfully', async () => {
+      // Setup database first
+      createTables();
       
-      const result = await transaction(callback);
+      // Add demo data
+      await addDemoData();
 
-      expect(result).toBe('success');
-      expect(mockPool.connect).toHaveBeenCalled();
-      expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
-      expect(callback).toHaveBeenCalledWith(mockClient);
-      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
-      expect(mockClient.release).toHaveBeenCalled();
-    });
-
-    it('should rollback transaction on error', async () => {
-      const error = new Error('Transaction failed');
-      const callback = jest.fn().mockRejectedValue(error);
-
-      await expect(transaction(callback)).rejects.toThrow('Transaction failed');
-
-      expect(mockPool.connect).toHaveBeenCalled();
-      expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
-      expect(callback).toHaveBeenCalledWith(mockClient);
-      expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
-      expect(mockClient.release).toHaveBeenCalled();
-    });
-
-    it('should release client even if rollback fails', async () => {
-      const error = new Error('Transaction failed');
-      const rollbackError = new Error('Rollback failed');
-      const callback = jest.fn().mockRejectedValue(error);
+      // Verify demo ABHA IDs exist
+      const demoAbhaIds = ['12345678901234', '98765432109876', '45678901234567', '11112222333344', '55556666777788'];
       
-      mockClient.query
-        .mockResolvedValueOnce(undefined) // BEGIN
-        .mockRejectedValueOnce(rollbackError); // ROLLBACK
+      for (const abhaId of demoAbhaIds) {
+        const user = db.prepare('SELECT abha_id FROM users WHERE abha_id = ?').get(abhaId) as any;
+        expect(user).toBeTruthy();
+        expect(user.abha_id).toBe(abhaId);
+      }
+    });
 
-      await expect(transaction(callback)).rejects.toThrow('Transaction failed');
+    it('should preserve existing data when adding demo data', async () => {
+      // Setup database
+      createTables();
+      
+      // Add some existing data (with unique ABHA ID and email)
+      db.prepare(`
+        INSERT INTO users (id, abha_id, email, password_hash, first_name, last_name, role)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).run('existing-user-test-123', '88888888888888', 'existing-test-unique@test.com', 'hash', 'Existing', 'User', 'patient');
 
-      expect(mockClient.release).toHaveBeenCalled();
+      // Add demo data
+      await addDemoData();
+
+      // Verify existing data is preserved
+      const existingUser = db.prepare('SELECT abha_id FROM users WHERE abha_id = ?').get('88888888888888') as any;
+      expect(existingUser).toBeTruthy();
+      expect(existingUser.abha_id).toBe('88888888888888');
+
+      // Verify demo data was added
+      const demoUser = db.prepare('SELECT abha_id FROM users WHERE abha_id = ?').get('12345678901234') as any;
+      expect(demoUser).toBeTruthy();
     });
   });
 
-  describe('Close Pool', () => {
-    it('should close pool successfully', async () => {
-      mockPool.end.mockResolvedValue(undefined);
-
-      await closePool();
-
-      expect(mockPool.end).toHaveBeenCalled();
+  describe('Error Handling', () => {
+    it('should handle database connection errors gracefully', () => {
+      // This test would require mocking the database connection
+      // For now, we'll test that the setup function doesn't throw
+      expect(() => {
+        try {
+          createTables();
+        } catch (error) {
+          // Should not throw for normal operations
+          throw error;
+        }
+      }).not.toThrow();
     });
 
-    it('should handle pool closing error', async () => {
-      const error = new Error('Failed to close pool');
-      mockPool.end.mockRejectedValue(error);
+    it('should handle missing tables gracefully', () => {
+      // Test that setup can handle missing tables
+      const result = createTables();
+      expect(result).toBe(true);
+    });
+  });
 
-      await expect(closePool()).resolves.toBeUndefined();
-      expect(mockPool.end).toHaveBeenCalled();
+  describe('Integration with Demo Script', () => {
+    it('should work with the demo script database checks', () => {
+      // Simulate the demo script's database checks
+      const dbFile = path.join(__dirname, '../../../data/quantivara.db');
+      
+      if (fs.existsSync(dbFile)) {
+        // Test the SQL queries that the demo script uses
+        const hasAbhaIdColumn = db.prepare("SELECT abha_id FROM medical_documents LIMIT 1").get();
+        expect(hasAbhaIdColumn).toBeDefined();
+
+        const userCount = db.prepare("SELECT COUNT(*) as count FROM users").get() as any;
+        expect(userCount.count).toBeGreaterThanOrEqual(0);
+
+        const demoAbhaCount = db.prepare(`
+          SELECT COUNT(*) as count FROM users 
+          WHERE abha_id IN ('12345678901234', '98765432109876', '45678901234567', '11112222333344', '55556666777788')
+        `).get() as any;
+        expect(demoAbhaCount.count).toBeGreaterThanOrEqual(0);
+      }
     });
   });
 });

@@ -200,23 +200,41 @@ const createTables = () => {
       );
     `);
 
-    // Create indexes for performance
-    db.exec(`
-      CREATE INDEX IF NOT EXISTS idx_users_abha_id ON users(abha_id);
-      CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-      CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+    // Add missing abha_id column to medical_documents if it doesn't exist
+    try {
+      db.exec(`ALTER TABLE medical_documents ADD COLUMN abha_id TEXT;`);
+      logger.info('✅ Added abha_id column to medical_documents table');
+    } catch (error) {
+      // Column already exists, ignore error
+      logger.info('ℹ️ abha_id column already exists in medical_documents table');
+    }
+
+    // Create indexes for performance (with error handling for each index)
+    const createIndexes = () => {
+      const indexes = [
+        'CREATE INDEX IF NOT EXISTS idx_users_abha_id ON users(abha_id)',
+        'CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)',
+        'CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)',
+        'CREATE INDEX IF NOT EXISTS idx_providers_type ON healthcare_providers(type)',
+        'CREATE INDEX IF NOT EXISTS idx_providers_tier ON healthcare_providers(tier)',
+        'CREATE INDEX IF NOT EXISTS idx_documents_patient ON medical_documents(patient_id)',
+        'CREATE INDEX IF NOT EXISTS idx_documents_type ON medical_documents(document_type)',
+        'CREATE INDEX IF NOT EXISTS idx_documents_status ON medical_documents(status)',
+        'CREATE INDEX IF NOT EXISTS idx_documents_abha_id ON medical_documents(abha_id)',
+        'CREATE INDEX IF NOT EXISTS idx_revenue_entity ON revenue_events(entity_type, entity_id)',
+        'CREATE INDEX IF NOT EXISTS idx_revenue_created ON revenue_events(created_at)'
+      ];
       
-      CREATE INDEX IF NOT EXISTS idx_providers_type ON healthcare_providers(type);
-      CREATE INDEX IF NOT EXISTS idx_providers_tier ON healthcare_providers(tier);
-      
-      CREATE INDEX IF NOT EXISTS idx_documents_patient ON medical_documents(patient_id);
-      CREATE INDEX IF NOT EXISTS idx_documents_type ON medical_documents(document_type);
-      CREATE INDEX IF NOT EXISTS idx_documents_status ON medical_documents(status);
-      CREATE INDEX IF NOT EXISTS idx_documents_abha_id ON medical_documents(abha_id);
-      
-      CREATE INDEX IF NOT EXISTS idx_revenue_entity ON revenue_events(entity_type, entity_id);
-      CREATE INDEX IF NOT EXISTS idx_revenue_created ON revenue_events(created_at);
-    `);
+      for (const index of indexes) {
+        try {
+          db.exec(index);
+        } catch (error) {
+          logger.warn(`⚠️ Could not create index: ${index}`, error);
+        }
+      }
+    };
+    
+    createIndexes();
 
     logger.info('✅ Database tables created successfully');
     return true;
