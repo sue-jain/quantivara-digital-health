@@ -1,9 +1,9 @@
 HANDWRITTEN PRESCRIPTION SAMPLE
 ==============================
 
-Patient: Anjali Verma
-Age: 34 Years, Female
-Date: 28-01-2024
+Patient: Ramesh Kumar
+Age: 34 Years, Male
+Date: 15-01-2024
 
 Doctor: Dr. Amit Kumar Singh, MBBS
 Reg No: MCI-98765

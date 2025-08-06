@@ -1,0 +1,72 @@
+CARDIAC BIOMARKERS LABORATORY REPORT
+====================================
+
+Patient: Suresh Patel
+Age: 65 Years, Male
+Sample ID: LAB-2024-003
+Date: 05-08-2024
+
+Laboratory: Cardiac Care Institute
+Address: Sector 12, Noida, UP 201301
+Report Date: 05-08-2024
+
+CARDIAC BIOMARKERS:
+===================
+
+1. Troponin I:
+   Value: 0.15 ng/mL
+   Normal Range: <0.04 ng/mL
+   Status: ELEVATED
+   Critical: Yes
+
+2. CK-MB (Creatine Kinase-MB):
+   Value: 25 ng/mL
+   Normal Range: <5 ng/mL
+   Status: ELEVATED
+   Critical: Yes
+
+3. BNP (Brain Natriuretic Peptide):
+   Value: 450 pg/mL
+   Normal Range: <100 pg/mL
+   Status: ELEVATED
+   Critical: Yes
+
+4. Lipid Profile:
+   - Total Cholesterol: 280 mg/dL (Normal: <200)
+   - LDL Cholesterol: 180 mg/dL (Normal: <100)
+   - HDL Cholesterol: 35 mg/dL (Normal: >40)
+   - Triglycerides: 320 mg/dL (Normal: <150)
+
+5. Cardiac Enzymes:
+   - AST: 85 U/L (Normal: 8-48)
+   - ALT: 65 U/L (Normal: 7-55)
+   - LDH: 280 U/L (Normal: 140-280)
+
+6. Inflammatory Markers:
+   - CRP: 15 mg/L (Normal: <3)
+   - ESR: 45 mm/hr (Normal: <20)
+   - Fibrinogen: 450 mg/dL (Normal: 200-400)
+
+7. Kidney Function:
+   - Serum Creatinine: 1.9 mg/dL (Normal: 0.7-1.3)
+   - eGFR: 42 mL/min/1.73m² (Normal: >90)
+
+CRITICAL VALUES: 3
+ABNORMAL VALUES: 8
+
+INTERPRETATION:
+==============
+- Elevated cardiac biomarkers suggest recent cardiac event
+- High BNP indicates heart failure
+- Poor lipid control requiring aggressive management
+- Kidney function impairment secondary to cardiac disease
+
+RECOMMENDATIONS:
+- Immediate cardiology consultation
+- Aggressive lipid-lowering therapy
+- Heart failure management
+- Kidney function monitoring
+- Regular cardiac biomarker monitoring
+
+[This is a simulated lab report for Suresh Patel - Heart Disease patient]
+[Patient information extracted for ABHA ID mapping] 

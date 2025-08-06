@@ -31,12 +31,13 @@ const upload = multer({
       'image/jpg', 
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-      'application/msword' // .doc
+      'application/msword', // .doc
+      'text/plain' // .txt files
     ];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only JPEG, PNG, PDF, and Word documents are allowed.'));
+      cb(new Error('Invalid file type. Only JPEG, PNG, PDF, Word documents, and text files are allowed.'));
     }
   }
 });
@@ -57,6 +58,9 @@ router.post('/upload', upload.single('document'), asyncHandler(async (req: Reque
     const providerId = req.body.providerId || 'demo-provider-001';
     const documentType = req.body.documentType; // Allow frontend to specify type
     
+    logger.info(`📄 Processing document: ${req.file.originalname}`);
+    logger.info(`🔍 Document type: ${documentType || 'auto-detected'}`);
+    
     // Process the document
     const result = await documentProcessor.processDocument(
       req.file,
@@ -65,12 +69,23 @@ router.post('/upload', upload.single('document'), asyncHandler(async (req: Reque
       documentType
     );
     
-    logger.info(`Document processed successfully: ${result.documentId}`);
+    logger.info(`✅ Document processed successfully: ${result.documentId}`);
+    if (result.linkedAbhaId && result.linkedAbhaId !== patientId) {
+      logger.info(`🔗 Document linked to ABHA ID: ${result.linkedAbhaId}`);
+    }
     
     res.json({
       success: true,
       message: 'Document uploaded and processed successfully',
-      data: result
+      data: {
+        ...result,
+        demoInfo: {
+          originalPatientId: patientId,
+          linkedAbhaId: result.linkedAbhaId,
+          patientName: result.extractedData?.patientInfo?.name || 'Unknown',
+          linkingSuccess: result.linkedAbhaId !== patientId
+        }
+      }
     });
   } catch (error) {
     logger.error('Document upload error:', error);
@@ -140,6 +155,70 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve documents',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+}));
+
+// Demo endpoint to test ABHA linking functionality
+router.post('/demo-abha-linking', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const { documentType, patientName } = req.body;
+  
+  if (!documentType) {
+    res.status(400).json({
+      success: false,
+      message: 'Document type is required'
+    });
+    return;
+  }
+  
+  // Create a mock file object for demo
+  const mockFile = {
+    fieldname: 'document',
+    originalname: `${documentType}-demo.jpg`,
+    encoding: '7bit',
+    mimetype: 'image/jpeg',
+    destination: path.join(__dirname, '../../../uploads'),
+    filename: `demo-${Date.now()}.jpg`,
+    path: path.join(__dirname, '../../../uploads', `demo-${Date.now()}.jpg`),
+    size: 1024 * 100 // 100KB mock size
+  } as Express.Multer.File;
+  
+  try {
+    logger.info(`🧪 Demo ABHA linking test for: ${documentType}`);
+    logger.info(`👤 Patient name: ${patientName || 'auto-extracted'}`);
+    
+    const result = await documentProcessor.processDocument(
+      mockFile,
+      'demo-patient-001', // Original demo ID
+      'demo-provider-001',
+      documentType
+    );
+    
+    const demoResult = {
+      documentId: result.documentId,
+      documentType: result.documentType,
+      extractedPatientName: result.extractedData?.patientInfo?.name,
+      originalPatientId: 'demo-patient-001',
+      linkedAbhaId: result.linkedAbhaId,
+      linkingSuccess: result.linkedAbhaId !== 'demo-patient-001',
+      accuracy: result.accuracy,
+      demoMessage: result.linkedAbhaId !== 'demo-patient-001' 
+        ? `✅ Successfully linked to ABHA ID: ${result.linkedAbhaId}`
+        : `⚠️ No ABHA ID found, using demo-patient-001`
+    };
+    
+    logger.info(`🎯 Demo result: ${demoResult.demoMessage}`);
+    
+    res.json({
+      success: true,
+      message: 'Demo ABHA linking test completed',
+      data: demoResult
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process demo document',
       error: error instanceof Error ? error.message : 'Unknown error'
     });
   }

@@ -1,0 +1,55 @@
+HYPERTENSION MANAGEMENT PRESCRIPTION
+===================================
+
+Patient: Ashok Gupta
+Age: 58 Years, Male
+Date: 05-08-2024
+
+Doctor: Dr. Anita Desai, MD (Internal Medicine)
+Reg No: MCI-45678
+Fortis Healthcare, Sector 15, Noida
+
+DIAGNOSIS:
+- Essential Hypertension (Stage 2)
+- Pre-diabetes
+- Obesity
+- Sleep Apnea
+
+MEDICATIONS:
+1. Tab. Amlodipine 10mg
+   Once daily x 30 days
+   Morning with breakfast
+   Instructions: Monitor for ankle swelling
+
+2. Tab. Telmisartan 80mg
+   Once daily x 30 days
+   Morning
+   Instructions: Take on empty stomach
+
+3. Tab. Hydrochlorothiazide 25mg
+   Once daily x 30 days
+   Morning
+   Instructions: Monitor potassium levels
+
+4. Tab. Metformin 500mg
+   Twice daily x 30 days
+   With meals
+   Instructions: For pre-diabetes management
+
+5. Tab. Atorvastatin 20mg
+   Once daily x 30 days
+   Evening after dinner
+   Instructions: For cardiovascular protection
+
+ADVICE:
+- Low salt diet (1.5g sodium/day)
+- Weight reduction program
+- Regular exercise 45 minutes daily
+- Blood pressure monitoring 3 times daily
+- Sleep study for apnea evaluation
+- Stress management techniques
+
+Follow-up: After 30 days for BP control assessment
+
+[This is a simulated prescription for Ashok Gupta - Hypertension patient]
+[Patient information extracted for ABHA ID mapping] 
