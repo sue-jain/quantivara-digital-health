@@ -1,6 +1,6 @@
 import path from 'path';
 
-export type FileType = 'pdf' | 'image' | 'unsupported';
+export type FileType = 'pdf' | 'image' | 'text' | 'unsupported';
 
 export function detectFileType(filePath: string): FileType {
   const ext = path.extname(filePath).toLowerCase();
@@ -12,6 +12,8 @@ export function detectFileType(filePath: string): FileType {
     case '.jpeg':
     case '.png':
       return 'image';
+    case '.txt':
+      return 'text';
     default:
       return 'unsupported';
   }
@@ -24,7 +26,8 @@ export function getMimeType(filePath: string): string {
     '.pdf': 'application/pdf',
     '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
-    '.png': 'image/png'
+    '.png': 'image/png',
+    '.txt': 'text/plain'
   };
   
   return mimeTypes[ext] || 'application/octet-stream';

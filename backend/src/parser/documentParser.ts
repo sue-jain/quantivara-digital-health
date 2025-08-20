@@ -41,6 +41,11 @@ export async function parseDocument(filePath: string): Promise<ParseResult> {
       const ocrResult = await parseImage(filePath);
       extractedText = cleanOCRText(ocrResult.text);
       confidence = ocrResult.confidence;
+    } else if (fileType === 'text') {
+      logger.info(`Processing text file: ${filePath}`);
+      const fs = require('fs');
+      extractedText = fs.readFileSync(filePath, 'utf8');
+      confidence = 100; // Perfect confidence for direct text reading
     }
     
     // Extract structured medical data
@@ -72,6 +77,14 @@ export async function parseDocument(filePath: string): Promise<ParseResult> {
 
 // Convert extracted data to match the existing format expected by frontend
 export function formatExtractedData(data: ExtractedData, accuracy?: number): any {
+  logger.info(`🔧 Formatting extracted data:`, {
+    documentType: data.documentType,
+    hasPatientInfo: !!data.patientInfo,
+    hasMedications: !!data.medications,
+    medicationCount: data.medications?.length || 0,
+    hasLabResults: !!data.labResults
+  });
+  
   const formatted: any = {
     documentType: data.documentType,
     extractionAccuracy: accuracy ? `${Math.round(accuracy)}%` : '95%'
@@ -97,13 +110,20 @@ export function formatExtractedData(data: ExtractedData, accuracy?: number): any
     formatted.criticalValues = 0; // Would need actual logic
     
   } else if (data.documentType === 'Prescription') {
-    formatted.patientInfo = data.patientInfo;
-    formatted.doctorInfo = data.doctorInfo;
-    formatted.diagnosis = data.diagnosis || [];
-    formatted.medications = data.medications || [];
-    formatted.prescriptionDate = data.date;
-    formatted.followUp = 'As directed by physician';
-    formatted.advice = ['Follow medication schedule', 'Maintain healthy diet'];
+    try {
+      formatted.patientInfo = data.patientInfo || {};
+      formatted.doctorInfo = data.doctorInfo || {};
+      formatted.diagnosis = data.diagnosis || [];
+      formatted.medications = data.medications || [];
+      formatted.prescriptionDate = data.date;
+      formatted.followUp = 'As directed by physician';
+      formatted.advice = ['Follow medication schedule', 'Maintain healthy diet'];
+      
+      logger.info(`✅ Successfully formatted prescription with ${formatted.medications.length} medications`);
+    } catch (error) {
+      logger.error(`❌ Error formatting prescription data: ${error}`);
+      throw error;
+    }
   } else {
     // Generic format
     formatted.patientInfo = data.patientInfo;
@@ -115,9 +135,14 @@ export function formatExtractedData(data: ExtractedData, accuracy?: number): any
 }
 
 function formatTestName(name: string): string {
+  if (!name || typeof name !== 'string') {
+    logger.warn(`⚠️ Invalid test name: ${name}`);
+    return 'Unknown Test';
+  }
+  
   const nameMap: Record<string, string> = {
     hemoglobin: 'Hemoglobin',
-    glucose: 'Blood Glucose',
+    glucose: 'Blood Glucose', 
     cholesterol: 'Total Cholesterol',
     uricacid: 'Uric Acid',
     tsh: 'TSH',
