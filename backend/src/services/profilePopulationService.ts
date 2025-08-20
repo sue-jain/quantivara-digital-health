@@ -62,6 +62,7 @@ export class ProfilePopulationService {
         case 'prescription':
         case 'handwritten_prescription':
           await this.populateMedications(userId, abhaId, extractedData, documentId);
+          await this.populateDiagnoses(userId, abhaId, extractedData, documentId);
           break;
           
         case 'lab_report':
@@ -131,6 +132,96 @@ export class ProfilePopulationService {
       
     } catch (error) {
       logger.error(`❌ Error populating medications for ABHA ID ${abhaId}:`, error);
+    }
+  }
+
+  /**
+   * Populate diagnoses from prescription data
+   */
+  private async populateDiagnoses(
+    userId: string, 
+    abhaId: string, 
+    extractedData: any, 
+    documentId: string
+  ): Promise<void> {
+    try {
+      // Safely extract diagnoses array - handle various data structures
+      let diagnoses: string[] = [];
+      
+      if (extractedData.diagnosis) {
+        if (Array.isArray(extractedData.diagnosis)) {
+          diagnoses = extractedData.diagnosis;
+        } else if (typeof extractedData.diagnosis === 'string') {
+          // If diagnosis is a single string, convert to array
+          diagnoses = [extractedData.diagnosis];
+        }
+      }
+      
+      // If no diagnoses found, log and return gracefully
+      if (!diagnoses || diagnoses.length === 0) {
+        logger.info(`📄 No diagnoses found in prescription for ABHA ID: ${abhaId} - this is normal for some prescriptions`);
+        return;
+      }
+      
+      const diagnosisDate = extractedData.prescriptionDate || extractedData.date || new Date().toISOString().split('T')[0];
+      const doctorName = extractedData.doctorInfo?.name || '';
+      
+      for (const diagnosis of diagnoses) {
+        try {
+          // Safely handle diagnosis text
+          if (!diagnosis || typeof diagnosis !== 'string') {
+            logger.warn(`⚠️ Invalid diagnosis format for ABHA ID ${abhaId}, skipping: ${diagnosis}`);
+            continue;
+          }
+          
+          // Clean up diagnosis text (remove leading dashes and trim)
+          const cleanDiagnosis = diagnosis.replace(/^[-\s•*]+/, '').trim();
+          
+          // Skip empty or very short diagnoses
+          if (cleanDiagnosis.length < 3) {
+            logger.debug(`📝 Skipping short/empty diagnosis for ABHA ID ${abhaId}: "${cleanDiagnosis}"`);
+            continue;
+          }
+          
+          // Check if diagnosis already exists for this patient
+          const existing = db.prepare(`
+            SELECT id FROM user_diagnoses 
+            WHERE abha_id = ? AND diagnosis_name = ?
+          `).get(abhaId, cleanDiagnosis) as any;
+
+          if (!existing) {
+            // Insert new diagnosis
+            db.prepare(`
+              INSERT INTO user_diagnoses (
+                user_id, abha_id, diagnosis_name, diagnosis_date, doctor_name, 
+                status, source_document_id
+              ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            `).run(
+              userId,
+              abhaId,
+              cleanDiagnosis,
+              diagnosisDate,
+              doctorName,
+              'ACTIVE',
+              documentId || null
+            );
+            
+            logger.info(`🩺 Added diagnosis: ${cleanDiagnosis} for ABHA ID: ${abhaId}`);
+          } else {
+            logger.debug(`📋 Diagnosis already exists for ABHA ID ${abhaId}: ${cleanDiagnosis}`);
+          }
+        } catch (diagnosisError) {
+          logger.error(`❌ Error processing individual diagnosis for ABHA ID ${abhaId}:`, diagnosisError);
+          // Continue with next diagnosis instead of failing completely
+          continue;
+        }
+      }
+      
+      logger.info(`✅ Processed ${diagnoses.length} diagnoses for ABHA ID: ${abhaId}`);
+      
+    } catch (error) {
+      logger.error(`❌ Error populating diagnoses for ABHA ID ${abhaId}:`, error);
+      // Don't throw - allow document processing to continue even if diagnosis population fails
     }
   }
 

@@ -19,7 +19,8 @@ const PATTERNS = {
   gender: [
     /Gender\s*[:]\s*(Male|Female|M|F)/i,
     /Sex\s*[:]\s*(Male|Female|M|F)/i,
-    /Age\/Sex\s*[:]\s*\d+\s*[\/]?\s*(M|F|Male|Female)/i
+    /Age\/Sex\s*[:]\s*\d+\s*[\/]?\s*(M|F|Male|Female)/i,
+    /Age\s*[:]\s*\d+\s*Years?,\s*(Male|Female|M|F)/i
   ],
   
   date: [
@@ -43,7 +44,10 @@ const PATTERNS = {
   // Prescription patterns
   medications: /(?:Rx|Prescription|Medicines?)[\s\S]*?(?=\n\n|$)/i,
   diagnosis: /(?:Diagnosis|Clinical\s*Diagnosis|Provisional\s*Diagnosis)\s*[:]\s*([^\n]+)/i,
-  doctorName: /Dr\.\s*([A-Za-z\s,]+?)(?:\n|$)/i,
+  doctorName: [
+    /Doctor\s*[:]\s*Dr\.\s*([A-Za-z\s,()]+?)(?:\n|$)/i,
+    /Dr\.\s*([A-Za-z\s,()]+?)(?:\n|$)/i
+  ],
 };
 
 export interface ExtractedData {
@@ -84,6 +88,8 @@ export function extractMedicalData(text: string, documentType?: string): Extract
   // Extract based on document type
   if (extracted.documentType?.toLowerCase().includes('lab')) {
     extracted.labResults = extractLabResults(text);
+  } else if (extracted.documentType?.toLowerCase().includes('ecg')) {
+    extracted.labResults = extractECGVitals(text);
   } else if (extracted.documentType?.toLowerCase().includes('prescription')) {
     extracted.medications = extractMedications(text);
     extracted.diagnosis = extractDiagnosis(text);
@@ -164,93 +170,327 @@ function extractDate(text: string): string | undefined {
 function extractLabResults(text: string): Record<string, any> {
   const results: Record<string, any> = {};
   
-  // Extract individual test results
-  for (const [testName, pattern] of Object.entries(PATTERNS.labTests)) {
-    const match = text.match(pattern);
+  // Split text into lines for better parsing
+  const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    
+    // Pattern 1: "Test Name: Value Unit (Normal: Range) Status"
+    // Example: "1. Troponin I: Value: 0.15 ng/mL Normal Range: <0.04 ng/mL Status: ELEVATED"
+    const pattern1 = /^(\d+\.\s*)?([A-Za-z][A-Za-z\s\-()]+?):\s*(?:Value:\s*)?([\d.<>]+)\s*([A-Za-z\/μ²]+)?/i;
+    let match = line.match(pattern1);
+    
     if (match) {
-      results[testName] = {
-        value: match[1],
-        unit: match[2] || getDefaultUnit(testName)
-      };
+      const testName = match[2].trim();
+      const value = match[3];
+      const unit = match[4] || '';
       
-      // Try to find normal range (usually after the value)
-      const rangePattern = new RegExp(
-        `${testName}[^\\n]*?(?:Normal|Reference|Range)[^\\n]*?([\\d.-]+\\s*-\\s*[\\d.-]+)`,
-        'i'
-      );
-      const rangeMatch = text.match(rangePattern);
-      if (rangeMatch) {
-        results[testName].normalRange = rangeMatch[1];
+      // Look for normal range and status in next few lines
+      let normalRange = '';
+      let status = 'NORMAL';
+      
+      for (let j = i; j <= Math.min(i + 3, lines.length - 1); j++) {
+        const nextLine = lines[j];
+        
+        // Extract normal range
+        const rangeMatch = nextLine.match(/Normal\s*(?:Range)?:\s*([<>]?[\d.-]+(?:\s*-\s*[\d.-]+)?)\s*([A-Za-z\/μ²]*)/i);
+        if (rangeMatch) {
+          normalRange = rangeMatch[1] + (rangeMatch[2] ? ' ' + rangeMatch[2] : '');
+        }
+        
+        // Extract status
+        const statusMatch = nextLine.match(/Status:\s*(NORMAL|ELEVATED|HIGH|LOW|CRITICAL|ABNORMAL)/i);
+        if (statusMatch) {
+          status = statusMatch[1].toUpperCase();
+        }
+      }
+      
+      results[testName.toLowerCase().replace(/\s+/g, '_')] = {
+        name: testName,
+        value: value,
+        unit: unit,
+        normalRange: normalRange,
+        status: status
+      };
+      continue;
+    }
+    
+    // Pattern 2: "- Test Name: Value Unit (Normal: Range)"
+    // Example: "- Total Cholesterol: 280 mg/dL (Normal: <200)"
+    const pattern2 = /^[-•*]\s*([A-Za-z][A-Za-z\s\-()]+?):\s*([\d.<>]+)\s*([A-Za-z\/μ²]+)?\s*(?:\(Normal:\s*([<>]?[\d.-]+(?:\s*-\s*[\d.-]+)?)\))?/i;
+    match = line.match(pattern2);
+    
+    if (match) {
+      const testName = match[1].trim();
+      const value = match[2];
+      const unit = match[3] || '';
+      const normalRange = match[4] || '';
+      
+      const status = determineLabStatus(value, normalRange);
+      results[testName.toLowerCase().replace(/\s+/g, '_')] = {
+        name: testName,
+        value: value,
+        unit: unit,
+        normalRange: normalRange,
+        status: status
+      };
+      continue;
+    }
+    
+    // Pattern 3: Simple "Test Name: Value Unit"
+    // Example: "Heart Rate: 88 bpm"
+    const pattern3 = /^([A-Za-z][A-Za-z\s\-()]+?):\s*([\d.<>]+)\s*([A-Za-z\/μ²]+)?/i;
+    match = line.match(pattern3);
+    
+    if (match && !line.includes('Patient') && !line.includes('Date') && !line.includes('Report')) {
+      const testName = match[1].trim();
+      const value = match[2];
+      const unit = match[3] || '';
+      
+      // Check if next line has normal range
+      let normalRange = '';
+      if (i + 1 < lines.length) {
+        const nextLine = lines[i + 1];
+        const rangeMatch = nextLine.match(/\(Normal:\s*([<>]?[\d.-]+(?:\s*-\s*[\d.-]+)?)\)/i);
+        if (rangeMatch) {
+          normalRange = rangeMatch[1];
+        }
+      }
+      
+      results[testName.toLowerCase().replace(/\s+/g, '_')] = {
+        name: testName,
+        value: value,
+        unit: unit,
+        normalRange: normalRange,
+        status: determineLabStatus(value, normalRange)
+      };
+    }
+  }
+  
+  // Filter out non-medical metadata
+  const filteredResults: Record<string, any> = {};
+  const metadataKeys = ['age', 'date', 'report_date', 'value', 'normal_range', 'critical_values', 'abnormal_values', 'patient', 'sample_id', 'test_id'];
+  
+  for (const [key, value] of Object.entries(results)) {
+    if (!metadataKeys.includes(key) && value.name && value.value && 
+        !value.name.toLowerCase().includes('patient') && 
+        !value.name.toLowerCase().includes('date') &&
+        value.name.length > 2) {
+      filteredResults[key] = value;
+    }
+  }
+  
+  return filteredResults;
+}
+
+function extractECGVitals(text: string): Record<string, any> {
+  const vitals: Record<string, any> = {};
+  const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+  
+  for (const line of lines) {
+    // Pattern for ECG measurements like "1. Heart Rate: 88 bpm (Normal: 60-100)"
+    const vitalPattern = /^(?:\d+\.\s*)?([A-Za-z][A-Za-z\s\-()]+?):\s*([\d.<>]+(?:\.\d+)?)\s*([A-Za-z\/°]+)?\s*(?:\(Normal:\s*([<>]?[\d.-]+(?:\s*-\s*[\d.-]+)?)\))?/i;
+    const match = line.match(vitalPattern);
+    
+    if (match && !line.includes('Patient') && !line.includes('Date') && !line.includes('ID')) {
+      const vitalName = match[1].trim();
+      const value = match[2];
+      const unit = match[3] || '';
+      const normalRange = match[4] || '';
+      
+      // Only include actual vital signs/measurements
+      const vitalKeywords = ['heart rate', 'pr interval', 'qrs duration', 'qt interval', 'axis', 'blood pressure', 'temperature', 'rate', 'interval', 'duration'];
+      if (vitalKeywords.some(keyword => vitalName.toLowerCase().includes(keyword))) {
+        const vitalKey = vitalName.toLowerCase().replace(/[^a-z0-9]/g, '');
+        vitals[vitalKey] = {
+          name: vitalName,
+          value: value,
+          unit: unit,
+          normalRange: normalRange,
+          status: determineLabStatus(value, normalRange)
+        };
       }
     }
   }
   
-  // Try to extract any other test results in table format
-  const tablePattern = /([A-Za-z\s]+?)\s{2,}([\d.]+)\s+([A-Za-z\/]+)\s+([\d.-]+\s*-\s*[\d.-]+)/g;
-  let match;
-  while ((match = tablePattern.exec(text)) !== null) {
-    const testName = match[1].trim().toLowerCase().replace(/\s+/g, '');
-    if (!results[testName] && testName.length > 2) { // Skip headers like "Test Name"
-      results[testName] = {
-        value: match[2],
-        unit: match[3],
-        normalRange: match[4]
-      };
-    }
-  }
-  
-  return results;
+  return vitals;
 }
 
 function extractMedications(text: string): Array<{ name: string; dosage?: string; frequency?: string }> {
   const medications: Array<{ name: string; dosage?: string; frequency?: string }> = [];
   
-  // Enhanced medication pattern to handle various formats
-  // Pattern 1: Tab. Name Dosage (same line)
-  const medPattern1 = /(?:Tab|Cap|Syp|Inj)\.?\s+([A-Za-z\s+]+?)\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU))\b/gi;
+  // Split text into lines for better parsing
+  const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
   
-  // Pattern 2: Tab. Name + Number + Unit (for cases like "Vitamin D3 1000 IU")
-  const medPattern2 = /(?:Tab|Cap|Syp|Inj)\.?\s+([A-Za-z\s+\d]+?)\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU))/gi;
+  // Frequency patterns to extract from subsequent lines
+  const frequencyPatterns = [
+    /(?:once|one time?)\s+daily/gi,
+    /(?:twice|two times?)\s+daily/gi,
+    /(?:thrice|three times?)\s+daily/gi,
+    /(?:four times?)\s+daily/gi,
+    /(\d+)\s*times?\s+(?:a\s+)?day/gi,
+    /(\d+)-(\d+)-(\d+)/g, // Pattern like 1-0-1
+    /(?:morning|evening|night|afternoon)/gi,
+    /(?:before|after)\s+(?:food|meal|breakfast|lunch|dinner)/gi,
+    /every\s+(\d+)\s+hours?/gi,
+    /as\s+(?:needed|required|directed)/gi,
+    /sos/gi
+  ];
   
-  // Pattern 3: Just numbered medications
-  const medPattern3 = /\d+\.\s*(?:Tab|Cap|Syp|Inj)\.?\s+([A-Za-z\s+\d]+?)\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU))/gi;
-  
-  const patterns = [medPattern1, medPattern2, medPattern3];
-  
-  patterns.forEach(pattern => {
-    let match;
-    while ((match = pattern.exec(text)) !== null) {
-      const name = match[1].trim();
-      const dosage = match[2].trim();
-      
-      // Avoid duplicates
-      if (!medications.some(med => med.name.toLowerCase() === name.toLowerCase())) {
-        medications.push({
-          name: name,
-          dosage: dosage,
-          frequency: 'As prescribed'
-        });
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    
+    // Enhanced medication patterns
+    const medPatterns = [
+      // Pattern 1: Numbered with Tab/Cap/Syp etc
+      /^\d+\.\s*(?:Tab|Cap|Syp|Inj|Drops?)\.?\s+([A-Za-z][A-Za-z\s\d\+]*?)(?:\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU|drops?)))?$/i,
+      // Pattern 2: Numbered medication without Tab/Cap prefix (e.g., "2. Sucralfate + Simethicone 10ml")
+      /^\d+\.\s+([A-Za-z][A-Za-z\s\d\+]*?)(?:\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU|drops?)))?$/i,
+      // Pattern 3: Direct Tab/Cap/Syp
+      /^(?:Tab|Cap|Syp|Inj|Drops?)\.?\s+([A-Za-z][A-Za-z\s\d\+]*?)(?:\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU|drops?)))?$/i,
+      // Pattern 4: Medicine name with dosage
+      /^([A-Za-z][A-Za-z\s\d\+]*?)\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU|drops?))$/i
+    ];
+    
+    for (const pattern of medPatterns) {
+      const match = line.match(pattern);
+      if (match) {
+        const name = match[1].trim().replace(/\s+/g, ' ');
+        const dosage = match[2] ? match[2].trim() : undefined;
+        
+        // Look for frequency in the next 2-3 lines
+        let frequency = extractFrequencyFromLines(lines, i + 1, i + 4);
+        
+        // Avoid duplicates
+        if (!medications.some(med => med.name.toLowerCase() === name.toLowerCase())) {
+          medications.push({
+            name: name,
+            dosage: dosage,
+            frequency: frequency || undefined
+          });
+        }
+        break;
       }
     }
-  });
+  }
   
   return medications;
 }
 
-function extractDiagnosis(text: string): string[] {
-  const match = text.match(PATTERNS.diagnosis);
-  if (match) {
-    return match[1].split(/[,;]/).map(d => d.trim()).filter(d => d.length > 0);
+function extractFrequencyFromLines(lines: string[], startIndex: number, endIndex: number): string | null {
+  const frequencyPatterns = [
+    { pattern: /once\s+daily/gi, replacement: 'Once daily' },
+    { pattern: /twice\s+daily/gi, replacement: 'Twice daily' },
+    { pattern: /thrice\s+daily/gi, replacement: 'Thrice daily' },
+    { pattern: /three\s+times?\s+daily/gi, replacement: 'Three times daily' },
+    { pattern: /(\d+)\s*times?\s+(?:a\s+)?day/gi, replacement: '$1 times daily' },
+    { pattern: /\(1-1-1\)/g, replacement: 'Three times daily' },
+    { pattern: /\(1-0-1\)/g, replacement: 'Twice daily' },
+    { pattern: /\((\d+)-(\d+)-(\d+)\)/g, replacement: '$1-$2-$3' },
+    { pattern: /(\d+)-(\d+)-(\d+)/g, replacement: '$1-$2-$3' },
+    { pattern: /every\s+(\d+)\s+hours?/gi, replacement: 'Every $1 hours' },
+    { pattern: /as\s+(?:needed|required|directed)/gi, replacement: 'As directed' },
+    { pattern: /sos/gi, replacement: 'SOS' },
+    { pattern: /morning/gi, replacement: 'Morning' },
+    { pattern: /evening/gi, replacement: 'Evening' },
+    { pattern: /night/gi, replacement: 'Night' },
+    { pattern: /before\s+(?:food|meal|breakfast|lunch|dinner)/gi, replacement: 'Before meals' },
+    { pattern: /after\s+(?:food|meal|breakfast|lunch|dinner)/gi, replacement: 'After meals' }
+  ];
+  
+  for (let i = startIndex; i < Math.min(endIndex, lines.length); i++) {
+    const line = lines[i];
+    
+    for (const { pattern, replacement } of frequencyPatterns) {
+      const match = line.match(pattern);
+      if (match) {
+        // Replace numbered groups in replacement string
+        let result = replacement;
+        for (let j = 1; j < match.length; j++) {
+          result = result.replace(new RegExp(`\\$${j}`, 'g'), match[j]);
+        }
+        return result;
+      }
+    }
   }
-  return [];
+  
+  return null;
+}
+
+function extractDiagnosis(text: string): string[] {
+  const diagnoses: string[] = [];
+  
+  // Find the DIAGNOSIS section
+  const diagnosisMatch = text.match(/(?:DIAGNOSIS|Clinical\s*Diagnosis|Provisional\s*Diagnosis)\s*[:]\s*\n?/i);
+  if (!diagnosisMatch) return [];
+  
+  // Get text after DIAGNOSIS header
+  const afterDiagnosis = text.substring(diagnosisMatch.index! + diagnosisMatch[0].length);
+  
+  // Split into lines and extract diagnosis items
+  const lines = afterDiagnosis.split('\n');
+  
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    
+    // Stop if we hit another section
+    if (trimmedLine.match(/^(MEDICATIONS?|ADVICE|TREATMENT|FOLLOW|INSTRUCTIONS?)[:]/i)) {
+      break;
+    }
+    
+    // Skip empty lines
+    if (trimmedLine.length === 0) continue;
+    
+    // Extract diagnosis items (lines starting with -, numbers, or containing diagnosis-like text)
+    if (trimmedLine.match(/^[-•*]\s*(.+)/) || 
+        trimmedLine.match(/^\d+\.\s*(.+)/) ||
+        (trimmedLine.length > 3 && !trimmedLine.includes(':') && trimmedLine.match(/[A-Za-z]/))) {
+      diagnoses.push(trimmedLine);
+    }
+  }
+  
+  return diagnoses.filter(d => d.length > 0);
 }
 
 function extractDoctorInfo(text: string): ExtractedData['doctorInfo'] | undefined {
-  const match = text.match(PATTERNS.doctorName);
-  if (match) {
-    return { name: match[1].trim() };
+  for (const pattern of PATTERNS.doctorName) {
+    const match = text.match(pattern);
+    if (match) {
+      return { name: match[1].trim() };
+    }
   }
   return undefined;
+}
+
+function determineLabStatus(value: string, normalRange: string): string {
+  if (!value || !normalRange) return 'NORMAL';
+  
+  const numValue = parseFloat(value);
+  if (isNaN(numValue)) return 'NORMAL';
+  
+  // Handle different range formats
+  if (normalRange.startsWith('<')) {
+    const threshold = parseFloat(normalRange.substring(1));
+    return numValue < threshold ? 'NORMAL' : 'HIGH';
+  }
+  
+  if (normalRange.startsWith('>')) {
+    const threshold = parseFloat(normalRange.substring(1));
+    return numValue > threshold ? 'NORMAL' : 'LOW';
+  }
+  
+  // Handle range like "70-100" or "0.7-1.3"
+  const rangeMatch = normalRange.match(/^([\d.]+)\s*-\s*([\d.]+)$/);
+  if (rangeMatch) {
+    const min = parseFloat(rangeMatch[1]);
+    const max = parseFloat(rangeMatch[2]);
+    if (numValue < min) return 'LOW';
+    if (numValue > max) return 'HIGH';
+    return 'NORMAL';
+  }
+  
+  return 'NORMAL';
 }
 
 function getDefaultUnit(testName: string): string {
