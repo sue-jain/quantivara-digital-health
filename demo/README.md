@@ -1,58 +1,123 @@
-# 🏥 Quantivara Digital Health - Demo Resources
-
-This folder contains all demo-related scripts, guides, and documentation for showcasing the Quantivara Digital Health platform.
-
-## 📁 Contents
-
-- **`run-demo.sh`** - Enhanced demo runner with error handling and monitoring
-- **`start-demo.sh`** - Original simple demo startup script
-- **`DEMO-GUIDE.md`** - Complete demo guide with investor pitch script
-- **`DEMO-CREDENTIALS.md`** - Test data, ABHA IDs, and demo credentials
-- **`DEMO-TESTING.md`** - Testing procedures and quality checks
-- **`interop-demo.md`** - Interoperability demo agent commands
+# Quantivara Digital Health Demo
 
 ## 🚀 Quick Start
 
-From the project root directory:
-
+### For New Developers
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd quantivara-digital-health
+
+# Run the demo (includes all setup automatically)
 ./demo/run-demo.sh
 ```
 
-Or if you're in the demo folder:
-
+### For Existing Developers
 ```bash
-./run-demo.sh
+# Just run the demo (handles all migrations automatically)
+./demo/run-demo.sh
 ```
 
-## 🔑 Key Information
+### Alternative: Using npm
+```bash
+npm run demo
+```
 
-- **Password**: `NmptGd3qAja?X7gY`
-- **Frontend**: http://localhost:8080
-- **Backend**: http://localhost:3001/api/v1
+## ✨ What's Included
 
-## 📋 Demo Highlights
+The demo automatically sets up:
 
-1. **ABHA ID Lookup** - 3-second patient data retrieval
-2. **⭐ Handwritten Prescription AI** - 92% accuracy on handwritten prescriptions
-3. **Real-time Analytics** - Live revenue and network metrics
-4. **WebSocket Integration** - Real-time document processing updates
+### 🔧 Backend Setup
+- ✅ Database schema creation
+- ✅ Demo ABHA IDs and patient data
+- ✅ **NEW: Profile integration tables**
+- ✅ **NEW: AI data migration from existing documents**
 
-## 🧪 Test Data
+### 🎯 Frontend Features
+- ✅ ABHA ID lookup system
+- ✅ Document processing with AI extraction
+- ✅ Analytics dashboard
+- ✅ **NEW: Enhanced user profiles with AI-extracted data**
 
-### ABHA IDs
-- `1234-5678-9012-34` - Diabetes patient
-- `9876-5432-1098-76` - Allergy patient
-- `4567-8901-2345-67` - Heart patient
+## 🆕 AI Profile Integration
 
-### Key Features to Demo
-1. Click "⭐ Handwritten Rx" in Document Processor
-2. Show real-time processing with progress updates
-3. Demonstrate 92% accuracy on mixed Hindi-English prescriptions
-4. Highlight network effects in Analytics Dashboard
+The demo now includes seamless AI profile integration:
 
-## 📝 Notes
+### Profile Data Available
+- **💊 Active Medications**: Extracted from prescriptions
+- **🧪 Lab Results**: Extracted from lab reports  
+- **🚨 Critical Alerts**: AI-detected abnormal values
+- **🫀 Vital Signs**: Extracted from ECG reports
 
-- All scripts now use relative paths from the demo folder
-- Logs are saved in this folder (backend.log, frontend.log)
-- Scripts handle port conflicts and process monitoring automatically
+### Demo ABHA IDs
+- `1234-5678-9012-34` (Ramesh Kumar - Diabetes)
+- `9876-5432-1098-76` (Priya Sharma - Asthma)
+- `4567-8901-2345-67` (Suresh Patel - Heart Disease)
+- `1111-2222-3333-44` (Ashok Gupta - Hypertension)
+- `5555-6666-7777-88` (Meera Singh - Thyroid)
+
+## 🔄 Automatic Migration
+
+The demo script automatically:
+
+1. **Checks existing data** - Detects if you have existing documents
+2. **Sets up profile tables** - Creates new tables for AI data organization
+3. **Migrates existing data** - Extracts AI data from existing documents
+4. **Populates profile tabs** - Organizes data into user-friendly tabs
+
+## 🎯 Demo Features
+
+### Document Processing
+- Upload medical documents (prescriptions, lab reports, ECG)
+- AI-powered data extraction
+- **NEW: Automatic profile population**
+
+### ABHA ID Lookup
+- Fast patient lookup using ABHA ID
+- **NEW: Enhanced profiles with AI-extracted data**
+
+### Analytics Dashboard
+- Healthcare network visualization
+- Revenue tracking
+- Performance metrics
+
+## 🛠️ Technical Details
+
+### Database Schema
+- **Existing tables**: `medical_documents`, `users`, `patients`
+- **NEW tables**: `user_medications`, `user_lab_results`, `user_vital_signs`, `user_critical_alerts`
+
+### AI Integration
+- **Document processing**: Extracts patient info, medications, lab results
+- **Profile population**: Automatically organizes data into tabs
+- **Critical alerts**: Detects abnormal values and creates alerts
+
+## 🚨 Troubleshooting
+
+### If demo fails to start:
+1. Check `demo/backend.log` for backend errors
+2. Check `frontend.log` for frontend errors
+3. Ensure ports 3001 and 8080 are available
+
+### If profile data doesn't appear:
+1. Check that migration completed successfully
+2. Verify database contains demo ABHA IDs
+3. Check backend logs for profile population errors
+
+## 📊 Demo Data Summary
+
+After running the demo, you'll have:
+- **5 demo patients** with ABHA IDs
+- **12+ processed documents** with AI extraction
+- **9 active medications** across patients
+- **15 lab results** with status tracking
+- **7 critical alerts** for abnormal values
+
+## 🎉 Ready to Demo!
+
+The demo is now ready to showcase:
+- **Seamless setup** for new and existing developers
+- **AI-powered document processing**
+- **Enhanced user profiles** with organized health data
+- **Real-time critical alerts**
+- **Cross-hospital data sharing** via ABHA ID

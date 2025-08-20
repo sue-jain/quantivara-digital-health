@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { logger } from '../utils/logger';
 import { parseDocument, formatExtractedData } from '../parser/documentParser';
+import { profilePopulationService } from './profilePopulationService';
 
 interface ExtractedMedication {
   name: string;
@@ -337,6 +338,20 @@ export class DocumentProcessor {
         new Date().toISOString(),
         documentId
       );
+      
+      // NEW: Populate user profile with AI-extracted data (Phase 2)
+      try {
+        await profilePopulationService.populateUserProfile(
+          abhaId,
+          extractedData,
+          documentId,
+          documentType
+        );
+        logger.info(`✅ Profile population completed for document: ${documentId}`);
+      } catch (profileError) {
+        logger.warn(`⚠️ Profile population failed for document ${documentId}: ${profileError}`);
+        // Don't fail document processing if profile population fails
+      }
       
       return {
         documentId,

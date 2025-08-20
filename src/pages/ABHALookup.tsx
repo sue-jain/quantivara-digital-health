@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Search, Loader2, AlertCircle, CheckCircle, User, Phone, Calendar, Heart, Pill, FileText, Clock, Home } from 'lucide-react';
+import { Search, Loader2, AlertCircle, CheckCircle, User, Phone, Calendar, Heart, Pill, FileText, Clock, Home, Brain, Activity, TrendingUp, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import patientService, { EmergencyProfile } from '@/services/patients';
 
@@ -16,6 +17,8 @@ const ABHALookup: React.FC = () => {
   const [abhaId, setAbhaId] = useState('');
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<EmergencyProfile | null>(null);
+  const [aiProfile, setAiProfile] = useState<any>(null);
+  const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lookupTime, setLookupTime] = useState<number | null>(null);
   const { toast } = useToast();
@@ -53,6 +56,9 @@ const ABHALookup: React.FC = () => {
       setLookupTime(totalTime);
       setProfile(data);
       
+      // Fetch AI profile data
+      await fetchAIProfile(cleanedId);
+      
       toast({
         title: "Patient Found",
         description: `Emergency profile retrieved in ${totalTime}ms`,
@@ -74,6 +80,91 @@ const ABHALookup: React.FC = () => {
 
   const handleLookup = async () => {
     await handleLookupWithId(abhaId);
+  };
+
+  const fetchAIProfile = async (abhaId: string) => {
+    setAiLoading(true);
+    try {
+      const response = await fetch(`http://localhost:3001/api/v1/patients/${abhaId}/ai-profile`);
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Deduplicate data to prevent duplicate entries
+        const deduplicatedData = {
+          ...data.data,
+          medications: {
+            ...data.data.medications,
+            items: data.data.medications.items.filter((med: any, index: number, self: any[]) => 
+              index === self.findIndex((m: any) => 
+                m.medication_name === med.medication_name && 
+                m.dosage === med.dosage &&
+                m.frequency === med.frequency
+              )
+            )
+          },
+          labResults: {
+            ...data.data.labResults,
+            items: data.data.labResults.items.filter((lab: any, index: number, self: any[]) => 
+              index === self.findIndex((l: any) => 
+                l.test_name === lab.test_name && 
+                l.value === lab.value &&
+                l.unit === lab.unit
+              )
+            )
+          },
+          vitalSigns: {
+            ...data.data.vitalSigns,
+            items: data.data.vitalSigns.items.filter((vital: any, index: number, self: any[]) => 
+              index === self.findIndex((v: any) => 
+                v.vital_type === vital.vital_type && 
+                v.value === vital.value &&
+                v.unit === vital.unit
+              )
+            )
+          },
+          criticalAlerts: {
+            ...data.data.criticalAlerts,
+            items: data.data.criticalAlerts.items.filter((alert: any, index: number, self: any[]) => 
+              index === self.findIndex((a: any) => 
+                a.alert_type === alert.alert_type && 
+                a.message === alert.message
+              )
+            )
+          }
+        };
+        
+        // Update counts after deduplication
+        deduplicatedData.medications.count = deduplicatedData.medications.items.length;
+        deduplicatedData.medications.active = deduplicatedData.medications.items.filter((m: any) => m.is_active === 1).length;
+        deduplicatedData.labResults.count = deduplicatedData.labResults.items.length;
+        deduplicatedData.labResults.abnormal = deduplicatedData.labResults.items.filter((l: any) => l.status !== 'NORMAL').length;
+        deduplicatedData.vitalSigns.count = deduplicatedData.vitalSigns.items.length;
+        deduplicatedData.criticalAlerts.count = deduplicatedData.criticalAlerts.items.length;
+        deduplicatedData.criticalAlerts.highSeverity = deduplicatedData.criticalAlerts.items.filter((c: any) => c.severity === 'high').length;
+        
+        setAiProfile(deduplicatedData);
+      } else {
+        console.warn('AI profile not available');
+        setAiProfile(null);
+      }
+    } catch (error) {
+      console.warn('Error fetching AI profile:', error);
+      setAiProfile(null);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  // Helper functions for lab results styling (matching LabReportResult format)
+  const getStatusColor = (status: string) => {
+    if (status === 'HIGH') return 'bg-orange-100 text-orange-800 border-orange-200';
+    if (status === 'LOW') return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    return 'bg-green-100 text-green-800 border-green-200';
+  };
+
+  const getStatusIcon = (status: string) => {
+    if (status === 'NORMAL') return <CheckCircle className="h-4 w-4" />;
+    return <AlertTriangle className="h-4 w-4" />;
   };
   
 
@@ -250,11 +341,12 @@ const ABHALookup: React.FC = () => {
             
             <CardContent className="pt-6">
               <Tabs defaultValue="critical" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-5">
                   <TabsTrigger value="critical">Critical Info</TabsTrigger>
                   <TabsTrigger value="medications">Medications</TabsTrigger>
                   <TabsTrigger value="documents">Recent Docs</TabsTrigger>
                   <TabsTrigger value="contact">Emergency Contact</TabsTrigger>
+                  <TabsTrigger value="ai-insights">AI Insights</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="critical" className="space-y-4 mt-6">
@@ -378,6 +470,290 @@ const ABHALookup: React.FC = () => {
                       </a>
                     </p>
                   </div>
+                </TabsContent>
+                
+                <TabsContent value="ai-insights" className="mt-6">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <Brain className="h-4 w-4" />
+                    AI Processing Results
+                  </h4>
+                  
+                  {aiLoading ? (
+                    <div className="text-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+                      <p className="text-muted-foreground">Analyzing AI-extracted data...</p>
+                    </div>
+                  ) : aiProfile ? (
+                    <div className="space-y-4">
+                      {/* Summary Stats */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Pill className="h-4 w-4 text-blue-600" />
+                            <span className="font-semibold text-blue-800">Medications</span>
+                          </div>
+                          <p className="text-2xl font-bold text-blue-900">{aiProfile.medications.count}</p>
+                          <p className="text-sm text-blue-700">{aiProfile.medications.active} active</p>
+                        </div>
+                        
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Activity className="h-4 w-4 text-green-600" />
+                            <span className="font-semibold text-green-800">Lab Results</span>
+                          </div>
+                          <p className="text-2xl font-bold text-green-900">{aiProfile.labResults.count}</p>
+                          <p className="text-sm text-green-700">{aiProfile.labResults.abnormal} abnormal</p>
+                        </div>
+                        
+                        <div className="bg-purple-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <TrendingUp className="h-4 w-4 text-purple-600" />
+                            <span className="font-semibold text-purple-800">Vital Signs</span>
+                          </div>
+                          <p className="text-2xl font-bold text-purple-900">{aiProfile.vitalSigns.count}</p>
+                          <p className="text-sm text-purple-700">Latest readings</p>
+                        </div>
+                        
+                        <div className="bg-red-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <AlertTriangle className="h-4 w-4 text-red-600" />
+                            <span className="font-semibold text-red-800">Alerts</span>
+                          </div>
+                          <p className="text-2xl font-bold text-red-900">{aiProfile.criticalAlerts.count}</p>
+                          <p className="text-sm text-red-700">{aiProfile.criticalAlerts.highSeverity} high severity</p>
+                        </div>
+                      </div>
+                      
+                      {/* Nested Tabs for AI Data */}
+                      <Tabs defaultValue="medications" className="w-full">
+                        <TabsList className="grid w-full grid-cols-4">
+                          <TabsTrigger value="medications" className="flex items-center gap-2">
+                            <Pill className="h-3 w-3" />
+                            Medications
+                          </TabsTrigger>
+                          <TabsTrigger value="lab-results" className="flex items-center gap-2">
+                            <Activity className="h-3 w-3" />
+                            Lab Results
+                          </TabsTrigger>
+                          <TabsTrigger value="vital-signs" className="flex items-center gap-2">
+                            <TrendingUp className="h-3 w-3" />
+                            Vital Signs
+                          </TabsTrigger>
+                          <TabsTrigger value="alerts" className="flex items-center gap-2">
+                            <AlertTriangle className="h-3 w-3" />
+                            Alerts
+                          </TabsTrigger>
+                        </TabsList>
+                        
+                        {/* Medications Tab */}
+                        <TabsContent value="medications" className="mt-4">
+                          {aiProfile.medications.items.length > 0 ? (
+                            <div className="space-y-3">
+                              {aiProfile.medications.items.map((med: any, index: number) => (
+                                <div key={index} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                  <div className="flex justify-between items-start mb-3">
+                                    <span className="font-semibold text-blue-900 text-lg">{med.medication_name}</span>
+                                    <Badge variant="secondary" className="text-xs">
+                                      {med.dosage}
+                                    </Badge>
+                                  </div>
+                                  <div className="text-sm text-blue-700 space-y-2">
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div>
+                                        <span className="font-medium">Frequency:</span>
+                                        <p className="text-blue-800">{med.frequency}</p>
+                                      </div>
+                                      <div>
+                                        <span className="font-medium">Duration:</span>
+                                        <p className="text-blue-800">{med.duration}</p>
+                                      </div>
+                                    </div>
+                                    {med.instructions && (
+                                      <div>
+                                        <span className="font-medium">Instructions:</span>
+                                        <p className="text-blue-800">{med.instructions}</p>
+                                      </div>
+                                    )}
+                                    <div className="text-xs text-blue-600 mt-3 pt-2 border-t border-blue-200">
+                                      Prescribed: {new Date(med.prescribed_date).toLocaleDateString()}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8">
+                              <Pill className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                              <p className="text-muted-foreground">No medications extracted</p>
+                            </div>
+                          )}
+                        </TabsContent>
+                        
+                        {/* Lab Results Tab */}
+                        <TabsContent value="lab-results" className="mt-4">
+                          {aiProfile.labResults.items.length > 0 ? (
+                            <div className="space-y-6">
+                              {/* Patient Information Card */}
+                              <Card>
+                                <CardHeader>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <User className="h-5 w-5" />
+                                    Patient Information
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div>
+                                      <p className="text-sm text-muted-foreground">Patient</p>
+                                      <p className="font-medium">{profile?.patient.name || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-muted-foreground">Age/Gender</p>
+                                      <p className="font-medium">{profile?.patient.age || 'N/A'} Years, {profile?.patient.gender || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-muted-foreground">Sample ID</p>
+                                      <p className="font-medium text-blue-600">LAB-{Date.now()}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-muted-foreground">Report Date</p>
+                                      <p className="font-medium text-green-600">{new Date().toLocaleDateString()}</p>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+
+                              {/* Test Results Table */}
+                              <Card>
+                                <CardHeader>
+                                  <CardTitle>Test Results</CardTitle>
+                                  <CardDescription>AI extracted laboratory parameters</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                      <thead>
+                                        <tr className="border-b">
+                                          <th className="text-left py-3 px-4 font-semibold">Test</th>
+                                          <th className="text-left py-3 px-4 font-semibold">Value</th>
+                                          <th className="text-left py-3 px-4 font-semibold">Normal Range</th>
+                                          <th className="text-left py-3 px-4 font-semibold">Status</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {aiProfile.labResults.items.map((lab: any, index: number) => (
+                                          <tr key={index} className="border-b hover:bg-gray-50">
+                                            <td className="py-3 px-4 font-medium">{lab.test_name}</td>
+                                            <td className="py-3 px-4">{lab.value} {lab.unit}</td>
+                                            <td className="py-3 px-4 text-muted-foreground">{lab.normal_range}</td>
+                                            <td className="py-3 px-4">
+                                              <Badge 
+                                                className={`${getStatusColor(lab.status)} flex items-center gap-1 w-fit`}
+                                              >
+                                                {getStatusIcon(lab.status)}
+                                                {lab.status}
+                                              </Badge>
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </CardContent>
+                              </Card>
+
+                              {/* Summary Footer */}
+                              <Card>
+                                <CardContent className="p-4">
+                                  <div className="flex justify-between items-center">
+                                    <div className="flex gap-6">
+                                      <div className="text-center">
+                                        <div className="text-2xl font-bold text-red-600">0</div>
+                                        <div className="text-sm text-muted-foreground">Critical Values</div>
+                                      </div>
+                                      <div className="text-center">
+                                        <div className="text-2xl font-bold text-orange-600">{aiProfile.labResults.abnormal}</div>
+                                        <div className="text-sm text-muted-foreground">Abnormal Values</div>
+                                      </div>
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      Extracted: {new Date(aiProfile.labResults.items[0]?.created_at || Date.now()).toLocaleDateString()}
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          ) : (
+                            <div className="text-center py-8">
+                              <Activity className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                              <p className="text-muted-foreground">No lab results extracted</p>
+                            </div>
+                          )}
+                        </TabsContent>
+                        
+                        {/* Vital Signs Tab */}
+                        <TabsContent value="vital-signs" className="mt-4">
+                          {aiProfile.vitalSigns.items.length > 0 ? (
+                            <div className="space-y-3">
+                              {aiProfile.vitalSigns.items.map((vital: any, index: number) => (
+                                <div key={index} className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                                  <div className="flex justify-between items-start mb-3">
+                                    <span className="font-semibold text-purple-900 text-lg">{vital.vital_type}</span>
+                                    <Badge variant="secondary" className="text-lg font-semibold">
+                                      {vital.value} {vital.unit}
+                                    </Badge>
+                                  </div>
+                                  <div className="text-xs text-purple-600 mt-3 pt-2 border-t border-purple-200">
+                                    Recorded: {new Date(vital.created_at).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8">
+                              <TrendingUp className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                              <p className="text-muted-foreground">No vital signs extracted</p>
+                            </div>
+                          )}
+                        </TabsContent>
+                        
+                        {/* Alerts Tab */}
+                        <TabsContent value="alerts" className="mt-4">
+                          {aiProfile.criticalAlerts.items.length > 0 ? (
+                            <div className="space-y-3">
+                              {aiProfile.criticalAlerts.items.map((alert: any, index: number) => (
+                                <div key={index} className="p-4 bg-red-50 rounded-lg border border-red-200">
+                                  <div className="flex justify-between items-start mb-3">
+                                    <span className="font-semibold text-red-900 text-lg">{alert.alert_type}</span>
+                                    <Badge variant="destructive">
+                                      {alert.severity}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-sm text-red-700 mb-3 leading-relaxed">{alert.message}</p>
+                                  <div className="text-xs text-red-600 mt-3 pt-2 border-t border-red-200">
+                                    Generated: {new Date(alert.created_at).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8">
+                              <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                              <p className="text-muted-foreground">No critical alerts generated</p>
+                            </div>
+                          )}
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Brain className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                      <p className="text-muted-foreground">No AI processing results available</p>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        AI insights will appear here when documents are processed
+                      </p>
+                    </div>
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>

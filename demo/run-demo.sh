@@ -187,6 +187,32 @@ if [ "$NEEDS_SEED" = true ]; then
     echo -e "${GREEN}✅ Demo data added successfully${NC}"
 fi
 
+# Setup profile integration tables (Phase 1) - only if needed
+PROFILE_TABLES_EXIST=false
+if sqlite3 "$DB_FILE" "SELECT name FROM sqlite_master WHERE type='table' AND name='user_medications';" > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ Profile integration tables already exist${NC}"
+    PROFILE_TABLES_EXIST=true
+else
+    echo -e "${BLUE}Setting up profile integration tables...${NC}"
+    npx ts-node src/scripts/setupProfileTables.ts || {
+        echo -e "${RED}❌ Profile tables setup failed${NC}"
+        exit 1
+    }
+    echo -e "${GREEN}✅ Profile integration tables ready${NC}"
+fi
+
+# Migrate existing data to profile tables (Phase 2) - only if needed
+if [ "$PROFILE_TABLES_EXIST" = false ] || [ "$NEEDS_SEED" = true ]; then
+    echo -e "${BLUE}Migrating existing document data to profile tabs...${NC}"
+    npx ts-node src/scripts/migrateExistingData.ts || {
+        echo -e "${RED}❌ Data migration failed${NC}"
+        exit 1
+    }
+    echo -e "${GREEN}✅ Profile data migration completed${NC}"
+else
+    echo -e "${GREEN}✅ Profile data already migrated${NC}"
+fi
+
 # Create .env if missing
 if [ ! -f ".env" ]; then
     echo -e "${YELLOW}Creating backend .env file...${NC}"
@@ -268,6 +294,7 @@ echo -e "${BLUE}Demo Features:${NC}"
 echo "  • ABHA ID Lookup: http://localhost:$FRONTEND_PORT/demo/abha-lookup"
 echo "  • Document Processor: http://localhost:$FRONTEND_PORT/processor"
 echo "  • Analytics Dashboard: http://localhost:$FRONTEND_PORT/demo/analytics"
+echo "  • 🆕 AI Profile Integration: Enhanced user profiles with AI-extracted data"
 echo ""
 echo -e "${BLUE}Test ABHA IDs:${NC}"
 echo "  • 1234-5678-9012-34 (Ramesh Kumar - Diabetes)"
@@ -275,6 +302,12 @@ echo "  • 9876-5432-1098-76 (Priya Sharma - Asthma)"
 echo "  • 4567-8901-2345-67 (Suresh Patel - Heart Disease)"
 echo "  • 1111-2222-3333-44 (Ashok Gupta - Hypertension)"
 echo "  • 5555-6666-7777-88 (Meera Singh - Thyroid)"
+echo ""
+echo -e "${BLUE}Profile Data Available:${NC}"
+echo "  • Active Medications: Extracted from prescriptions"
+echo "  • Lab Results: Extracted from lab reports"
+echo "  • Critical Alerts: AI-detected abnormal values"
+echo "  • Vital Signs: Extracted from ECG reports"
 echo ""
 echo -e "${YELLOW}Press Ctrl+C to stop all servers${NC}"
 echo "========================================"

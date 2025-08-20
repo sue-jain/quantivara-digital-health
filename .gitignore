@@ -41,3 +41,8 @@ coverage/
 *.coverage
 uploads/
 backend/eng.traineddata
+
+# SQLite database files
+backend/data/*.db
+backend/data/*.db-wal
+backend/data/*.db-shm

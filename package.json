@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "demo": "./demo/run-demo.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

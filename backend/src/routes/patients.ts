@@ -397,4 +397,228 @@ router.get('/:abhaId/timeline', asyncHandler(async (req: Request, res: Response)
   }
 }));
 
+// NEW: Get AI processing results for patient profile
+router.get('/:abhaId/ai-profile', asyncHandler(async (req: Request, res: Response) => {
+  const startTime = Date.now();
+  const { abhaId } = req.params;
+  
+  try {
+    // Verify patient exists
+    const patientExists = db.prepare('SELECT id FROM users WHERE abha_id = ? AND role = ?').get(abhaId, 'patient') as any;
+    if (!patientExists) {
+      throw new AppError('Patient not found with this ABHA ID', 404, 'PATIENT_NOT_FOUND');
+    }
+
+    // Get active medications
+    const medicationsQuery = `
+      SELECT 
+        id, medication_name, dosage, frequency, duration, instructions, 
+        prescribed_date, source_document_id, created_at
+      FROM user_medications 
+      WHERE abha_id = ? AND is_active = 1
+      ORDER BY created_at DESC
+    `;
+    const medications = db.prepare(medicationsQuery).all(abhaId) as any[];
+
+    // Get lab results
+    const labResultsQuery = `
+      SELECT 
+        id, test_name, value, unit, normal_range, 
+        status, source_document_id, created_at
+      FROM user_lab_results 
+      WHERE abha_id = ?
+      ORDER BY created_at DESC
+    `;
+    const labResults = db.prepare(labResultsQuery).all(abhaId) as any[];
+
+    // Get vital signs
+    const vitalSignsQuery = `
+      SELECT 
+        id, vital_type, value, unit, source_document_id, created_at
+      FROM user_vital_signs 
+      WHERE abha_id = ?
+      ORDER BY created_at DESC
+    `;
+    const vitalSigns = db.prepare(vitalSignsQuery).all(abhaId) as any[];
+
+    // Get critical alerts
+    const criticalAlertsQuery = `
+      SELECT 
+        id, alert_type, message, severity, source_document_id, created_at
+      FROM user_critical_alerts 
+      WHERE abha_id = ?
+      ORDER BY created_at DESC
+    `;
+    const criticalAlerts = db.prepare(criticalAlertsQuery).all(abhaId) as any[];
+
+    // Get health trends
+    const healthTrendsQuery = `
+      SELECT 
+        id, trend_type, value, unit, measurement_date, trend_direction, 
+        confidence_score, source_document_ids, created_at
+      FROM user_health_trends 
+      WHERE abha_id = ?
+      ORDER BY created_at DESC
+    `;
+    const healthTrends = db.prepare(healthTrendsQuery).all(abhaId) as any[];
+
+    const aiProfileData = {
+      abhaId,
+      medications: {
+        count: medications.length,
+        active: medications.filter(m => m.is_active === 1).length,
+        items: medications
+      },
+      labResults: {
+        count: labResults.length,
+        abnormal: labResults.filter(l => l.status !== 'NORMAL').length,
+        items: labResults
+      },
+      vitalSigns: {
+        count: vitalSigns.length,
+        items: vitalSigns
+      },
+      criticalAlerts: {
+        count: criticalAlerts.length,
+        highSeverity: criticalAlerts.filter(c => c.severity === 'high').length,
+        items: criticalAlerts
+      },
+      healthTrends: {
+        count: healthTrends.length,
+        items: healthTrends
+      },
+      summary: {
+        totalAIDataPoints: medications.length + labResults.length + vitalSigns.length + criticalAlerts.length + healthTrends.length,
+        lastUpdated: Math.max(
+          ...medications.map(m => new Date(m.created_at).getTime()),
+          ...labResults.map(l => new Date(l.created_at).getTime()),
+          ...vitalSigns.map(v => new Date(v.created_at).getTime()),
+          ...criticalAlerts.map(c => new Date(c.created_at).getTime()),
+          ...healthTrends.map(h => new Date(h.created_at).getTime())
+        )
+      }
+    };
+
+    performanceLogger.info({
+      operation: 'ai_profile_lookup',
+      duration: Date.now() - startTime,
+      success: true,
+      abhaId,
+      dataPoints: aiProfileData.summary.totalAIDataPoints
+    });
+
+    res.json({
+      success: true,
+      message: 'AI processing results retrieved successfully',
+      data: aiProfileData
+    });
+    
+  } catch (error) {
+    performanceLogger.info({
+      operation: 'ai_profile_lookup',
+      duration: Date.now() - startTime,
+      success: false,
+      abhaId
+    });
+    throw error;
+  }
+}));
+
+// NEW: Get specific AI data type for patient
+router.get('/:abhaId/ai-profile/:dataType', asyncHandler(async (req: Request, res: Response) => {
+  const startTime = Date.now();
+  const { abhaId, dataType } = req.params;
+  
+  try {
+    // Verify patient exists
+    const patientExists = db.prepare('SELECT id FROM users WHERE abha_id = ? AND role = ?').get(abhaId, 'patient') as any;
+    if (!patientExists) {
+      throw new AppError('Patient not found with this ABHA ID', 404, 'PATIENT_NOT_FOUND');
+    }
+
+    let data;
+    let count = 0;
+
+    switch (dataType) {
+      case 'medications':
+        data = db.prepare(`
+          SELECT * FROM user_medications 
+          WHERE abha_id = ? AND is_active = 1 
+          ORDER BY created_at DESC
+        `).all(abhaId) as any[];
+        count = data.length;
+        break;
+
+      case 'lab-results':
+        data = db.prepare(`
+          SELECT * FROM user_lab_results 
+          WHERE abha_id = ? 
+          ORDER BY created_at DESC
+        `).all(abhaId) as any[];
+        count = data.length;
+        break;
+
+      case 'vital-signs':
+        data = db.prepare(`
+          SELECT * FROM user_vital_signs 
+          WHERE abha_id = ? 
+          ORDER BY created_at DESC
+        `).all(abhaId) as any[];
+        count = data.length;
+        break;
+
+      case 'critical-alerts':
+        data = db.prepare(`
+          SELECT * FROM user_critical_alerts 
+          WHERE abha_id = ? 
+          ORDER BY created_at DESC
+        `).all(abhaId) as any[];
+        count = data.length;
+        break;
+
+      case 'health-trends':
+        data = db.prepare(`
+          SELECT * FROM user_health_trends 
+          WHERE abha_id = ? 
+          ORDER BY created_at DESC
+        `).all(abhaId) as any[];
+        count = data.length;
+        break;
+
+      default:
+        throw new AppError(`Invalid data type: ${dataType}`, 400, 'INVALID_DATA_TYPE');
+    }
+
+    performanceLogger.info({
+      operation: 'ai_profile_data_lookup',
+      duration: Date.now() - startTime,
+      success: true,
+      abhaId,
+      dataType,
+      count
+    });
+
+    res.json({
+      success: true,
+      message: `${dataType} data retrieved successfully`,
+      data: {
+        abhaId,
+        dataType,
+        count,
+        items: data
+      }
+    });
+    
+  } catch (error) {
+    performanceLogger.info({
+      operation: 'ai_profile_data_lookup',
+      duration: Date.now() - startTime,
+      success: false,
+      abhaId,
+      dataType
+    });
+    throw error;
+  }
+}));
+
 export default router;
