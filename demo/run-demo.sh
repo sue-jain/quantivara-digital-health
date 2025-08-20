@@ -189,7 +189,9 @@ fi
 
 # Setup profile integration tables (Phase 1) - only if needed
 PROFILE_TABLES_EXIST=false
-if sqlite3 "$DB_FILE" "SELECT name FROM sqlite_master WHERE type='table' AND name='user_medications';" > /dev/null 2>&1; then
+PROFILE_TABLE_COUNT=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('user_medications', 'user_lab_results', 'user_critical_alerts', 'user_vital_signs', 'user_health_trends');" 2>/dev/null || echo "0")
+
+if [ "$PROFILE_TABLE_COUNT" -eq "5" ]; then
     echo -e "${GREEN}✅ Profile integration tables already exist${NC}"
     PROFILE_TABLES_EXIST=true
 else
@@ -199,18 +201,52 @@ else
         exit 1
     }
     echo -e "${GREEN}✅ Profile integration tables ready${NC}"
+    PROFILE_TABLES_EXIST=false  # Just created, so migration is needed
 fi
 
-# Migrate existing data to profile tables (Phase 2) - only if needed
-if [ "$PROFILE_TABLES_EXIST" = false ] || [ "$NEEDS_SEED" = true ]; then
-    echo -e "${BLUE}Migrating existing document data to profile tabs...${NC}"
+# Migrate existing data to profile tables (Phase 2) - smart migration logic
+SHOULD_MIGRATE=false
+
+if [ "$PROFILE_TABLES_EXIST" = false ]; then
+    # Tables were just created, definitely need migration
+    echo -e "${BLUE}Profile tables just created. Migrating existing document data...${NC}"
+    SHOULD_MIGRATE=true
+else
+    # Tables already exist - check if migration is needed
+    echo -e "${BLUE}Checking if profile data migration is needed...${NC}"
+    
+    # Count documents vs migrated profile data
+    DOCUMENT_COUNT=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM medical_documents WHERE extracted_data IS NOT NULL AND abha_id IS NOT NULL;" 2>/dev/null || echo "0")
+    MEDICATION_COUNT=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM user_medications;" 2>/dev/null || echo "0")
+    LAB_RESULT_COUNT=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM user_lab_results;" 2>/dev/null || echo "0")
+    
+    echo -e "${YELLOW}📊 Migration Status Check:${NC}"
+    echo -e "${YELLOW}   Documents with extracted data: $DOCUMENT_COUNT${NC}"
+    echo -e "${YELLOW}   Migrated medications: $MEDICATION_COUNT${NC}"
+    echo -e "${YELLOW}   Migrated lab results: $LAB_RESULT_COUNT${NC}"
+    
+    # Decide if migration is needed
+    if [ "$DOCUMENT_COUNT" -gt "0" ] && [ "$MEDICATION_COUNT" -eq "0" ] && [ "$LAB_RESULT_COUNT" -eq "0" ]; then
+        echo -e "${BLUE}Found documents but no migrated profile data. Migration needed...${NC}"
+        SHOULD_MIGRATE=true
+    elif [ "$NEEDS_SEED" = true ] && [ "$DOCUMENT_COUNT" -eq "0" ]; then
+        echo -e "${BLUE}Fresh demo setup detected. Running migration to populate sample data...${NC}"
+        SHOULD_MIGRATE=true
+    else
+        echo -e "${GREEN}✅ Profile data appears to be already migrated${NC}"
+        SHOULD_MIGRATE=false
+    fi
+fi
+
+# Run migration if needed
+if [ "$SHOULD_MIGRATE" = true ]; then
     npx ts-node src/scripts/migrateExistingData.ts || {
         echo -e "${RED}❌ Data migration failed${NC}"
         exit 1
     }
     echo -e "${GREEN}✅ Profile data migration completed${NC}"
 else
-    echo -e "${GREEN}✅ Profile data already migrated${NC}"
+    echo -e "${GREEN}✅ Profile data migration skipped (already up to date)${NC}"
 fi
 
 # Create .env if missing

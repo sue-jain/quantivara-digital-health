@@ -205,17 +205,34 @@ function extractLabResults(text: string): Record<string, any> {
 function extractMedications(text: string): Array<{ name: string; dosage?: string; frequency?: string }> {
   const medications: Array<{ name: string; dosage?: string; frequency?: string }> = [];
   
-  // Common medication pattern
-  const medPattern = /(?:Tab|Cap|Syp|Inj)\.?\s+([A-Za-z\s]+?)\s+([\d.]+\s*(?:mg|ml|gm)?)\s*(?:-\s*)?([A-Za-z0-9\s-]*?)(?:\n|$)/gi;
-  let match;
+  // Enhanced medication pattern to handle various formats
+  // Pattern 1: Tab. Name Dosage (same line)
+  const medPattern1 = /(?:Tab|Cap|Syp|Inj)\.?\s+([A-Za-z\s+]+?)\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU))\b/gi;
   
-  while ((match = medPattern.exec(text)) !== null) {
-    medications.push({
-      name: match[1].trim(),
-      dosage: match[2].trim(),
-      frequency: match[3].trim() || undefined
-    });
-  }
+  // Pattern 2: Tab. Name + Number + Unit (for cases like "Vitamin D3 1000 IU")
+  const medPattern2 = /(?:Tab|Cap|Syp|Inj)\.?\s+([A-Za-z\s+\d]+?)\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU))/gi;
+  
+  // Pattern 3: Just numbered medications
+  const medPattern3 = /\d+\.\s*(?:Tab|Cap|Syp|Inj)\.?\s+([A-Za-z\s+\d]+?)\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU))/gi;
+  
+  const patterns = [medPattern1, medPattern2, medPattern3];
+  
+  patterns.forEach(pattern => {
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const name = match[1].trim();
+      const dosage = match[2].trim();
+      
+      // Avoid duplicates
+      if (!medications.some(med => med.name.toLowerCase() === name.toLowerCase())) {
+        medications.push({
+          name: name,
+          dosage: dosage,
+          frequency: 'As prescribed'
+        });
+      }
+    }
+  });
   
   return medications;
 }
