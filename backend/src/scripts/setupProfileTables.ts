@@ -94,6 +94,23 @@ const setupProfileTables = async () => {
       );
     `);
 
+    // 6. User Diagnoses Table - for AI-extracted diagnosis data
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS user_diagnoses (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        user_id TEXT REFERENCES users(id),
+        abha_id TEXT NOT NULL,
+        diagnosis_name TEXT NOT NULL,
+        diagnosis_date TEXT,
+        doctor_name TEXT,
+        status TEXT DEFAULT 'ACTIVE', -- ACTIVE, RESOLVED, CHRONIC
+        severity TEXT, -- MILD, MODERATE, SEVERE, CRITICAL
+        source_document_id TEXT,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+      );
+    `);
+
     // Create indexes for performance
     db.exec(`
       CREATE INDEX IF NOT EXISTS idx_user_medications_abha_id ON user_medications(abha_id);
@@ -106,6 +123,8 @@ const setupProfileTables = async () => {
       CREATE INDEX IF NOT EXISTS idx_user_critical_alerts_resolved ON user_critical_alerts(is_resolved);
       CREATE INDEX IF NOT EXISTS idx_user_health_trends_abha_id ON user_health_trends(abha_id);
       CREATE INDEX IF NOT EXISTS idx_user_health_trends_type ON user_health_trends(trend_type);
+      CREATE INDEX IF NOT EXISTS idx_user_diagnoses_abha_id ON user_diagnoses(abha_id);
+      CREATE INDEX IF NOT EXISTS idx_user_diagnoses_status ON user_diagnoses(status);
     `);
 
     logger.info('✅ Profile integration tables created successfully!');
@@ -115,6 +134,7 @@ const setupProfileTables = async () => {
     logger.info('   - user_vital_signs (for AI-extracted vital signs)');
     logger.info('   - user_critical_alerts (for AI-detected critical values)');
     logger.info('   - user_health_trends (for aggregated health data)');
+    logger.info('   - user_diagnoses (for AI-extracted diagnosis data)');
     logger.info('🎯 Ready for Phase 2: Profile Population Logic');
 
   } catch (error) {

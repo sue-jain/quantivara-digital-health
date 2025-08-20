@@ -101,11 +101,30 @@ CREATE TABLE IF NOT EXISTS revenue_events (
     FOREIGN KEY (provider_id) REFERENCES healthcare_providers(id)
 );
 
+-- User Diagnoses (AI Profile Integration)
+CREATE TABLE IF NOT EXISTS user_diagnoses (
+    id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+    user_id TEXT REFERENCES users(id),
+    abha_id TEXT NOT NULL,
+    diagnosis_name TEXT NOT NULL,
+    diagnosis_date TEXT,
+    doctor_name TEXT,
+    status TEXT DEFAULT 'ACTIVE', -- ACTIVE, RESOLVED, CHRONIC
+    severity TEXT, -- MILD, MODERATE, SEVERE, CRITICAL
+    source_document_id TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+);
+
 -- Performance Indexes for Users Table
 CREATE INDEX IF NOT EXISTS idx_users_name_dob ON users(first_name, last_name, date_of_birth);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_users_abha_id ON users(abha_id);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+-- Indexes for User Diagnoses
+CREATE INDEX IF NOT EXISTS idx_user_diagnoses_abha_id ON user_diagnoses(abha_id);
+CREATE INDEX IF NOT EXISTS idx_user_diagnoses_status ON user_diagnoses(status);
 
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_documents_patient ON medical_documents(patient_id);
