@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Activity, FileText, Users, BarChart3, Settings, ArrowRight, Zap } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Activity, FileText, Users, BarChart3, Settings, ArrowRight, Zap, Home } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import DemoControlPanel from '@/components/demo/DemoControlPanel';
 
 const DemoHub: React.FC = () => {
+  const navigate = useNavigate();
   const demoFeatures = [
     {
       title: 'ABHA ID Lookup',
@@ -18,12 +19,28 @@ const DemoHub: React.FC = () => {
       color: 'from-blue-500 to-cyan-500',
     },
     {
+      title: 'Patient Lookup',
+      description: 'Find patient ABHA ID using name and date of birth',
+      icon: <Users className="h-6 w-6" />,
+      link: '/demo/patient-lookup',
+      badge: 'Interactive',
+      color: 'from-indigo-500 to-purple-500',
+    },
+    {
       title: 'Document Processing',
       description: 'AI-powered medical document extraction with 94%+ accuracy',
       icon: <FileText className="h-6 w-6" />,
       link: '/processor',
       badge: 'Interactive',
       color: 'from-purple-500 to-pink-500',
+    },
+    {
+      title: 'Voice Patient Lookup',
+      description: 'Voice-activated patient search and profile opening',
+      icon: <Users className="h-6 w-6" />,
+      link: '/demo/voice-lookup',
+      badge: 'New Feature',
+      color: 'from-orange-500 to-red-500',
     },
     {
       title: 'Analytics Dashboard',
@@ -39,10 +56,22 @@ const DemoHub: React.FC = () => {
     <div className="container mx-auto p-6 max-w-7xl">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">Quantivara Demo Hub</h1>
-        <p className="text-lg text-muted-foreground">
-          Experience the future of Indian healthcare digitization
-        </p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-4xl font-bold mb-4">Quantivara Demo Hub</h1>
+            <p className="text-lg text-muted-foreground">
+              Experience the future of Indian healthcare digitization
+            </p>
+          </div>
+          <Button
+            onClick={() => navigate('/')}
+            variant="outline"
+            className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300"
+          >
+            <Home className="h-4 w-4" />
+            Back to Home
+          </Button>
+        </div>
       </div>
 
       {/* Demo Alert */}

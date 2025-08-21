@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Loader2, AlertCircle, CheckCircle, User, Calendar, Phone, Mail, ExternalLink, Home } from 'lucide-react';
+import { Search, Loader2, AlertCircle, CheckCircle, User, Calendar, Phone, Mail, ExternalLink, Home, Grid3X3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -91,14 +91,24 @@ const PatientLookup: React.FC = () => {
               Find patient ABHA ID using name and date of birth
             </p>
           </div>
-          <Button
-            onClick={() => navigate('/')}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Home className="h-4 w-4" />
-            Back to Home
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => navigate('/')}
+              variant="outline"
+              className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300"
+            >
+              <Home className="h-4 w-4" />
+              Back to Home
+            </Button>
+            <Button
+              onClick={() => navigate('/demo')}
+              variant="outline"
+              className="flex items-center gap-2 hover:bg-green-50 hover:border-green-300"
+            >
+              <Grid3X3 className="h-4 w-4" />
+              Back to Demo Hub
+            </Button>
+          </div>
         </div>
       </div>
 

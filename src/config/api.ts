@@ -41,6 +41,7 @@ export const API_ENDPOINTS = {
     profile: (abhaId: string) => `/patients/${abhaId}/profile`,
     emergencyProfile: (abhaId: string) => `/patients/${abhaId}/emergency-profile`,
     timeline: (abhaId: string) => `/patients/${abhaId}/timeline`,
+    addMedication: (abhaId: string) => `/patients/${abhaId}/medications`,
   },
   
   // Document endpoints

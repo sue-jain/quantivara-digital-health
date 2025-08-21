@@ -15,6 +15,16 @@ export interface EmergencyContact {
   phone: string;
 }
 
+export interface Medication {
+  name: string;
+  dosage: string;
+  frequency: string;
+  instructions?: string;
+  startDate?: string;
+  endDate?: string;
+  prescribedBy?: string;
+}
+
 export interface PatientProfile {
   abhaId: string;
   personalInfo: {
@@ -212,6 +222,27 @@ class PatientService {
       month: 'long',
       day: 'numeric'
     });
+  }
+
+  // NEW: Add medication to patient profile
+  async addMedicationToPatient(abhaId: string, medication: Medication): Promise<{ success: boolean; message: string; medication: Medication }> {
+    const startTime = Date.now();
+    
+    try {
+      const response = await apiClient<{ success: boolean; message: string; medication: Medication }>(
+        API_ENDPOINTS.patients.addMedication(abhaId),
+        {
+          method: 'POST',
+          body: JSON.stringify(medication)
+        }
+      );
+      
+      console.log(`Medication added to patient ${abhaId} in ${Date.now() - startTime}ms`);
+      return response.data;
+    } catch (error) {
+      console.error('Error adding medication to patient:', error);
+      throw error;
+    }
   }
 }
 
