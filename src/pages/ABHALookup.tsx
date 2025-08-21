@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Search, Loader2, AlertCircle, CheckCircle, User, Phone, Calendar, Heart, Pill, FileText, Clock, Home, Brain, Activity, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Search, Loader2, AlertCircle, CheckCircle, User, Phone, Calendar, Heart, Pill, FileText, Clock, Home, Brain, Activity, TrendingUp, AlertTriangle, Grid3X3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import patientService, { EmergencyProfile } from '@/services/patients';
+import { demoMedicationsStore } from './VoicePatientLookupDemo';
 
 const ABHALookup: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -181,20 +182,20 @@ const ABHALookup: React.FC = () => {
           </div>
           <div className="flex gap-2">
             <Button
-              onClick={() => navigate('/demo/patient-lookup')}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <User className="h-4 w-4" />
-              Back to Patient Lookup
-            </Button>
-            <Button
               onClick={() => navigate('/')}
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300"
             >
               <Home className="h-4 w-4" />
               Back to Home
+            </Button>
+            <Button
+              onClick={() => navigate('/demo')}
+              variant="outline"
+              className="flex items-center gap-2 hover:bg-green-50 hover:border-green-300"
+            >
+              <Grid3X3 className="h-4 w-4" />
+              Back to Demo Hub
             </Button>
           </div>
         </div>
@@ -394,18 +395,106 @@ const ABHALookup: React.FC = () => {
                     <Pill className="h-4 w-4" />
                     Current Medications
                   </h4>
-                  {profile.criticalInfo.currentMedications.length > 0 ? (
-                    <div className="space-y-2">
-                      {profile.criticalInfo.currentMedications.map((med, index) => (
-                        <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                          <Pill className="h-4 w-4 text-gray-600" />
-                          <span>{med}</span>
+                  
+                  {/* Demo store medications (newly added via voice commands) */}
+                  {(() => {
+                    const demoMeds = demoMedicationsStore.get(abhaId) || [];
+                    const cleanedAbhaId = patientService.cleanAbhaId(abhaId);
+                    const formattedAbhaId = patientService.formatAbhaId(abhaId);
+                    const allDemoKeys = Array.from(demoMedicationsStore.keys());
+                    
+                    console.log('🔍 Debug medication lookup:', {
+                      abhaId,
+                      cleanedAbhaId,
+                      formattedAbhaId,
+                      allDemoKeys,
+                      demoMeds,
+                      storeSize: demoMedicationsStore.size
+                    });
+                    
+                    // Try multiple ABHA ID formats to find medications
+                    let foundMeds = demoMeds;
+                    if (foundMeds.length === 0) {
+                      foundMeds = demoMedicationsStore.get(cleanedAbhaId) || [];
+                    }
+                    if (foundMeds.length === 0) {
+                      foundMeds = demoMedicationsStore.get(formattedAbhaId) || [];
+                    }
+                    
+                    return foundMeds.length > 0 ? (
+                      <div className="mb-6">
+                        <h5 className="font-medium text-green-700 mb-3 flex items-center gap-2">
+                          💊 Current Medications ({foundMeds.length})
+                        </h5>
+                        <div className="space-y-3">
+                          {foundMeds.map((med, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                              <div className="flex items-center gap-3">
+                                <Pill className="h-4 w-4 text-green-600" />
+                                <div>
+                                  <p className="font-medium text-green-900">{med.name} {med.dosage}</p>
+                                  <p className="text-sm text-green-700">{med.frequency}</p>
+                                </div>
+                              </div>
+                              <div className="text-right text-xs text-green-600">
+                                <p>Added: {med.addedAt}</p>
+                                <p>By: {med.addedBy}</p>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      </div>
+                    ) : null;
+                  })()}
+                  
+                  {/* Original profile medications */}
+                  {profile.criticalInfo.currentMedications.length > 0 ? (
+                    <div>
+                      <h5 className="font-medium text-blue-700 mb-3 flex items-center gap-2">
+                        📋 Profile Medications
+                      </h5>
+                      <div className="space-y-2">
+                        {profile.criticalInfo.currentMedications.map((med, index) => (
+                          <div key={index} className="flex items-center gap-2 p-2 bg-blue-50 rounded border border-blue-200">
+                            <Pill className="h-4 w-4 text-blue-600" />
+                            <span className="text-blue-900">{med}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ) : (
-                    <p className="text-muted-foreground">No current medications</p>
+                    <p className="text-muted-foreground">No profile medications on file</p>
                   )}
+                  
+                  {/* Summary */}
+                  {(() => {
+                    const demoMeds = demoMedicationsStore.get(abhaId) || [];
+                    const cleanedAbhaId = patientService.cleanAbhaId(abhaId);
+                    const formattedAbhaId = patientService.formatAbhaId(abhaId);
+                    
+                    // Try multiple ABHA ID formats to find medications
+                    let foundMeds = demoMeds;
+                    if (foundMeds.length === 0) {
+                      foundMeds = demoMedicationsStore.get(cleanedAbhaId) || [];
+                    }
+                    if (foundMeds.length === 0) {
+                      foundMeds = demoMedicationsStore.get(formattedAbhaId) || [];
+                    }
+                    
+                    const totalMeds = foundMeds.length + profile.criticalInfo.currentMedications.length;
+                    return totalMeds > 0 ? (
+                      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <p className="text-sm text-gray-600">
+                          Total medications: <span className="font-medium">{totalMeds}</span>
+                          {foundMeds.length > 0 && (
+                            <span className="ml-2 text-green-600">
+                              (including {foundMeds.length} added via voice commands)
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    ) : null;
+                  })()}
                 </TabsContent>
                 
                 <TabsContent value="documents" className="mt-6">

@@ -18,6 +18,7 @@ import ABHALookup from "./pages/ABHALookup";
 import PatientLookup from "./pages/PatientLookup";
 import AnalyticsDashboard from "./pages/AnalyticsDashboard";
 import DemoHub from "./pages/DemoHub";
+import VoicePatientLookupDemo from "./pages/VoicePatientLookupDemo";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = () => {
             <Route path="/demo/abha-lookup" element={<ABHALookup />} />
             <Route path="/demo/patient-lookup" element={<PatientLookup />} />
             <Route path="/demo/analytics" element={<AnalyticsDashboard />} />
+            <Route path="/demo/voice-lookup" element={<VoicePatientLookupDemo />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
