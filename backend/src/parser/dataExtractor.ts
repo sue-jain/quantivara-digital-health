@@ -4,10 +4,12 @@ import { logger } from '../utils/logger';
 const PATTERNS = {
   // Patient information patterns
   patientName: [
-    /Patient\s*Name\s*[:]\s*([A-Za-z\s]+?)(?:\n|$)/i,
-    /Name\s*[:]\s*([A-Za-z\s]+?)(?:\n|$)/i,
-    /Patient\s*[:]\s*([A-Za-z\s]+?)(?:\n|$)/i,
-    /(?:Mr\.|Mrs\.|Ms\.|Dr\.)\s+([A-Za-z\s]+?)(?:\n|,|$)/i
+    /Patient\s*Name\s*[:]\s*\n+\s*([A-Za-z\s]+?)(?:\n|Age|Date|$)/i,
+    /Patient\s*Name\s*[:]\s*([A-Za-z\s]+?)(?:\n|Age|Date|$)/i,
+    /Name\s*[:]\s*\n+\s*([A-Za-z\s]+?)(?:\n|Age|Date|$)/i,
+    /Name\s*[:]\s*([A-Za-z\s]+?)(?:\n|Age|Date|$)/i,
+    /Patient\s*[:]\s*([A-Za-z\s]+?)(?:\n|Age|$)/i,
+    /(?:Mr\.|Mrs\.|Ms\.|Dr\.)\s+([A-Za-z\s]+?)(?:\n|,|Age|$)/i
   ],
   
   age: [
@@ -42,11 +44,12 @@ const PATTERNS = {
   },
   
   // Prescription patterns
-  medications: /(?:Rx|Prescription|Medicines?)[\s\S]*?(?=\n\n|$)/i,
+  medications: /(?:Rx|Prescription|Medicines?|Medications?)[\s\S]*?(?=\n\n|Instructions|Follow-up|Medical\s+Advice|$)/i,
   diagnosis: /(?:Diagnosis|Clinical\s*Diagnosis|Provisional\s*Diagnosis)\s*[:]\s*([^\n]+)/i,
   doctorName: [
-    /Doctor\s*[:]\s*Dr\.\s*([A-Za-z\s,()]+?)(?:\n|$)/i,
-    /Dr\.\s*([A-Za-z\s,()]+?)(?:\n|$)/i
+    /Doctor\s*[:]\s*\n*\s*Dr\.\s*([A-Za-z\s,()]+?)(?:\n|Reg|,\s*(?:MD|MBBS)|$)/i,
+    /Doctor\s*[:]\s*\n*\s*([A-Za-z\s,()]+?)(?:\n|Reg|,\s*(?:MD|MBBS)|$)/i,
+    /Dr\.\s*([A-Za-z\s,()]+?)(?:\n|Reg|,\s*(?:MD|MBBS)|$)/i
   ],
 };
 
@@ -375,7 +378,12 @@ function extractMedications(text: string): Array<{ name: string; dosage?: string
     }
   }
   
-  return medications;
+  // Remove duplicates based on medication name
+  const uniqueMeds = medications.filter((med, index, self) =>
+    index === self.findIndex((m) => m.name.toLowerCase() === med.name.toLowerCase())
+  );
+  
+  return uniqueMeds;
 }
 
 function extractFrequencyFromLines(lines: string[], startIndex: number, endIndex: number): string | null {
@@ -454,6 +462,7 @@ function extractDiagnosis(text: string): string[] {
 }
 
 function extractDoctorInfo(text: string): ExtractedData['doctorInfo'] | undefined {
+  // Handle array of patterns
   for (const pattern of PATTERNS.doctorName) {
     const match = text.match(pattern);
     if (match) {

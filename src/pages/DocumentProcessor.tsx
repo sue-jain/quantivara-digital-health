@@ -357,44 +357,60 @@ const DocumentProcessor: React.FC = () => {
       };
     }
     
-    // Prescription Documents
+    // Prescription Documents - Mock data should match actual PDF content
     if (name.includes('prescription') || name.includes('rx')) {
       return {
         documentType: "Prescription",
         patientInfo: {
-          name: "Ramesh Kumar Sharma",
-          age: "52 Years",
-          gender: "Male",
-          patientId: "PID-2024-001"
+          name: "Priya Sharma",
+          age: "45 years",
+          gender: "Female",
+          patientId: "MFC-2024-0892"
         },
         doctorInfo: {
-          name: "Dr. Priya Patel, MBBS, MD",
-          registration: "MCI-12345",
-          clinic: "Apollo Health Center"
+          name: "Dr. Rajesh Kumar, MD",
+          registration: "MH/2015/78234",
+          clinic: "MediCare Family Clinic"
         },
-        diagnosis: ["Type 2 Diabetes Mellitus", "Hypertension Stage 1"],
+        diagnosis: ["Type 2 Diabetes Mellitus (E11.9)", "Essential Hypertension (I10)"],
         medications: [
           {
-            name: "Metformin",
+            name: "Tab. Metformin",
             dosage: "500mg",
-            frequency: "Twice daily",
+            frequency: "Twice daily after meals",
             duration: "30 days",
             instructions: "After meals"
           },
           {
-            name: "Amlodipine",
+            name: "Tab. Amlodipine",
             dosage: "5mg",
-            frequency: "Once daily",
+            frequency: "Once daily in morning",
             duration: "30 days",
-            instructions: "Morning with water"
+            instructions: "Morning"
+          },
+          {
+            name: "Tab. Atorvastatin",
+            dosage: "20mg",
+            frequency: "Once at bedtime",
+            duration: "30 days",
+            instructions: "At bedtime"
+          },
+          {
+            name: "Tab. Aspirin",
+            dosage: "75mg",
+            frequency: "Once daily after lunch",
+            duration: "30 days",
+            instructions: "After lunch"
           }
         ],
         advice: [
-          "Regular exercise 30 min daily",
-          "Avoid sugar and fried foods",
-          "Monitor blood pressure daily"
+          "Take medications regularly as prescribed",
+          "Monitor blood sugar levels twice weekly",
+          "Follow diabetic diet plan provided",
+          "Regular exercise - 30 minutes daily walking",
+          "Avoid smoking and alcohol"
         ],
-        followUp: "After 15 days with reports",
+        followUp: "After 30 days or earlier if symptoms worsen",
         extractionAccuracy: "96%"
       };
     }

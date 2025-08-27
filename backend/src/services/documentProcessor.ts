@@ -612,7 +612,7 @@ export class DocumentProcessor {
       };
     }
     
-    // Regular prescription
+    // Regular prescription - this is fallback mock data, should match PDF if possible
     return {
       patientInfo: {
         name: patientName,
@@ -858,19 +858,55 @@ export class DocumentProcessor {
   }
   
   private async savePrescriptionData(documentId: string, data: ExtractedPrescription) {
-    // Skip saving to prescriptions table for now since it's not properly set up in SQLite
-    // The data is already saved in medical_documents.extracted_data
-    logger.info(`📝 Prescription data extracted for: ${data.patientInfo.name}`);
-    logger.info(`💊 Medications: ${data.medications.length} items`);
-    logger.info(`🏥 Doctor: ${data.doctorInfo.name}`);
+    try {
+      // Try to save to prescriptions table if it exists
+      const insert = db.prepare(`
+        INSERT INTO prescriptions (
+          id, document_id, diagnosis, medications, advice, follow_up_date
+        ) VALUES (?, ?, ?, ?, ?, ?)
+      `);
+      
+      insert.run(
+        uuidv4(),
+        documentId,
+        JSON.stringify(data.diagnosis),
+        JSON.stringify(data.medications),
+        JSON.stringify(data.advice),
+        data.followUp
+      );
+    } catch (error) {
+      // If table doesn't exist or saving fails, just log the extracted data
+      logger.info(`📝 Prescription data extracted for: ${data.patientInfo.name}`);
+      logger.info(`💊 Medications: ${data.medications.length} items`);
+      logger.info(`🏥 Doctor: ${data.doctorInfo.name}`);
+      logger.warn('Prescriptions table not available, data saved in medical_documents.extracted_data only');
+    }
   }
   
   private async saveLabReportData(documentId: string, data: ExtractedLabReport) {
-    // Skip saving to lab_reports table for now since it's not properly set up in SQLite
-    // The data is already saved in medical_documents.extracted_data
-    logger.info(`🔬 Lab report data extracted for: ${data.patientInfo.name}`);
-    logger.info(`🧪 Tests: ${data.tests.length} items`);
-    logger.info(`🏥 Lab: ${data.labInfo.name}`);
+    try {
+      // Try to save to lab_reports table if it exists
+      const insert = db.prepare(`
+        INSERT INTO lab_reports (
+          id, document_id, test_results, critical_values, abnormal_values, report_date
+        ) VALUES (?, ?, ?, ?, ?, ?)
+      `);
+      
+      insert.run(
+        uuidv4(),
+        documentId,
+        JSON.stringify(data.tests),
+        data.criticalValues,
+        data.abnormalValues,
+        data.labInfo.reportDate
+      );
+    } catch (error) {
+      // If table doesn't exist or saving fails, just log the extracted data
+      logger.info(`🔬 Lab report data extracted for: ${data.patientInfo.name}`);
+      logger.info(`🧪 Tests: ${data.tests.length} items`);
+      logger.info(`🏥 Lab: ${data.labInfo.name}`);
+      logger.warn('Lab reports table not available, data saved in medical_documents.extracted_data only');
+    }
   }
   
   async getDocumentStatus(documentId: string): Promise<any> {
