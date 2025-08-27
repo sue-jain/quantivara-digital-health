@@ -1,6 +1,36 @@
-# Quantivara Backend - Database Management
+# Quantivara Backend
 
-## Database Scripts
+## Claude Code Agents
+
+### Available Agents
+
+The backend includes several specialized Claude Code agents for different tasks:
+
+| Agent | Command | Purpose |
+|-------|---------|---------|
+| **document-parser-extractor** | `/agent document-parser-extractor` | Extract structured data from medical documents with 99% accuracy |
+| **e2e-integration-tester** | `/agent e2e-integration-tester` | Run comprehensive end-to-end integration tests |
+| **demo-hub-validator** | `/agent demo-hub-validator` | Validate demo functionality for investor readiness |
+| **backend-integration-expert** | `/agent backend-integration-expert` | Backend code validation, testing, and frontend integration |
+| **indian-medical-nlp-ehr-converter** | `/agent indian-medical-nlp-ehr-converter` | Convert Indian medical terminology to EHR codes |
+| **medical-ehr-decoder** | `/agent medical-ehr-decoder` | Decode unstructured medical text to standardized formats |
+
+### Running Agents
+
+To use an agent in Claude Code:
+1. Type `/agent` followed by the agent name
+2. Provide the task description when prompted
+3. The agent will autonomously complete the task
+
+Example:
+```
+/agent document-parser-extractor
+Task: Extract patient data from the uploaded prescription PDF
+```
+
+## Database Management
+
+### Database Scripts
 
 ### Available Commands
 

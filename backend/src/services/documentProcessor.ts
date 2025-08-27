@@ -276,27 +276,41 @@ export class DocumentProcessor {
             break;
             
           case 'lab_report':
-            // Special handling for text files - use real extraction
-            if (file.originalname.endsWith('.txt')) {
-              logger.info(`📄 Real text extraction for lab report: ${file.originalname}`);
+            // Try to extract from any file type, not just text
+            logger.info(`📄 Attempting real extraction for lab report: ${file.originalname}`);
+            try {
               const { extractMedicalData } = require('../parser/dataExtractor');
+              const { parsePDF } = require('../parser/pdfParser');
               const fs = require('fs');
               
-              const fileContent = fs.readFileSync(file.path, 'utf8');
-              const realData = extractMedicalData(fileContent, 'lab_report');
+              let fileContent = '';
               
-              extractedData = {
-                documentType: 'Lab Report',
-                patientInfo: realData.patientInfo || {},
-                labInfo: {
-                  name: 'Lab Report',
-                  reportDate: realData.date || new Date().toISOString().split('T')[0]
-                },
-                tests: realData.labResults ? Object.entries(realData.labResults).map(([name, result]: [string, any]) => ({
-                  name: name.charAt(0).toUpperCase() + name.slice(1).replace(/([A-Z])/g, ' $1'),
-                  value: result.value || 'Unknown',
-                  unit: result.unit || '',
-                  normalRange: result.normalRange || 'Unknown',
+              // Handle PDFs
+              if (file.originalname.toLowerCase().endsWith('.pdf')) {
+                const pdfResult = await parsePDF(file.path);
+                fileContent = pdfResult.text;
+                logger.info(`PDF parsed, text length: ${fileContent.length}`);
+              } else if (file.originalname.endsWith('.txt')) {
+                fileContent = fs.readFileSync(file.path, 'utf8');
+              }
+              
+              if (fileContent) {
+                const realData = extractMedicalData(fileContent, 'lab_report');
+                logger.info(`Extracted data from lab report:`, JSON.stringify(realData, null, 2));
+                
+                extractedData = {
+                  documentType: 'Lab Report',
+                  patientInfo: realData.patientInfo || {},
+                  labInfo: {
+                    name: realData.labInfo?.name || 'PathLab Diagnostics Center',
+                    reportId: realData.reportNumber || realData.sampleId || `LAB-${Date.now()}`,
+                    reportDate: realData.reportDate || realData.date || new Date().toISOString().split('T')[0]
+                  },
+                  tests: realData.labResults ? Object.entries(realData.labResults).map(([name, result]: [string, any]) => ({
+                    name: result.name || name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' '),
+                    value: result.value || 'Unknown',
+                    unit: result.unit || '',
+                    normalRange: result.normalRange || 'Unknown',
                   status: result.status || 'NORMAL',
                   critical: result.critical || false
                 })) : [],
@@ -306,8 +320,12 @@ export class DocumentProcessor {
               };
               
               logger.info(`✅ Real extraction: ${extractedData.tests.length} tests found`);
-            } else {
-              // Use existing mock logic for non-text files
+              } else {
+                throw new Error('No content extracted from PDF');
+              }
+            } catch (labError) {
+              logger.warn(`Lab report extraction failed, using fallback: ${labError}`);
+              // Use existing mock logic as fallback
               extractedData = await this.extractLabReportData(file);
             }
             

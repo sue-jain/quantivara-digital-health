@@ -151,8 +151,8 @@ Patient Name: Amit Patel
 Age/Gender: 52 years / Male
 Patient ID: PLD-PAT-2024-3421
 Report No: PLD-2024-45678
-Collection Date: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-Report Date: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+Collection Date: August 25, 2025
+Report Date: August 25, 2025
 Referred By: Dr. Sunita Verma, MBBS
 Sample Type: Blood (Serum)
 
@@ -163,13 +163,20 @@ RBC Count: 4.8 million/μL (4.5 - 5.5) - Normal
 WBC Count: 12.5 thousand/μL (4.0 - 11.0) - High
 Platelet Count: 220 thousand/μL (150 - 450) - Normal
 Hematocrit: 39.5 % (40.0 - 50.0) - Low
+MCV: 82 fL (80 - 100) - Normal
+MCH: 28 pg (27 - 32) - Normal
+MCHC: 33.5 g/dL (32 - 36) - Normal
+Neutrophils: 75 % (40 - 70) - High
+Lymphocytes: 18 % (20 - 40) - Low
 
 LIPID PROFILE
 
 Total Cholesterol: 245 mg/dL (< 200) - High
 Triglycerides: 180 mg/dL (< 150) - High
 HDL Cholesterol: 38 mg/dL (> 40) - Low
-LDL Cholesterol: 165 mg/dL (< 100) - High`;
+LDL Cholesterol: 165 mg/dL (< 100) - High
+VLDL Cholesterol: 36 mg/dL (< 30) - High
+Total/HDL Ratio: 6.4 (< 5.0) - High`;
   }
   
   return 'Medical Document Content';

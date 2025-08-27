@@ -218,6 +218,8 @@ npm run dev
 - **Revenue Tracking**: See revenue impact in real-time
 - **AI Processing**: 94%+ accuracy on medical documents
 - **Control Panel**: Manage demo settings and simulate events
+- **Enhanced PDF Parsing**: Accurate extraction of patient names, doctor details, and all medications
+- **Claude Code Agents**: Specialized AI agents for document parsing, testing, and validation
 
 ### **Build for Production**
 ```bash

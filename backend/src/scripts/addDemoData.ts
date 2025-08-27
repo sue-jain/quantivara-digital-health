@@ -1,6 +1,7 @@
 import { db } from '../config/sqlite';
 import { logger } from '../utils/logger';
 import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 
 // Fixed demo ABHA IDs for consistent demos
 const DEMO_ABHA_IDS = [
@@ -86,9 +87,10 @@ const addDemoData = async () => {
       for (const hospital of missingProviders) {
         const result = db.prepare(`
           INSERT INTO healthcare_providers 
-          (name, type, registration_number, address, contact_info, certifications, tier, is_government, monthly_fee, is_active)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          (id, name, type, registration_number, address, is_active)
+          VALUES (?, ?, ?, ?, ?, ?)
         `).run(
+          uuidv4(),
           hospital.name,
           'hospital',
           `HOS-${Math.floor(Math.random() * 900000) + 100000}`,
@@ -98,15 +100,6 @@ const addDemoData = async () => {
             state: 'Maharashtra',
             pincode: '400001'
           }),
-          JSON.stringify({
-            phone: '9876543210',
-            email: `info@${hospital.name.toLowerCase().replace(/\s+/g, '')}.com`,
-            website: `www.${hospital.name.toLowerCase().replace(/\s+/g, '')}.com`
-          }),
-          JSON.stringify(['NABH', 'NABL']),
-          hospital.tier,
-          0,
-          hospital.fee,
           1
         );
       }
@@ -121,11 +114,13 @@ const addDemoData = async () => {
       if (!patient) continue;
       
       // Create user
+      const userId = uuidv4();
       const userResult = db.prepare(`
         INSERT INTO users 
-        (abha_id, email, phone, password_hash, first_name, last_name, date_of_birth, gender, role)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (id, abha_id, email, phone, password_hash, first_name, last_name, date_of_birth, gender, role)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
+        userId,
         patient.abhaId,
         `${patient.firstName.toLowerCase()}.${patient.lastName.toLowerCase()}@email.com`,
         `98765432${Math.floor(Math.random() * 100)}`,
@@ -137,27 +132,25 @@ const addDemoData = async () => {
         'patient'
       );
       
-      // Create patient profile
-      const patientResult = db.prepare(`
-        INSERT INTO patients 
-        (user_id, blood_group, height_cm, weight_kg, emergency_contact, medical_conditions, allergies, current_medications)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        userResult.lastInsertRowid.toString(),
-        'A+',
-        165,
-        70,
-        JSON.stringify({
-          name: `${patient.firstName} ${patient.lastName}`,
-          relationship: 'Spouse',
-          phone: `98765432${Math.floor(Math.random() * 100)}`
-        }),
-        JSON.stringify(patient.conditions),
-        JSON.stringify([]),
-        JSON.stringify([])
-      );
+      // Add diagnoses for the patient
+      for (const condition of patient.conditions) {
+        db.prepare(`
+          INSERT INTO user_diagnoses 
+          (id, user_id, abha_id, diagnosis_name, diagnosis_date, doctor_name, status, severity)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          uuidv4(),
+          userId,
+          patient.abhaId,
+          condition,
+          new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)).toISOString(),
+          'Dr. Demo Doctor',
+          'ACTIVE',
+          'MODERATE'
+        );
+      }
       
-      patientIds.push(patientResult.lastInsertRowid.toString());
+      patientIds.push(userId);
     }
 
     // Re-enable foreign key constraints

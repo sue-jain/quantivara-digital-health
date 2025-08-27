@@ -4,21 +4,21 @@ import { logger } from '../utils/logger';
 const PATTERNS = {
   // Patient information patterns
   patientName: [
-    /Patient\s*Name\s*[:]\s*\n+\s*([A-Za-z\s]+?)(?:\n|Age|Date|$)/i,
-    /Patient\s*Name\s*[:]\s*([A-Za-z\s]+?)(?:\n|Age|Date|$)/i,
-    /Name\s*[:]\s*\n+\s*([A-Za-z\s]+?)(?:\n|Age|Date|$)/i,
-    /Name\s*[:]\s*([A-Za-z\s]+?)(?:\n|Age|Date|$)/i,
-    /Patient\s*[:]\s*([A-Za-z\s]+?)(?:\n|Age|$)/i,
-    /(?:Mr\.|Mrs\.|Ms\.|Dr\.)\s+([A-Za-z\s]+?)(?:\n|,|Age|$)/i
+    /Patient\s*Name\s*[:]\s*([A-Za-z\s]+?)(?=\s*\n|$)/i,
+    /Name\s*[:]\s*([A-Za-z\s]+?)(?=\s*\n|$)/i,
+    /Patient\s*[:]\s*([A-Za-z\s]+?)(?=\s*\n|$)/i,
+    /(?:Mr\.|Mrs\.|Ms\.|Dr\.)\s+([A-Za-z\s]+?)(?=\s*\n|,|$)/i
   ],
   
   age: [
+    /Age\/Gender\s*[:]\s*(\d+)\s*years?/i,
     /Age\s*[:]\s*(\d+)\s*(years?|yrs?)?/i,
     /(\d+)\s*(years?|yrs?)\s*old/i,
     /Age\/Sex\s*[:]\s*(\d+)/i
   ],
   
   gender: [
+    /Age\/Gender\s*[:]\s*\d+\s*years?\s*\/\s*(Male|Female)/i,
     /Gender\s*[:]\s*(Male|Female|M|F)/i,
     /Sex\s*[:]\s*(Male|Female|M|F)/i,
     /Age\/Sex\s*[:]\s*\d+\s*[\/]?\s*(M|F|Male|Female)/i,
@@ -26,9 +26,25 @@ const PATTERNS = {
   ],
   
   date: [
+    /Report\s*Date\s*[:]\s*([A-Za-z]+\s+\d{1,2},\s+\d{4})/i,
+    /Collection\s*Date\s*[:]\s*([A-Za-z]+\s+\d{1,2},\s+\d{4})/i,
     /Date\s*[:]\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})/i,
     /Report\s*Date\s*[:]\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})/i,
     /Collection\s*Date\s*[:]\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})/i
+  ],
+  
+  // Lab specific patterns
+  reportNumber: [
+    /Report\s*No\s*[:]\s*([A-Z0-9-]+)/i,
+    /Report\s*Number\s*[:]\s*([A-Z0-9-]+)/i,
+    /Lab\s*ID\s*[:]\s*([A-Z0-9-]+)/i,
+    /Sample\s*ID\s*[:]\s*([A-Z0-9-]+)/i
+  ],
+  
+  patientId: [
+    /Patient\s*ID\s*[:]\s*([A-Z0-9-]+)/i,
+    /Patient\s*No\s*[:]\s*([A-Z0-9-]+)/i,
+    /MRN\s*[:]\s*([A-Z0-9-]+)/i
   ],
   
   // Lab test patterns
@@ -59,9 +75,12 @@ export interface ExtractedData {
     name?: string;
     age?: string;
     gender?: string;
+    patientId?: string;
   };
   date?: string;
-  labResults?: Record<string, { value: string; unit?: string; normalRange?: string }>;
+  reportNumber?: string;
+  sampleId?: string;
+  labResults?: Record<string, { value: string; unit?: string; normalRange?: string; status?: string }>;
   medications?: Array<{ name: string; dosage?: string; frequency?: string }>;
   diagnosis?: string[];
   doctorInfo?: {
@@ -90,6 +109,9 @@ export function extractMedicalData(text: string, documentType?: string): Extract
   
   // Extract based on document type
   if (extracted.documentType?.toLowerCase().includes('lab')) {
+    // Extract lab-specific information
+    extracted.reportNumber = extractReportNumber(text);
+    extracted.sampleId = extracted.reportNumber; // Use report number as sample ID for now
     extracted.labResults = extractLabResults(text);
   } else if (extracted.documentType?.toLowerCase().includes('ecg')) {
     extracted.labResults = extractECGVitals(text);
@@ -157,6 +179,15 @@ function extractPatientInfo(text: string): ExtractedData['patientInfo'] {
     }
   }
   
+  // Extract patient ID
+  for (const pattern of PATTERNS.patientId) {
+    const match = text.match(pattern);
+    if (match) {
+      info.patientId = match[1].trim();
+      break;
+    }
+  }
+  
   return info;
 }
 
@@ -165,6 +196,16 @@ function extractDate(text: string): string | undefined {
     const match = text.match(pattern);
     if (match) {
       return match[1];
+    }
+  }
+  return undefined;
+}
+
+function extractReportNumber(text: string): string | undefined {
+  for (const pattern of PATTERNS.reportNumber) {
+    const match = text.match(pattern);
+    if (match) {
+      return match[1].trim();
     }
   }
   return undefined;
@@ -179,10 +220,32 @@ function extractLabResults(text: string): Record<string, any> {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     
+    // Pattern for lab results with normal range in parentheses
+    // Example: "Hemoglobin: 13.2 g/dL (13.0 - 17.0) - Normal"
+    const labPattern = /^([A-Za-z][A-Za-z\s\-()]+?):\s*([\d.]+)\s*([A-Za-z\/μ²]+)?\s*\(([\d.\s<>-]+)\)\s*-?\s*(Normal|High|Low|Critical)?/i;
+    let match = line.match(labPattern);
+    
+    if (match) {
+      const testName = match[1].trim();
+      const value = match[2];
+      const unit = match[3] || '';
+      const normalRange = match[4].trim();
+      const status = match[5] ? match[5].toUpperCase() : determineLabStatus(value, normalRange);
+      
+      results[testName.toLowerCase().replace(/\s+/g, '_')] = {
+        name: testName,
+        value: value,
+        unit: unit,
+        normalRange: normalRange,
+        status: status
+      };
+      continue;
+    }
+    
     // Pattern 1: "Test Name: Value Unit (Normal: Range) Status"
     // Example: "1. Troponin I: Value: 0.15 ng/mL Normal Range: <0.04 ng/mL Status: ELEVATED"
     const pattern1 = /^(\d+\.\s*)?([A-Za-z][A-Za-z\s\-()]+?):\s*(?:Value:\s*)?([\d.<>]+)\s*([A-Za-z\/μ²]+)?/i;
-    let match = line.match(pattern1);
+    match = line.match(pattern1);
     
     if (match) {
       const testName = match[2].trim();
@@ -346,12 +409,12 @@ function extractMedications(text: string): Array<{ name: string; dosage?: string
     
     // Enhanced medication patterns
     const medPatterns = [
-      // Pattern 1: Numbered with Tab/Cap/Syp etc
-      /^\d+\.\s*(?:Tab|Cap|Syp|Inj|Drops?)\.?\s+([A-Za-z][A-Za-z\s\d\+]*?)(?:\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU|drops?)))?$/i,
+      // Pattern 1: Numbered with Tab/Cap/Syp etc (with optional dosage and frequency on same line)
+      /^\d+\.\s*(?:Tab|Cap|Syp|Inj|Drops?)\.?\s+([A-Za-z][A-Za-z\s\d\+]*?)(?:\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU|drops?)))?(?:\s*-\s*(.+))?$/i,
       // Pattern 2: Numbered medication without Tab/Cap prefix (e.g., "2. Sucralfate + Simethicone 10ml")
-      /^\d+\.\s+([A-Za-z][A-Za-z\s\d\+]*?)(?:\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU|drops?)))?$/i,
+      /^\d+\.\s+([A-Za-z][A-Za-z\s\d\+]*?)(?:\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU|drops?)))?(?:\s*-\s*(.+))?$/i,
       // Pattern 3: Direct Tab/Cap/Syp
-      /^(?:Tab|Cap|Syp|Inj|Drops?)\.?\s+([A-Za-z][A-Za-z\s\d\+]*?)(?:\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU|drops?)))?$/i,
+      /^(?:Tab|Cap|Syp|Inj|Drops?)\.?\s+([A-Za-z][A-Za-z\s\d\+]*?)(?:\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU|drops?)))?(?:\s*-\s*(.+))?$/i,
       // Pattern 4: Medicine name with dosage
       /^([A-Za-z][A-Za-z\s\d\+]*?)\s+([\d.]+\s*(?:mg|ml|gm|mcg|IU|drops?))$/i
     ];
@@ -362,8 +425,13 @@ function extractMedications(text: string): Array<{ name: string; dosage?: string
         const name = match[1].trim().replace(/\s+/g, ' ');
         const dosage = match[2] ? match[2].trim() : undefined;
         
-        // Look for frequency in the next 2-3 lines
-        let frequency = extractFrequencyFromLines(lines, i + 1, i + 4);
+        // Check if frequency was captured inline (in match[3])
+        let frequency = match[3] ? match[3].trim() : null;
+        
+        // If no inline frequency, look for frequency in the next 2-3 lines
+        if (!frequency) {
+          frequency = extractFrequencyFromLines(lines, i + 1, i + 4);
+        }
         
         // Avoid duplicates
         if (!medications.some(med => med.name.toLowerCase() === name.toLowerCase())) {
