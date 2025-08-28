@@ -3,6 +3,9 @@ import { logger } from '../utils/logger';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 
+// Import profile tables setup function
+import { setupProfileTables } from './setupProfileTables';
+
 // Fixed demo ABHA IDs for consistent demos
 const DEMO_ABHA_IDS = [
   '12345678901234', // Ramesh Kumar - Diabetes
@@ -29,6 +32,10 @@ const DEMO_HOSPITALS = [
 const addDemoData = async () => {
   try {
     logger.info('🔍 Checking for missing demo data...');
+    
+    // Ensure profile integration tables exist
+    logger.info('🏗️  Setting up profile integration tables if needed...');
+    await setupProfileTables();
     
     // Check if abha_id column exists in medical_documents table
     const tableInfo = db.prepare("PRAGMA table_info(medical_documents)").all() as any[];
@@ -87,8 +94,8 @@ const addDemoData = async () => {
       for (const hospital of missingProviders) {
         const result = db.prepare(`
           INSERT INTO healthcare_providers 
-          (id, name, type, registration_number, address, is_active)
-          VALUES (?, ?, ?, ?, ?, ?)
+          (id, name, type, registration_number, address, contact_info, is_active)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
         `).run(
           uuidv4(),
           hospital.name,
@@ -99,6 +106,11 @@ const addDemoData = async () => {
             city: 'Mumbai',
             state: 'Maharashtra',
             pincode: '400001'
+          }),
+          JSON.stringify({
+            phone: '9876543210',
+            email: `info@${hospital.name.toLowerCase().replace(/\s+/g, '')}.com`,
+            website: `www.${hospital.name.toLowerCase().replace(/\s+/g, '')}.com`
           }),
           1
         );
@@ -132,7 +144,27 @@ const addDemoData = async () => {
         'patient'
       );
       
-      // Add diagnoses for the patient
+      // Create patient profile (for existing flows)
+      const patientResult = db.prepare(`
+        INSERT INTO patients 
+        (user_id, blood_group, height_cm, weight_kg, emergency_contact, medical_conditions, allergies, current_medications)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        userId,
+        'A+',
+        165,
+        70,
+        JSON.stringify({
+          name: `${patient.firstName} ${patient.lastName}`,
+          relationship: 'Spouse',
+          phone: `98765432${Math.floor(Math.random() * 100)}`
+        }),
+        JSON.stringify(patient.conditions),
+        JSON.stringify([]),
+        JSON.stringify([])
+      );
+      
+      // Add diagnoses for the patient (for new flows)
       for (const condition of patient.conditions) {
         db.prepare(`
           INSERT INTO user_diagnoses 
@@ -150,7 +182,7 @@ const addDemoData = async () => {
         );
       }
       
-      patientIds.push(userId);
+      patientIds.push(patientResult.lastInsertRowid.toString());
     }
 
     // Re-enable foreign key constraints
