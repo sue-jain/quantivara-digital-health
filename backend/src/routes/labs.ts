@@ -162,4 +162,10 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
   }
 }));
 
+// Public endpoint: list lab test catalog (for dropdowns)
+router.get('/tests/catalog', asyncHandler(async (_req: Request, res: Response) => {
+  const rows = db.prepare('SELECT id, name, loinc_code as loincCode FROM app_lab_tests_catalog WHERE is_active = 1 ORDER BY name ASC').all() as any[];
+  res.json({ success: true, data: rows });
+}));
+
 export default router;

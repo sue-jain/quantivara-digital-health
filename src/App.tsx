@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Technology from "./pages/Technology";
@@ -12,69 +13,78 @@ import Solutions from "./pages/Solutions";
 import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
-import { PrivateAccess } from "./components/PrivateAccess";
 import DocumentProcessorPage from "./pages/DocumentProcessorPage";
+import PatientUploadPage from "./pages/PatientUploadPage";
 import ABHALookup from "./pages/ABHALookup";
 import PatientLookup from "./pages/PatientLookup";
 import AnalyticsDashboard from "./pages/AnalyticsDashboard";
 import DemoHub from "./pages/DemoHub";
 import VoicePatientLookupDemo from "./pages/VoicePatientLookupDemo";
+import TestAuth from "./pages/TestAuth";
+import SimpleTest from "./pages/SimpleTest";
+import LoginTest from "./pages/LoginTest";
+import UserDashboard from "./pages/UserDashboard";
+import UserProfile from "./pages/UserProfile";
+import PatientProfile from "./pages/PatientProfile";
+import DoctorHome from "./pages/DoctorHome";
+import DoctorDashboard from "./pages/DoctorDashboard";
+import DoctorProfilePage from "./pages/DoctorProfile";
+import DoctorPatients from "./pages/DoctorPatients";
+import LoginSelection from "./pages/LoginSelection";
+import RequireRole from "@/components/auth/RequireRole";
+import PatientShell from "@/components/layout/PatientShell";
+import PatientCareTeamPage from "./pages/PatientCareTeamPage";
+import PatientHome from "./pages/PatientHome";
+import PatientDocumentsPage from "./pages/PatientDocumentsPage";
+import PatientLabTestsPage from "./pages/PatientLabTestsPage";
+import PatientVisitsPage from "./pages/PatientVisitsPage";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Check if user is already authenticated
-    const authenticated = sessionStorage.getItem('site-authenticated');
-    setIsAuthenticated(authenticated === 'true');
-    setIsLoading(false);
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <PrivateAccess onAuthenticated={() => setIsAuthenticated(true)} />
-        </TooltipProvider>
-      </QueryClientProvider>
-    );
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/technology" element={<Technology />} />
-            <Route path="/solutions" element={<Solutions />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/processor" element={<DocumentProcessorPage />} />
-            <Route path="/demo" element={<DemoHub />} />
-            <Route path="/demo/abha-lookup" element={<ABHALookup />} />
-            <Route path="/demo/patient-lookup" element={<PatientLookup />} />
-            <Route path="/demo/analytics" element={<AnalyticsDashboard />} />
-            <Route path="/demo/voice-lookup" element={<VoicePatientLookupDemo />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <AuthProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/technology" element={<Technology />} />
+              <Route path="/solutions" element={<Solutions />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/processor" element={<PatientUploadPage />} />
+              <Route path="/demo" element={<DemoHub />} />
+              <Route path="/demo/abha-lookup" element={<ABHALookup />} />
+              <Route path="/demo/patient-lookup" element={<PatientLookup />} />
+              <Route path="/demo/analytics" element={<AnalyticsDashboard />} />
+              <Route path="/demo/voice-lookup" element={<VoicePatientLookupDemo />} />
+              <Route path="/test-auth" element={<TestAuth />} />
+              <Route path="/simple-test" element={<SimpleTest />} />
+              <Route path="/login-test" element={<LoginTest />} />
+              <Route path="/login" element={<LoginSelection />} />
+              <Route path="/user" element={<RequireRole role="patient"><PatientShell /></RequireRole>}>
+                <Route index element={<PatientHome />} />
+                <Route path="dashboard" element={<UserDashboard />} />
+                <Route path="documents" element={<PatientDocumentsPage />} />
+                <Route path="lab-tests" element={<PatientLabTestsPage />} />
+                <Route path="visits" element={<PatientVisitsPage />} />
+                <Route path="care-team" element={<PatientCareTeamPage />} />
+                <Route path="profile" element={<UserProfile />} />
+                <Route path="settings" element={<PatientProfile />} />
+              </Route>
+              <Route path="/doctor" element={<RequireRole role="doctor"><DoctorHome /></RequireRole>} />
+              <Route path="/doctor/dashboard" element={<RequireRole role="doctor"><DoctorDashboard /></RequireRole>} />
+              <Route path="/doctor/patients" element={<RequireRole role="doctor"><DoctorPatients /></RequireRole>} />
+              <Route path="/doctor/patient-lookup" element={<RequireRole role="doctor"><DoctorPatients /></RequireRole>} />
+              <Route path="/doctor/profile" element={<RequireRole role="doctor"><DoctorProfilePage /></RequireRole>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

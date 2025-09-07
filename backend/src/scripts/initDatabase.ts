@@ -2,8 +2,12 @@ import { db } from '../config/sqlite';
 import fs from 'fs';
 import path from 'path';
 import { logger } from '../utils/logger';
+import createAuthTables from './createAuthTables';
+import createDemoUsers from './createDemoUsers';
+import createDoctorTables from './createDoctorTables';
+import createDemoDoctors from './createDemoDoctors';
 
-const initDatabase = () => {
+const initDatabase = async () => {
   try {
     // Read the schema file
     const schemaPath = path.join(__dirname, '../../sql/sqlite-schema.sql');
@@ -76,6 +80,18 @@ const initDatabase = () => {
       '1234-5678-9012'
     );
     
+    // Initialize authentication system tables
+    await createAuthTables();
+    
+    // Create demo users first
+    await createDemoUsers();
+    
+    // Initialize doctor system tables
+    await createDoctorTables();
+    
+    // Skip demo doctors for now (will create separately)
+    logger.info('⏭️ Skipping demo doctors creation for now');
+    
     logger.info('✅ Database initialized successfully');
     
   } catch (error) {
@@ -86,8 +102,12 @@ const initDatabase = () => {
 
 // Run if called directly
 if (require.main === module) {
-  initDatabase();
-  process.exit(0);
+  initDatabase().then(() => {
+    process.exit(0);
+  }).catch((error) => {
+    console.error('Database initialization failed:', error);
+    process.exit(1);
+  });
 }
 
 export default initDatabase;

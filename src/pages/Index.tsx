@@ -7,9 +7,155 @@ import SolutionSection from '@/components/sections/SolutionSection';
 import TestimonialsSection from '@/components/sections/TestimonialsSection';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Users, Building, Heart } from 'lucide-react';
+import { ArrowRight, Users, Building, Heart, LayoutDashboard, User, FileText, Settings } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
+  const { isAuthenticated, user, userType } = useAuth();
+
+  // If user is authenticated, show role-based home page
+  if (isAuthenticated && userType === 'patient') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        
+        {/* Personalized Welcome Section */}
+        <section className="py-16 bg-gradient-to-r from-healthcare-blue-600 to-healthcare-green-600 text-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h1 className="text-4xl md:text-5xl font-heading font-bold mb-6">
+                Welcome back, {user?.firstName || user?.username}! 👋
+              </h1>
+              <p className="text-xl text-blue-100 max-w-2xl mx-auto">
+                Manage your health records, upload documents, and connect with your care team
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Quick Actions */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-heading font-bold text-gray-900 mb-4">
+                Quick Actions
+              </h2>
+              <p className="text-lg text-gray-600">
+                Everything you need to manage your health records
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch">
+              <Link to="/user/dashboard" className="group">
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 hover:border-healthcare-blue-300 h-full flex flex-col">
+                  <div className="w-12 h-12 bg-healthcare-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-healthcare-blue-200 transition-colors">
+                    <LayoutDashboard className="h-6 w-6 text-healthcare-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Dashboard</h3>
+                  <p className="text-gray-600 text-sm">View your health overview and recent activity</p>
+                </div>
+              </Link>
+
+              <Link to="/processor" className="group">
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 hover:border-healthcare-green-300 h-full flex flex-col">
+                  <div className="w-12 h-12 bg-healthcare-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-healthcare-green-200 transition-colors">
+                    <FileText className="h-6 w-6 text-healthcare-green-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Documents</h3>
+                  <p className="text-gray-600 text-sm">Upload medical documents for AI analysis</p>
+                </div>
+              </Link>
+
+              {/* Profile Settings Quick Action */}
+              <Link to="/user/settings" className="group">
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 hover:border-orange-300 h-full flex flex-col">
+                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-orange-200 transition-colors">
+                    <Settings className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Profile Settings</h3>
+                  <p className="text-gray-600 text-sm">Update your details and preferences</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+
+
+        <Footer />
+      </div>
+    );
+  }
+
+  if (isAuthenticated && userType === 'doctor') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+
+        {/* Doctor Welcome Section */}
+        <section className="py-16 bg-gradient-to-r from-healthcare-blue-600 to-healthcare-green-600 text-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h1 className="text-4xl md:text-5xl font-heading font-bold mb-6">
+                Welcome, Dr. {user?.lastName || user?.username}
+              </h1>
+              <p className="text-xl text-blue-100 max-w-2xl mx-auto">
+                Access your practice dashboard and patient tools
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Doctor Quick Actions */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-heading font-bold text-gray-900 mb-4">
+                Quick Actions
+              </h2>
+              <p className="text-lg text-gray-600">Navigate your core tools</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch">
+              <Link to="/doctor/dashboard" className="group">
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 hover:border-healthcare-blue-300 h-full flex flex-col">
+                  <div className="w-12 h-12 bg-healthcare-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-healthcare-blue-200 transition-colors">
+                    <LayoutDashboard className="h-6 w-6 text-healthcare-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Doctor Dashboard</h3>
+                  <p className="text-gray-600 text-sm">View your patients and tools</p>
+                </div>
+              </Link>
+
+              <Link to="/doctor/patients" className="group">
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 hover:border-healthcare-green-300 h-full flex flex-col">
+                  <div className="w-12 h-12 bg-healthcare-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-healthcare-green-200 transition-colors">
+                    <User className="h-6 w-6 text-healthcare-green-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Patient Lookup</h3>
+                  <p className="text-gray-600 text-sm">Search and request consent</p>
+                </div>
+              </Link>
+
+              <Link to="/doctor/profile" className="group">
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 hover:border-orange-300 h-full flex flex-col">
+                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-orange-200 transition-colors">
+                    <Settings className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Profile</h3>
+                  <p className="text-gray-600 text-sm">Update professional details</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <Footer />
+      </div>
+    );
+  }
+
+  // If user is not authenticated, show the original marketing page
   return (
     <div className="min-h-screen bg-white">
       <Header />

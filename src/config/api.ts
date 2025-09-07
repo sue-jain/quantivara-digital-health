@@ -13,6 +13,9 @@ export const API_CONFIG = {
   RETRY_DELAY: 1000, // 1 second
 };
 
+// Export API_BASE_URL for backward compatibility
+export const API_BASE_URL = API_CONFIG.BASE_URL + API_CONFIG.API_PREFIX;
+
 // Full API endpoint URL builder
 export const getApiUrl = (endpoint: string) => {
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;

@@ -40,6 +40,8 @@ backend/COMPREHENSIVE-TEST-REPORT.md
 coverage/
 *.coverage
 uploads/
+backend/uploads/
+backend/database.sqlite
 backend/eng.traineddata
 
 # SQLite database files

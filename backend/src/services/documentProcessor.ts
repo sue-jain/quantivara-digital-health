@@ -185,7 +185,8 @@ export class DocumentProcessor {
     file: Express.Multer.File,
     patientId: string,
     providerId: string,
-    specifiedType?: string
+    specifiedType?: string,
+    options?: { forcedAbhaId?: string; expectedPatientName?: string }
   ): Promise<any> {
     const documentId = uuidv4();
     const documentType = specifiedType || this.detectDocumentType(file.originalname);
@@ -194,7 +195,7 @@ export class DocumentProcessor {
       // Try real parsing first to extract patient info
       let extractedData: any;
       let accuracy = 90 + Math.random() * 8;
-      let abhaId = patientId; // Default to provided patientId
+      let abhaId = options?.forcedAbhaId || patientId; // Default to provided patientId or forced ABHA
       
       try {
         logger.info(`Attempting real document parsing for: ${file.path}`);
@@ -207,14 +208,16 @@ export class DocumentProcessor {
           logger.info(`Successfully extracted real data from document`);
           
           // Try to get ABHA ID from extracted patient name first, then from file name
-          if (extractedData.patientInfo?.name) {
-            abhaId = await this.findAbhaIdFromPatientInfo(extractedData.patientInfo.name);
-            logger.info(`🔗 Linking document to ABHA ID from patient name: ${abhaId}`);
-          } else {
-            const fileAbhaId = this.getAbhaIdFromFileName(file.originalname);
-            if (fileAbhaId) {
-              abhaId = fileAbhaId;
-              logger.info(`🔗 Linking document to ABHA ID from filename: ${abhaId}`);
+          if (!options?.forcedAbhaId) {
+            if (extractedData.patientInfo?.name) {
+              abhaId = await this.findAbhaIdFromPatientInfo(extractedData.patientInfo.name);
+              logger.info(`🔗 Linking document to ABHA ID from patient name: ${abhaId}`);
+            } else {
+              const fileAbhaId = this.getAbhaIdFromFileName(file.originalname);
+              if (fileAbhaId) {
+                abhaId = fileAbhaId;
+                logger.info(`🔗 Linking document to ABHA ID from filename: ${abhaId}`);
+              }
             }
           }
           
@@ -262,14 +265,16 @@ export class DocumentProcessor {
             }
             
             // Try patient name first, then file name
-            if (extractedData.patientInfo?.name) {
-              abhaId = await this.findAbhaIdFromPatientInfo(extractedData.patientInfo.name);
-              logger.info(`🔗 Linking prescription to ABHA ID from patient name: ${abhaId}`);
-            } else {
-              const fileAbhaId = this.getAbhaIdFromFileName(file.originalname);
-              if (fileAbhaId) {
-                abhaId = fileAbhaId;
-                logger.info(`🔗 Linking prescription to ABHA ID from filename: ${abhaId}`);
+            if (!options?.forcedAbhaId) {
+              if (extractedData.patientInfo?.name) {
+                abhaId = await this.findAbhaIdFromPatientInfo(extractedData.patientInfo.name);
+                logger.info(`🔗 Linking prescription to ABHA ID from patient name: ${abhaId}`);
+              } else {
+                const fileAbhaId = this.getAbhaIdFromFileName(file.originalname);
+                if (fileAbhaId) {
+                  abhaId = fileAbhaId;
+                  logger.info(`🔗 Linking prescription to ABHA ID from filename: ${abhaId}`);
+                }
               }
             }
             await this.savePrescriptionData(documentId, extractedData);
@@ -330,14 +335,16 @@ export class DocumentProcessor {
             }
             
             // Try patient name first, then file name
-            if (extractedData.patientInfo?.name) {
-              abhaId = await this.findAbhaIdFromPatientInfo(extractedData.patientInfo.name);
-              logger.info(`🔗 Linking lab report to ABHA ID from patient name: ${abhaId}`);
-            } else {
-              const labFileAbhaId = this.getAbhaIdFromFileName(file.originalname);
-              if (labFileAbhaId) {
-                abhaId = labFileAbhaId;
-                logger.info(`🔗 Linking lab report to ABHA ID from filename: ${abhaId}`);
+            if (!options?.forcedAbhaId) {
+              if (extractedData.patientInfo?.name) {
+                abhaId = await this.findAbhaIdFromPatientInfo(extractedData.patientInfo.name);
+                logger.info(`🔗 Linking lab report to ABHA ID from patient name: ${abhaId}`);
+              } else {
+                const labFileAbhaId = this.getAbhaIdFromFileName(file.originalname);
+                if (labFileAbhaId) {
+                  abhaId = labFileAbhaId;
+                  logger.info(`🔗 Linking lab report to ABHA ID from filename: ${abhaId}`);
+                }
               }
             }
             await this.saveLabReportData(documentId, extractedData);
@@ -367,14 +374,23 @@ export class DocumentProcessor {
               extractionAccuracy: "85%"
             };
             // Try file name for default case too
-            const defaultFileAbhaId = this.getAbhaIdFromFileName(file.originalname);
-            if (defaultFileAbhaId) {
-              abhaId = defaultFileAbhaId;
-              logger.info(`🔗 Linking default document to ABHA ID from filename: ${abhaId}`);
+            if (!options?.forcedAbhaId) {
+              const defaultFileAbhaId = this.getAbhaIdFromFileName(file.originalname);
+              if (defaultFileAbhaId) {
+                abhaId = defaultFileAbhaId;
+                logger.info(`🔗 Linking default document to ABHA ID from filename: ${abhaId}`);
+              }
             }
         }
       }
       
+      // If caller provided expected patient name, override display name in extracted data
+      if (options?.expectedPatientName) {
+        extractedData = extractedData || {};
+        extractedData.patientInfo = extractedData.patientInfo || {};
+        extractedData.patientInfo.name = options.expectedPatientName;
+      }
+
       // Save document record with ABHA ID
       const validPatientId = this.getValidPatientId();
       const validProviderId = this.getValidProviderId();

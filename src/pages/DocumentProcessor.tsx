@@ -1,17 +1,20 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, FileText, Camera, X, Loader2, CheckCircle, Stethoscope, Building, Heart, ImageIcon, Leaf, ClipboardList, Wifi, WifiOff } from 'lucide-react';
+import { Upload, FileText, Camera, X, Loader2, CheckCircle, Stethoscope, Building, Heart, ImageIcon, Leaf, ClipboardList, Wifi, WifiOff, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import PrescriptionResult from '@/components/results/PrescriptionResult';
 import LabReportResult from '@/components/results/LabReportResult';
 import ECGResult from '@/components/results/ECGResult';
 import DemoSummary from '@/components/demo/DemoSummary';
 import documentService from '@/services/documents';
+import userDocumentService from '@/services/userDocuments';
 import webSocketService from '@/services/websocket';
 
 interface UploadedFile {
@@ -29,11 +32,13 @@ const DocumentProcessor: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [wsConnected, setWsConnected] = useState(false);
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   
-  // Demo mode configuration
+  // Use logged-in user ID or fallback to demo mode
   const DEMO_MODE = import.meta.env.VITE_ENABLE_DEMO_MODE === 'true';
-  const DEMO_PATIENT_ID = 'demo-patient-001';
-  const DEMO_PROVIDER_ID = 'demo-provider-001';
+  const PATIENT_ID = isAuthenticated && user ? user.id : 'demo-patient-001';
+  const PROVIDER_ID = 'demo-provider-001';
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map(file => ({
@@ -121,23 +126,40 @@ const DocumentProcessor: React.FC = () => {
     // Process only the pending files
     for (let i = 0; i < pendingFiles.length; i++) {
       const file = pendingFiles[i];
-      const documentType = documentService.detectDocumentType(file.file.name);
+      const documentType = isAuthenticated && user 
+        ? userDocumentService.detectDocumentType(file.file.name)
+        : documentService.detectDocumentType(file.file.name);
       
       // Try real upload first
       try {
         console.log('🔍 Attempting to upload document:', file.file.name);
         console.log('🔍 Document type:', documentType);
+        console.log('🔍 User ID:', PATIENT_ID);
         
-        const uploadResult = await documentService.uploadDocument({
-          file: file.file,
-          patientId: DEMO_PATIENT_ID,
-          providerId: DEMO_PROVIDER_ID,
-          documentType: documentType
-        });
+        let uploadResult;
+        
+        // Use new user documents API for authenticated users
+        if (isAuthenticated && user) {
+          uploadResult = await userDocumentService.uploadDocument({
+            file: file.file,
+            userId: PATIENT_ID,
+            documentType: documentType
+          });
+        } else {
+          // Fallback to old API for demo mode
+          uploadResult = await documentService.uploadDocument({
+            file: file.file,
+            patientId: PATIENT_ID,
+            providerId: PROVIDER_ID,
+            documentType: documentType
+          });
+        }
         
         // Update with real results
-        if (uploadResult && uploadResult.extractedData) {
-          const extractedData = uploadResult.extractedData;
+        if (uploadResult && uploadResult.data) {
+          const extractedData = uploadResult.data.extractedData;
+          const documentTypeFromResult = uploadResult.data.documentType || documentType;
+          
           setUploadedFiles(prev => 
             prev.map(f => 
               f.id === file.id 
@@ -146,7 +168,7 @@ const DocumentProcessor: React.FC = () => {
                     status: 'completed' as const,
                     progress: 100,
                     result: {
-                      type: extractedData.documentType || uploadResult.documentType || documentType,
+                      type: documentTypeFromResult,
                       extractedData: extractedData
                     }
                   }
@@ -158,8 +180,26 @@ const DocumentProcessor: React.FC = () => {
             title: "Document processed",
             description: `Successfully extracted data from ${file.file.name}`,
           });
+          
+          // If user is logged in, show option to go back to dashboard
+          if (isAuthenticated && user) {
+            toast({
+              title: "Document linked to your profile",
+              description: "View your documents in the Dashboard",
+              action: (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigate('/user/dashboard')}
+                >
+                  View Dashboard
+                </Button>
+              ),
+            });
+          }
         } else {
           // Fallback to mock data if real upload doesn't return extracted data
+          const mockData = mockExtractedData(file.file.name);
           setUploadedFiles(prev => 
             prev.map(f => 
               f.id === file.id 
@@ -167,7 +207,10 @@ const DocumentProcessor: React.FC = () => {
                     ...f, 
                     status: 'completed' as const,
                     progress: 100,
-                    result: mockExtractedData(file.file.name)
+                    result: {
+                      type: mockData.documentType || documentType,
+                      extractedData: mockData
+                    }
                   }
                 : f
             )
@@ -888,7 +931,7 @@ const DocumentProcessor: React.FC = () => {
   const getAvailableDocumentTypes = () => {
     const completedFiles = uploadedFiles.filter(f => f.status === 'completed' && f.result);
     const typeGroups = completedFiles.reduce((acc, file) => {
-      const type = file.result.type;
+      const type = file.result?.type || 'Unknown Document';
       if (!acc[type]) {
         acc[type] = [];
       }
@@ -906,11 +949,17 @@ const DocumentProcessor: React.FC = () => {
 
   const getFirstAvailableTab = () => {
     const completedFiles = uploadedFiles.filter(f => f.status === 'completed' && f.result);
-    return completedFiles.length > 0 ? completedFiles[0].result.type : '';
+    return completedFiles.length > 0 ? (completedFiles[0].result?.type || 'Unknown Document') : '';
   };
 
-  const sampleDocuments = [
-    // Special documents with ⭐ (starred) - grouped together
+  // Show demo files only for non-authenticated users (demo mode)
+  const sampleDocuments = isAuthenticated && user ? [
+    // For authenticated users, show only generic examples without personal data
+    { name: 'sample-prescription.txt', label: 'Sample Prescription', special: true },
+    { name: 'sample-lab-report.txt', label: 'Sample Lab Report', special: true },
+    { name: 'sample-ecg-report.txt', label: 'Sample ECG Report', special: true }
+  ] : [
+    // For demo mode (non-authenticated users), show all demo files
     { name: 'handwritten-prescription.txt', label: 'Handwritten Prescription', special: true },
     { name: 'ramesh-kumar-prescription.txt', label: 'Ramesh Kumar - Diabetes Prescription', special: true },
     { name: 'ramesh-kumar-lab-report.txt', label: 'Ramesh Kumar - Diabetes Lab Report', special: true },
@@ -926,13 +975,43 @@ const DocumentProcessor: React.FC = () => {
   ];
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl" data-testid="document-processor">
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">AI Document Processor</h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header for logged-in users */}
+      {isAuthenticated && user && (
+        <div className="bg-white shadow-sm border-b">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-lg font-semibold">Document Upload</h1>
+                <p className="text-sm text-gray-600">Upload medical documents for {user.firstName} {user.lastName}</p>
+                <p className="text-xs text-amber-600 mt-1">⚠️ Only upload your own medical documents to protect your privacy</p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/user/dashboard')}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Dashboard
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <div className="container mx-auto p-6 max-w-6xl" data-testid="document-processor">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">
+                {isAuthenticated && user ? 'Personal Document Upload' : 'AI Document Processor'}
+              </h1>
             <p className="text-muted-foreground">
-              Upload medical documents for instant AI-powered data extraction
+              {isAuthenticated && user 
+                ? `Upload your medical documents for instant AI-powered data extraction and secure storage`
+                : 'Upload medical documents for instant AI-powered data extraction'
+              }
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -953,7 +1032,8 @@ const DocumentProcessor: React.FC = () => {
           </div>
         </div>
         
-        {/* Demo Instructions */}
+        {/* Demo Instructions - hide for authenticated patients/doctors */}
+        {!isAuthenticated && (
         <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4 mb-6">
           <div className="flex items-start gap-3">
             <div className="bg-green-100 rounded-full p-2">
@@ -973,8 +1053,10 @@ const DocumentProcessor: React.FC = () => {
             </div>
           </div>
         </div>
+        )}
         
-        {/* Sample Documents */}
+        {/* Sample Documents - hide for authenticated patients/doctors */}
+        {!isAuthenticated && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <h3 className="font-semibold text-blue-900 mb-2">Try with Sample Documents:</h3>
           <div className="flex flex-wrap gap-2">
@@ -1042,6 +1124,7 @@ const DocumentProcessor: React.FC = () => {
             ))}
           </div>
         </div>
+        )}
       </div>
 
       {/* Upload Area */}
@@ -1261,6 +1344,7 @@ const DocumentProcessor: React.FC = () => {
           </Card>
         </div>
       )}
+      </div>
     </div>
   );
 };
