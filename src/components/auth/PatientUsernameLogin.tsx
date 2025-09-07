@@ -34,7 +34,7 @@ const PatientUsernameLogin: React.FC<PatientUsernameLoginProps> = ({ onBack }) =
 
     try {
       await login(username.trim(), password, 'patient');
-      navigate('/');
+      navigate('/user');
     } catch (err: any) {
       setError(err.message || 'Invalid username or password');
     } finally {

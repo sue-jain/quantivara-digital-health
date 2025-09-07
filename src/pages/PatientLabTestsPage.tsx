@@ -27,8 +27,10 @@ const PatientLabTestsPage: React.FC = () => {
   const generateId = () => `T-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
   const addLabTest = () => {
     if (!newTestName.trim()) return;
-    const byLoinc = catalog.find(c => (c.loincCode || '').toLowerCase() === newTestName.trim().toLowerCase());
-    const resolvedName = byLoinc ? byLoinc.name : newTestName.trim();
+    const input = newTestName.trim().toLowerCase();
+    const byLoinc = catalog.find(c => (c.loincCode || '').toLowerCase() && input.includes((c.loincCode || '').toLowerCase()));
+    const byName = catalog.find(c => (c.name || '').toLowerCase() && input.includes((c.name || '').toLowerCase()));
+    const resolvedName = byLoinc ? byLoinc.name : byName ? byName.name : newTestName.trim();
     const now = new Date().toISOString();
     const item: LabTestItem = {
       testId: `TEST-${generateId()}`,
@@ -82,12 +84,12 @@ const PatientLabTestsPage: React.FC = () => {
                 list="lab-tests-catalog"
               />
               <datalist id="lab-tests-catalog">
-                {catalog.map((t) => (
-                  <option key={`${t.id}-name`} value={t.name} />
-                ))}
-                {catalog.filter(t=>t.loincCode).map((t) => (
-                  <option key={`${t.id}-loinc`} value={t.loincCode as string} />
-                ))}
+                {catalog.map((t) => {
+                  const combined = `${t.name}${t.loincCode ? ` (${t.loincCode})` : ''}`;
+                  return (
+                    <option key={`${t.id}-combo`} value={combined} />
+                  );
+                })}
               </datalist>
             </div>
             <select

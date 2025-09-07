@@ -89,8 +89,9 @@ const initDatabase = async () => {
     // Initialize doctor system tables
     await createDoctorTables();
     
-    // Skip demo doctors for now (will create separately)
-    logger.info('⏭️ Skipping demo doctors creation for now');
+    // Seed demo doctors (idempotent)
+    await createDemoDoctors();
+    logger.info('👩‍⚕️ Seeded demo doctors');
     
     logger.info('✅ Database initialized successfully');
     
