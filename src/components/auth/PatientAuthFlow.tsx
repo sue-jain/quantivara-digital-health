@@ -47,6 +47,7 @@ const PatientAuthFlow: React.FC<PatientAuthFlowProps> = ({ onBack }) => {
     setAbhaId(linkedAbhaId);
     if (isNewSignup) {
       // Already logged in via signup; just proceed
+      window.dispatchEvent(new CustomEvent('abha:updated'));
       navigate('/user');
     } else {
       await loginPatient(phoneNumber, linkedAbhaId);
@@ -56,6 +57,7 @@ const PatientAuthFlow: React.FC<PatientAuthFlowProps> = ({ onBack }) => {
   const handleABHASkip = async () => {
     if (isNewSignup) {
       // Keep current new user session
+      window.dispatchEvent(new CustomEvent('abha:updated'));
       navigate('/user');
     } else {
       await loginPatient(phoneNumber);

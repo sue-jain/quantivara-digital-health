@@ -32,6 +32,19 @@ export interface AvailableDoctor {
   displayName: string;
 }
 
+export interface AvailableLab {
+  id: string;
+  hfrUid: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  stateCode?: string;
+  licenseNumber?: string;
+  displayName?: string;
+}
+
 export interface AddDoctorRequest {
   doctorId: string;
   relationshipType?: 'primary' | 'consultant' | 'specialist';
@@ -76,6 +89,35 @@ class PatientCareTeamService {
     }
 
     const result = await response.json();
+    return result.data;
+  }
+
+  async getAvailableLabs(): Promise<AvailableLab[]> {
+    const response = await fetch(`${API_BASE_URL}/patient/available-labs`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch available labs');
+    }
+
+    const result = await response.json();
+    return result.data;
+  }
+
+  async listCareTeamLabs(userId: string): Promise<Array<{ id: string; labId: string; labName: string; hfrUid?: string; consentStatus: string; consentDate?: string }>> {
+    const response = await fetch(`${API_BASE_URL}/patient/${userId}/care-team/labs`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to fetch labs in care team');
+    }
     return result.data;
   }
 
@@ -152,6 +194,31 @@ class PatientCareTeamService {
     const result = await response.json();
     if (!response.ok || !result.success) {
       throw new Error(result.message || 'Failed to reject consent');
+    }
+    return { message: result.message };
+  }
+
+  async addLabToCareTeam(userId: string, labId: string, notes?: string): Promise<{ message: string; data: any }> {
+    const response = await fetch(`${API_BASE_URL}/patient/${userId}/care-team/labs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ labId, notes }),
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to add lab to care team');
+    }
+    return { message: result.message, data: result.data };
+  }
+
+  async removeLabFromCareTeam(userId: string, id: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/patient/${userId}/care-team/labs/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to remove lab from care team');
     }
     return { message: result.message };
   }

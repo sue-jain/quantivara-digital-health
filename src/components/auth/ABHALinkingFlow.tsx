@@ -81,6 +81,7 @@ const ABHALinkingFlow: React.FC<ABHALinkingFlowProps> = ({
       const formattedAbhaId = `${cleanAbhaId.slice(0, 2)}-${cleanAbhaId.slice(2, 6)}-${cleanAbhaId.slice(6, 10)}-${cleanAbhaId.slice(10, 14)}`;
       
       setScenario('success');
+      window.dispatchEvent(new CustomEvent('abha:updated'));
       setTimeout(() => onSuccess(formattedAbhaId), 1500);
     } catch (err) {
       setError('ABHA ID not found. Please check and try again.');
@@ -140,6 +141,7 @@ const ABHALinkingFlow: React.FC<ABHALinkingFlowProps> = ({
       
       setFoundAbhaId(newAbhaId);
       setScenario('success');
+      window.dispatchEvent(new CustomEvent('abha:updated'));
       setTimeout(() => onSuccess(newAbhaId), 1500);
     } catch (err) {
       setError('Failed to create ABHA ID. Please try again.');
@@ -392,6 +394,7 @@ const ABHALinkingFlow: React.FC<ABHALinkingFlowProps> = ({
                       <Button
                         onClick={() => {
                           setScenario('success');
+                          window.dispatchEvent(new CustomEvent('abha:updated'));
                           setTimeout(() => onSuccess(foundAbhaId), 1500);
                         }}
                         className="w-full mt-3 text-gray-800"

@@ -186,46 +186,10 @@ const createDemoUsers = async () => {
         );
       }
 
-      // Create sample medical documents for demo
-      const sampleDocuments = [
-        {
-          id: `doc-${patient.abhaId}-prescription-1`,
-          type: 'prescription',
-          fileName: `Prescription for ${patient.conditions[0]}.pdf`,
-          content: `Prescription for ${patient.firstName} ${patient.lastName}\nMedication: Sample medication for ${patient.conditions[0]}\nDosage: As prescribed\nDoctor: Dr. Sample Doctor`
-        },
-        {
-          id: `doc-${patient.abhaId}-lab-report-1`,
-          type: 'lab_report',
-          fileName: `Lab Report - ${patient.conditions[0]}.pdf`,
-          content: `Lab Report for ${patient.firstName} ${patient.lastName}\nTest: Blood test for ${patient.conditions[0]}\nResults: Within normal range\nDate: ${new Date().toISOString().split('T')[0]}`
-        }
-      ];
-
-      for (const doc of sampleDocuments) {
-        db.prepare(`
-          INSERT OR REPLACE INTO app_user_medical_documents 
-          (id, user_id, abha_id, document_type, file_name, content, metadata, extraction_accuracy, status, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(
-          doc.id,
-          userId,
-          patient.abhaId,
-          doc.type,
-          doc.fileName,
-          doc.content,
-          JSON.stringify({ source: 'demo', created_by: 'system' }),
-          95, // High accuracy for demo
-          'processed',
-          new Date().toISOString(),
-          new Date().toISOString()
-        );
-      }
-
       logger.info(`✅ Created demo user: ${patient.firstName} ${patient.lastName} (${patient.username})`);
       logger.info(`   - ABHA ID: ${patient.abhaId}`);
       logger.info(`   - Conditions: ${patient.conditions.join(', ')}`);
-      logger.info(`   - Medical documents: ${sampleDocuments.length} created`);
+      logger.info(`   - Medical documents: 0 created (manual uploads only)`);
     }
 
     logger.info('🎉 All demo users created successfully!');

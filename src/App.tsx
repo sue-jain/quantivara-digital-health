@@ -38,6 +38,7 @@ import PatientHome from "./pages/PatientHome";
 import PatientDocumentsPage from "./pages/PatientDocumentsPage";
 import PatientLabTestsPage from "./pages/PatientLabTestsPage";
 import PatientVisitsPage from "./pages/PatientVisitsPage";
+import LabDashboard from "./pages/LabDashboard";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => {
               <Route path="/demo/abha-lookup" element={<ABHALookup />} />
               <Route path="/demo/patient-lookup" element={<PatientLookup />} />
               <Route path="/demo/analytics" element={<AnalyticsDashboard />} />
+              <Route path="/lab" element={<LabDashboard />} />
               <Route path="/demo/voice-lookup" element={<VoicePatientLookupDemo />} />
               <Route path="/test-auth" element={<TestAuth />} />
               <Route path="/simple-test" element={<SimpleTest />} />

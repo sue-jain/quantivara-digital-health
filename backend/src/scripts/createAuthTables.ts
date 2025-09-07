@@ -157,6 +157,38 @@ const createAuthTables = async () => {
 
     logger.info('✅ Authentication system tables created successfully!');
     
+    // 8. Labs (HFR registry for labs)
+    logger.info('🧪 Creating app_labs table...');
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS app_labs (
+        id TEXT PRIMARY KEY,
+        hfr_uid TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        name TEXT NOT NULL,
+        email TEXT,
+        phone TEXT,
+        address TEXT,
+        city TEXT,
+        state_code TEXT,
+        license_number TEXT,
+        is_active BOOLEAN DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    logger.info('🧪 Creating app_lab_sessions table...');
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS app_lab_sessions (
+        id TEXT PRIMARY KEY,
+        lab_id TEXT NOT NULL,
+        session_token TEXT UNIQUE NOT NULL,
+        expires_at DATETIME NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (lab_id) REFERENCES app_labs(id)
+      )
+    `);
+    
     // Populate demo ABHA registry
     await populateDemoABHARegistry();
 

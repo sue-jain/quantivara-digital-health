@@ -113,6 +113,45 @@ router.get('/available-doctors', asyncHandler(async (req: Request, res: Response
   }
 }));
 
+// Get available labs (for adding to care team)
+router.get('/available-labs', asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const labs = db.prepare(`
+      SELECT 
+        id,
+        hfr_uid,
+        name,
+        email,
+        phone,
+        address,
+        city,
+        state_code,
+        license_number
+      FROM app_labs
+      WHERE is_active = 1
+      ORDER BY name
+    `).all() as any[];
+
+    const formattedLabs = labs.map(lab => ({
+      id: lab.id,
+      hfrUid: lab.hfr_uid,
+      name: lab.name,
+      email: lab.email,
+      phone: lab.phone,
+      address: lab.address,
+      city: lab.city,
+      stateCode: lab.state_code,
+      licenseNumber: lab.license_number,
+      displayName: `${lab.name} (${lab.hfr_uid})`
+    }));
+
+    return res.json({ success: true, data: formattedLabs });
+  } catch (error) {
+    logger.error('Error fetching available labs:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch available labs' });
+  }
+}));
+
 // Add doctor to care team (request consent)
 router.post('/:userId/care-team', asyncHandler(async (req: Request, res: Response) => {
   const { userId } = req.params;
@@ -200,6 +239,96 @@ router.post('/:userId/care-team', asyncHandler(async (req: Request, res: Respons
       success: false,
       message: 'Failed to add doctor to care team'
     });
+  }
+}));
+
+// Add lab to care team (patient-side)
+router.post('/:userId/care-team/labs', asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const { labId, notes = '' } = req.body as { labId?: string; notes?: string };
+
+  if (!labId) {
+    return res.status(400).json({ success: false, message: 'Lab ID is required' });
+  }
+
+  try {
+    // Verify lab exists
+    const lab = db.prepare(`SELECT id, name FROM app_labs WHERE id = ? AND is_active = 1`).get(labId) as any;
+    if (!lab) {
+      return res.status(404).json({ success: false, message: 'Lab not found' });
+    }
+
+    // Check if already present in care team
+    const exists = db.prepare(`
+      SELECT id FROM app_user_care_team
+      WHERE user_id = ? AND provider_type = 'lab' AND provider_id = ?
+    `).get(userId, labId) as any;
+    if (exists) {
+      return res.status(400).json({ success: false, message: 'Lab already in your care team' });
+    }
+
+    // Insert as approved for demo
+    const id = uuidv4();
+    const userAbha = db.prepare(`SELECT abha_id FROM app_user_abha_profiles WHERE user_id = ?`).get(userId) as any;
+    const abhaId = userAbha?.abha_id || null;
+    if (!abhaId) {
+      return res.status(400).json({ success: false, message: 'Please link your ABHA ID before adding a lab to your care team' });
+    }
+    db.prepare(`
+      INSERT INTO app_user_care_team
+      (id, user_id, abha_id, provider_type, provider_id, provider_name, consent_status, consent_date, created_at, updated_at)
+      VALUES (?, ?, ?, 'lab', ?, ?, 'approved', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).run(id, userId, abhaId, labId, lab.name, new Date().toISOString());
+
+    return res.json({ success: true, message: `${lab.name} added to your care team`, data: { id } });
+  } catch (error) {
+    logger.error('Error adding lab to care team:', error);
+    return res.status(500).json({ success: false, message: 'Failed to add lab to care team' });
+  }
+}));
+
+// Remove lab from care team
+router.delete('/:userId/care-team/labs/:id', asyncHandler(async (req: Request, res: Response) => {
+  const { userId, id } = req.params;
+  try {
+    const rel = db.prepare(`
+      SELECT id FROM app_user_care_team
+      WHERE id = ? AND user_id = ? AND provider_type = 'lab'
+    `).get(id, userId) as any;
+    if (!rel) {
+      return res.status(404).json({ success: false, message: 'Care team lab not found' });
+    }
+    db.prepare(`DELETE FROM app_user_care_team WHERE id = ?`).run(id);
+    return res.json({ success: true, message: 'Lab removed from your care team' });
+  } catch (error) {
+    logger.error('Error removing lab from care team:', error);
+    return res.status(500).json({ success: false, message: 'Failed to remove lab from care team' });
+  }
+}));
+
+// List labs in care team
+router.get('/:userId/care-team/labs', asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  try {
+    const rows = db.prepare(`
+      SELECT c.id, c.provider_id, c.provider_name, c.consent_status, c.consent_date, l.hfr_uid
+      FROM app_user_care_team c
+      LEFT JOIN app_labs l ON l.id = c.provider_id
+      WHERE c.user_id = ? AND c.provider_type = 'lab'
+      ORDER BY c.consent_date DESC, c.created_at DESC
+    `).all(userId) as any[];
+    const data = rows.map(r => ({
+      id: r.id,
+      labId: r.provider_id,
+      labName: r.provider_name,
+      hfrUid: r.hfr_uid,
+      consentStatus: r.consent_status,
+      consentDate: r.consent_date,
+    }));
+    return res.json({ success: true, data });
+  } catch (error) {
+    logger.error('Error listing care team labs:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch labs in care team' });
   }
 }));
 

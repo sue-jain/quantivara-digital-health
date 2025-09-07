@@ -6,6 +6,7 @@ import createAuthTables from './createAuthTables';
 import createDemoUsers from './createDemoUsers';
 import createDoctorTables from './createDoctorTables';
 import createDemoDoctors from './createDemoDoctors';
+import createDemoLabs from './createDemoLabs';
 
 const initDatabase = async () => {
   try {
@@ -92,6 +93,10 @@ const initDatabase = async () => {
     // Seed demo doctors (idempotent)
     await createDemoDoctors();
     logger.info('👩‍⚕️ Seeded demo doctors');
+
+    // Seed demo labs (idempotent)
+    await createDemoLabs();
+    logger.info('🧪 Seeded demo labs');
     
     logger.info('✅ Database initialized successfully');
     

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import patientCareTeamService, { CareTeamMember, AvailableDoctor } from '@/services/patientCareTeam';
+import patientCareTeamService, { CareTeamMember, AvailableDoctor, AvailableLab } from '@/services/patientCareTeam';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, Info, MessageCircle, Trash2, FlaskConical, Plus } from 'lucide-react';
@@ -14,6 +14,10 @@ const PatientCareTeamPage: React.FC = () => {
   const [showStatusInfo, setShowStatusInfo] = useState<string | boolean | null>(null);
   const [showAddDoctor, setShowAddDoctor] = useState(true);
   const [selectedDoctor, setSelectedDoctor] = useState('');
+  const [availableLabs, setAvailableLabs] = useState<AvailableLab[]>([]);
+  const [selectedLab, setSelectedLab] = useState('');
+  const [careTeamLabs, setCareTeamLabs] = useState<Array<{ id: string; labId: string; labName: string; hfrUid?: string; consentStatus: string; consentDate?: string }>>([]);
+  const [showLabConsent, setShowLabConsent] = useState(false);
   const [addingDoctor, setAddingDoctor] = useState(false);
   const [addDoctorStep, setAddDoctorStep] = useState<'select' | 'consent'>('select');
   const [consentScopes, setConsentScopes] = useState<{ labReports: boolean; prescriptions: boolean; pastHistory: boolean }>({ labReports: true, prescriptions: true, pastHistory: false });
@@ -41,10 +45,27 @@ const PatientCareTeamPage: React.FC = () => {
       // ignore
     }
   };
+  const fetchAvailableLabs = async () => {
+    try {
+      const labs = await patientCareTeamService.getAvailableLabs();
+      setAvailableLabs(labs);
+    } catch (e) {
+      // ignore
+    }
+  };
+  const fetchCareTeamLabs = async () => {
+    if (!user) return;
+    try {
+      const labs = await patientCareTeamService.listCareTeamLabs(user.id);
+      setCareTeamLabs(labs);
+    } catch {}
+  };
 
   useEffect(() => {
     fetchCareTeam();
     fetchAvailableDoctors();
+    fetchAvailableLabs();
+    fetchCareTeamLabs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -249,7 +270,54 @@ const PatientCareTeamPage: React.FC = () => {
                   </div>
                 </>
               ) : (
-                <div className="p-6 text-sm text-gray-600">Lab care team management is coming soon.</div>
+                <>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Select Lab</label>
+                      <select value={selectedLab} onChange={(e)=>setSelectedLab(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Choose a lab...</option>
+                        {availableLabs.map(lab => (
+                          <option key={lab.id} value={lab.id}>{lab.name} ({lab.hfrUid})</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={()=> setShowLabConsent(true)} disabled={!selectedLab} style={{ backgroundColor: '#BBF1F1', color: '#374151' }}>Next</Button>
+                      <Button variant="outline" onClick={()=>setSelectedLab('')}>Cancel</Button>
+                    </div>
+
+                    {showLabConsent && (
+                      <div className="mt-3 p-3 rounded-md border bg-gray-50">
+                        <div className="font-medium text-gray-900 mb-2">Consent Scopes</div>
+                        <div className="text-sm text-gray-700 mb-3">Labs can only access: Ordered Lab tests</div>
+                        <div className="flex gap-2">
+                          <Button onClick={async()=>{ if(!user||!selectedLab) return; try { const r = await patientCareTeamService.addLabToCareTeam(user.id, selectedLab, JSON.stringify({ scopes: { orderedLabTests: true } })); toast({ title:'Consent granted', description:r.message }); setSelectedLab(''); setShowLabConsent(false); await fetchCareTeamLabs(); } catch(e:any){ toast({ title:'Error', description:e.message||'Failed to add lab', variant:'destructive' }); } }} style={{ backgroundColor: '#BBF1F1', color: '#374151' }}>Confirm</Button>
+                          <Button variant="outline" onClick={()=> setShowLabConsent(false)}>Back</Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-8">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2"><FlaskConical className="h-4 w-4"/> Connected Labs</h4>
+                    {careTeamLabs.length === 0 ? (
+                      <div className="text-sm text-gray-600">No labs added yet.</div>
+                    ) : (
+                      <div className="space-y-2">
+                        {careTeamLabs.map(lab => (
+                          <div key={lab.id} className="p-3 border rounded-md bg-white flex items-center justify-between">
+                            <div>
+                              <div className="font-medium text-gray-900">{lab.labName}</div>
+                              <div className="text-xs text-gray-600">HFR: {lab.hfrUid}</div>
+                              <div className="text-xs text-gray-500">Status: {lab.consentStatus}</div>
+                            </div>
+                            <Button variant="ghost" className="h-8 px-2 hover:bg-red-50" onClick={async()=>{ if(!user) return; try { const r = await patientCareTeamService.removeLabFromCareTeam(user.id, lab.id); toast({ title:'Removed', description:r.message }); await fetchCareTeamLabs(); } catch(e:any){ toast({ title:'Error', description:e.message||'Failed to remove lab', variant:'destructive' }); } }}>Remove</Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>

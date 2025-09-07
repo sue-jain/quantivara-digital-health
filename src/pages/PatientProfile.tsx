@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import santhicaLogo from '@/assets/santhica-logo.png';
 import patientProfileService, { PatientProfile, UpdateProfileData, ABHAStatus } from '@/services/patientProfile';
+import ABHALinkingModal from '@/components/auth/ABHALinkingModal';
 import { toast } from '@/hooks/use-toast';
 
 const PatientProfilePage: React.FC = () => {
@@ -17,6 +18,7 @@ const PatientProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showABHAPrompt, setShowABHAPrompt] = useState(false);
+  const [showAbhaModal, setShowAbhaModal] = useState(false);
   
   const [formData, setFormData] = useState({
     email: '',
@@ -137,8 +139,8 @@ const PatientProfilePage: React.FC = () => {
   };
 
   const handleLinkABHA = () => {
-    // Navigate to ABHA linking flow
-    navigate('/login'); // This would trigger the ABHA linking flow
+    // Open in-page ABHA linking modal (consistent with dashboard UX)
+    setShowAbhaModal(true);
   };
 
   if (!isAuthenticated) {
@@ -382,6 +384,19 @@ const PatientProfilePage: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+
+        {showAbhaModal && (
+          <ABHALinkingModal
+            isOpen={showAbhaModal}
+            onClose={() => setShowAbhaModal(false)}
+            onSuccess={async () => {
+              setShowAbhaModal(false);
+              await checkABHAStatus();
+              setShowABHAPrompt(false);
+              await fetchProfile();
+            }}
+          />
+        )}
 
         
 

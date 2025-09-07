@@ -49,6 +49,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authService.login({ username, password, userType });
       setUser(response.data.user);
       setUserType(response.data.userType);
+      if (response.data.userType === 'patient') {
+        // Ask ABHA status consumers to refresh immediately after any login path
+        window.dispatchEvent(new CustomEvent('abha:updated'));
+      }
     } catch (error) {
       throw error;
     } finally {
@@ -64,6 +68,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authService.login({ username: data.username, password: data.password, userType: 'patient' });
       setUser(response.data.user);
       setUserType('patient');
+      // Trigger ABHA status refresh hook post-signup login
+      window.dispatchEvent(new CustomEvent('abha:updated'));
     } catch (error) {
       throw error;
     } finally {

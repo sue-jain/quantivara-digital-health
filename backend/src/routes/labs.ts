@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { asyncHandler, AppError } from '../middleware/errorHandler';
 import { db } from '../config/sqlite';
 import { logRevenueEvent } from '../utils/logger';
+import bcrypt from 'bcryptjs';
 
 const router = express.Router();
 
@@ -166,6 +167,30 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
 router.get('/tests/catalog', asyncHandler(async (_req: Request, res: Response) => {
   const rows = db.prepare('SELECT id, name, loinc_code as loincCode FROM app_lab_tests_catalog WHERE is_active = 1 ORDER BY name ASC').all() as any[];
   res.json({ success: true, data: rows });
+}));
+
+// New auth system: list available labs (for care team/lab booking)
+router.get('/list', asyncHandler(async (_req: Request, res: Response) => {
+  const labs = db.prepare(`
+    SELECT id, hfr_uid as hfrUid, name, email, phone, address, city, state_code as stateCode, license_number as licenseNumber
+    FROM app_labs WHERE is_active = 1
+    ORDER BY name
+  `).all() as any[];
+  res.json({ success: true, data: labs });
+}));
+
+// New auth system: lab login with HFR ID
+router.post('/login', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const { hfrUid, password } = req.body;
+  if (!hfrUid || !password) { res.status(400).json({ success: false, message: 'HFR ID and password are required' }); return; }
+  const lab = db.prepare('SELECT * FROM app_labs WHERE hfr_uid = ? AND is_active = 1').get(hfrUid) as any;
+  if (!lab) { res.status(401).json({ success: false, message: 'Invalid HFR ID or password' }); return; }
+  const ok = await bcrypt.compare(password, lab.password);
+  if (!ok) { res.status(401).json({ success: false, message: 'Invalid HFR ID or password' }); return; }
+  const token = `${lab.id}-${Date.now()}`;
+  db.prepare('INSERT INTO app_lab_sessions (id, lab_id, session_token, expires_at) VALUES (?, ?, ?, ?)')
+    .run(token, lab.id, token, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString());
+  res.json({ success: true, data: { token, lab: { id: lab.id, hfrUid: lab.hfr_uid, name: lab.name } } });
 }));
 
 export default router;

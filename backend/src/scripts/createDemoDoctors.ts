@@ -91,13 +91,28 @@ export async function createDemoDoctors(): Promise<void> {
       return await bcrypt.hash(password, 10);
     };
 
+    // Resolve a valid hospital/provider to satisfy potential FK constraints in existing DBs
+    let providerId: string | null = null;
+    try {
+      const pv = db.prepare('SELECT id FROM healthcare_providers LIMIT 1').get() as any;
+      providerId = pv?.id || null;
+    } catch {}
+
     // Insert doctors
     const insertDoctor = db.prepare(`
-      INSERT OR REPLACE INTO app_doctors (
+      INSERT OR IGNORE INTO app_doctors (
         id, nmr_uid, password, first_name, last_name, email, phone,
         specialty, state_code, hospital_id, hospital_name, license_number,
         qualification, experience_years, is_active, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    const updateDoctor = db.prepare(`
+      UPDATE app_doctors
+      SET password = ?, first_name = ?, last_name = ?, email = ?, phone = ?,
+          specialty = ?, state_code = ?, hospital_id = ?, hospital_name = ?, license_number = ?,
+          qualification = ?, experience_years = ?, is_active = 1, updated_at = ?
+      WHERE nmr_uid = ?
     `);
 
     for (const doctor of DEMO_DOCTORS) {
@@ -114,7 +129,7 @@ export async function createDemoDoctors(): Promise<void> {
         doctor.phone,
         doctor.specialty,
         doctor.stateCode,
-        null, // hospital_id - set to null for now
+        null, // ensure no FK coupling on hospital_id
         doctor.hospitalName,
         doctor.licenseNumber,
         doctor.qualification,
@@ -122,6 +137,23 @@ export async function createDemoDoctors(): Promise<void> {
         1, // is_active
         new Date().toISOString(),
         new Date().toISOString()
+      );
+      // Upsert-like behavior without REPLACE (avoid FK delete): always update by nmr_uid
+      updateDoctor.run(
+        hashedPassword,
+        doctor.firstName,
+        doctor.lastName,
+        doctor.email,
+        doctor.phone,
+        doctor.specialty,
+        doctor.stateCode,
+        null,
+        doctor.hospitalName,
+        doctor.licenseNumber,
+        doctor.qualification,
+        doctor.experienceYears,
+        new Date().toISOString(),
+        doctor.nmrUid
       );
 
       logger.info(`✅ Created doctor: ${doctor.firstName} ${doctor.lastName} (${doctor.nmrUid})`);

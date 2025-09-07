@@ -89,6 +89,8 @@ const ABHALinkingModal: React.FC<ABHALinkingModalProps> = ({ isOpen, onClose, on
         title: "ABHA ID linked successfully",
         description: "Your health profile is now connected!",
       });
+      // Broadcast immediate ABHA status update
+      window.dispatchEvent(new CustomEvent('abha:updated'));
     } catch (error: any) {
       setError(error.message || 'Failed to link ABHA ID');
     } finally {

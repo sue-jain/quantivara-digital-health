@@ -51,6 +51,24 @@ export const useAbhaStatus = () => {
     checkAbhaStatus();
   }, [user, isAuthenticated, userType]);
 
+  // Listen for global ABHA updates to refresh immediately (e.g., after linking)
+  useEffect(() => {
+    const onAbhaUpdated = async (_e: Event) => {
+      if (!isAuthenticated || !user || userType !== 'patient') return;
+      try {
+        setAbhaStatus(prev => ({ ...prev, loading: true }));
+        const status = await patientProfileService.getABHAStatus(user.id);
+        setAbhaStatus({ ...status, loading: false });
+      } catch (err) {
+        setAbhaStatus(prev => ({ ...prev, loading: false }));
+      }
+    };
+    window.addEventListener('abha:updated', onAbhaUpdated as EventListener);
+    return () => {
+      window.removeEventListener('abha:updated', onAbhaUpdated as EventListener);
+    };
+  }, [isAuthenticated, user, userType]);
+
   const refreshAbhaStatus = async () => {
     if (!isAuthenticated || !user || userType !== 'patient') return;
     
