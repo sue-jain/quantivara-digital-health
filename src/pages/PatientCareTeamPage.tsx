@@ -141,7 +141,7 @@ const PatientCareTeamPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-gray-900">{category==='doctor' ? 'Doctors' : 'Lab'}</CardTitle>
-                  <CardDescription>{category==='doctor' ? 'Manage your doctors and their access' : 'Manage connected labs (coming soon)'}</CardDescription>
+                  <CardDescription>{category==='doctor' ? 'Manage your doctors and their access' : 'Manage connected labs and their access'}</CardDescription>
                 </div>
                 <div className="relative">
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowStatusInfo(showStatusInfo === true ? null : true)} title="Status Information">
@@ -236,7 +236,7 @@ const PatientCareTeamPage: React.FC = () => {
                     {showAddDoctor ? (
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Select Doctor</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Select and add Doctor</label>
                           <select value={selectedDoctor} onChange={(e) => setSelectedDoctor(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">Choose a doctor...</option>
                             {availableDoctors.filter(doctor => !careTeam.some(member => member.doctorId === doctor.id)).map((doctor) => (
@@ -264,41 +264,12 @@ const PatientCareTeamPage: React.FC = () => {
                           </div>
                         )}
                       </div>
-                    ) : (
-                      <Button variant="outline" onClick={() => setShowAddDoctor(true)}>Add New Care Team Member</Button>
-                    )}
+                    ) : null}
                   </div>
                 </>
               ) : (
                 <>
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Select Lab</label>
-                      <select value={selectedLab} onChange={(e)=>setSelectedLab(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Choose a lab...</option>
-                        {availableLabs.map(lab => (
-                          <option key={lab.id} value={lab.id}>{lab.name} ({lab.hfrUid})</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button onClick={()=> setShowLabConsent(true)} disabled={!selectedLab} style={{ backgroundColor: '#BBF1F1', color: '#374151' }}>Next</Button>
-                      <Button variant="outline" onClick={()=>setSelectedLab('')}>Cancel</Button>
-                    </div>
-
-                    {showLabConsent && (
-                      <div className="mt-3 p-3 rounded-md border bg-gray-50">
-                        <div className="font-medium text-gray-900 mb-2">Consent Scopes</div>
-                        <div className="text-sm text-gray-700 mb-3">Labs can only access: Ordered Lab tests</div>
-                        <div className="flex gap-2">
-                          <Button onClick={async()=>{ if(!user||!selectedLab) return; try { const r = await patientCareTeamService.addLabToCareTeam(user.id, selectedLab, JSON.stringify({ scopes: { orderedLabTests: true } })); toast({ title:'Consent granted', description:r.message }); setSelectedLab(''); setShowLabConsent(false); await fetchCareTeamLabs(); } catch(e:any){ toast({ title:'Error', description:e.message||'Failed to add lab', variant:'destructive' }); } }} style={{ backgroundColor: '#BBF1F1', color: '#374151' }}>Confirm</Button>
-                          <Button variant="outline" onClick={()=> setShowLabConsent(false)}>Back</Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-8">
                     <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2"><FlaskConical className="h-4 w-4"/> Connected Labs</h4>
                     {careTeamLabs.length === 0 ? (
                       <div className="text-sm text-gray-600">No labs added yet.</div>
@@ -311,11 +282,74 @@ const PatientCareTeamPage: React.FC = () => {
                               <div className="text-xs text-gray-600">HFR: {lab.hfrUid}</div>
                               <div className="text-xs text-gray-500">Status: {lab.consentStatus}</div>
                             </div>
-                            <Button variant="ghost" className="h-8 px-2 hover:bg-red-50" onClick={async()=>{ if(!user) return; try { const r = await patientCareTeamService.removeLabFromCareTeam(user.id, lab.id); toast({ title:'Removed', description:r.message }); await fetchCareTeamLabs(); } catch(e:any){ toast({ title:'Error', description:e.message||'Failed to remove lab', variant:'destructive' }); } }}>Remove</Button>
+                            <div className="flex items-center gap-2 ml-4">
+                              {lab.consentStatus === 'approved' ? (
+                                <>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowStatusInfo(showStatusInfo === lab.id ? null : lab.id)} title="View Status">
+                                    <Info className={`h-4 w-4 ${lab.consentStatus === 'approved' ? 'text-green-600' : lab.consentStatus === 'pending' ? 'text-yellow-600' : 'text-gray-600'}`} />
+                                  </Button>
+                                  {showStatusInfo === lab.id && (
+                                    <div className="relative">
+                                      <div className="absolute right-0 top-8 z-20 w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+                                        <div className="text-xs font-medium text-gray-900">Active Access</div>
+                                        <div className="text-xs text-gray-600 mt-1">Can access ordered lab tests</div>
+                                      </div>
+                                    </div>
+                                  )}
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-red-50" title="Revoke Access" onClick={async()=>{ if(!user) return; try { const r = await patientCareTeamService.removeLabFromCareTeam(user.id, lab.id); toast({ title:'Access revoked', description:r.message }); await fetchCareTeamLabs(); } catch(e:any){ toast({ title:'Error', description:e.message||'Failed to revoke lab', variant:'destructive' }); } }}>
+                                    <Trash2 className="h-4 w-4 text-red-600" />
+                                  </Button>
+                                </>
+                              ) : (
+                                <>
+                                  <Button variant="outline" size="sm" onClick={async()=>{ if(!user) return; try { const r = await patientCareTeamService.approveLabAccess(user.id, lab.id); toast({ title:'Access restored', description:r.message }); await fetchCareTeamLabs(); } catch(e:any){ toast({ title:'Error', description:e.message||'Failed to restore access', variant:'destructive' }); } }}>Re-add</Button>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowStatusInfo(showStatusInfo === lab.id ? null : lab.id)} title="View Status">
+                                    <Info className={`h-4 w-4 ${lab.consentStatus === 'pending' ? 'text-yellow-600' : 'text-gray-600'}`} />
+                                  </Button>
+                                  {showStatusInfo === lab.id && (
+                                    <div className="relative">
+                                      <div className="absolute right-0 top-8 z-20 w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+                                        <div className="text-xs font-medium text-gray-900">Access Revoked</div>
+                                        <div className="text-xs text-gray-600 mt-1">Access has been revoked</div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>
                     )}
+                  </div>
+
+                  <div className="mt-8 pt-4 border-t">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Select and add Lab</label>
+                        <select value={selectedLab} onChange={(e)=>setSelectedLab(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <option value="">Choose a lab...</option>
+                          {availableLabs.map(lab => (
+                            <option key={lab.id} value={lab.id}>{lab.name} ({lab.hfrUid})</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={()=> setShowLabConsent(true)} disabled={!selectedLab} style={{ backgroundColor: '#BBF1F1', color: '#374151' }}>Next</Button>
+                        <Button variant="outline" onClick={()=>setSelectedLab('')}>Cancel</Button>
+                      </div>
+
+                      {showLabConsent && (
+                        <div className="mt-3 p-3 rounded-md border bg-gray-50">
+                          <div className="font-medium text-gray-900 mb-2">Consent Scopes</div>
+                          <div className="text-sm text-gray-700 mb-3">Labs can only access: Ordered Lab tests</div>
+                          <div className="flex gap-2">
+                            <Button onClick={async()=>{ if(!user||!selectedLab) return; try { const r = await patientCareTeamService.addLabToCareTeam(user.id, selectedLab, JSON.stringify({ scopes: { orderedLabTests: true } })); toast({ title:'Consent granted', description:r.message }); setSelectedLab(''); setShowLabConsent(false); await fetchCareTeamLabs(); } catch(e:any){ toast({ title:'Error', description:e.message||'Failed to add lab', variant:'destructive' }); } }} style={{ backgroundColor: '#BBF1F1', color: '#374151' }}>Confirm</Button>
+                            <Button variant="outline" onClick={()=> setShowLabConsent(false)}>Back</Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </>
               )}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Header from '@/components/layout/Header';
+// import Header from '@/components/layout/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import doctorService, { DoctorPatient } from '@/services/doctor';
+import userDocumentService from '@/services/userDocuments';
 import DoctorVoiceDiagnosis from '@/components/doctor/DoctorVoiceDiagnosis';
 
 const DoctorPatients: React.FC = () => {
@@ -25,6 +26,8 @@ const DoctorPatients: React.FC = () => {
   const [summary, setSummary] = useState<any | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summaryError, setSummaryError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -106,7 +109,7 @@ const DoctorPatients: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
+      {/* <Header /> */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Patients</h1>
@@ -118,7 +121,7 @@ const DoctorPatients: React.FC = () => {
             >
               {patients.map(p => (
                 <option key={p.relationshipId} value={p.patientId}>
-                  {p.firstName} {p.lastName}{p.abhaId ? ` (ABHA: ${p.abhaId})` : ''}
+                  {p.firstName} {p.lastName}{p.abhaId ? ` (ABHA: {p.abhaId})` : ''}
                 </option>
               ))}
               {patients.length === 0 && <option value="">No consented patients</option>}
@@ -153,8 +156,7 @@ const DoctorPatients: React.FC = () => {
                     <div key={idx} className="p-3 border rounded-md flex items-center justify-between">
                       <div>
                         <div className="font-medium">{r.firstName} {r.lastName}</div>
-                        <div className="text-xs text-gray-600">{r.username} • {r.phone}</div>
-                        {r.abhaId && <div className="text-xs text-gray-600">ABHA: {r.abhaId}</div>}
+                        {/* Hide extra identifiers until consent */}
                       </div>
                       <div className="flex items-center gap-2">
                         <Button variant="outline" onClick={async () => {
@@ -209,6 +211,21 @@ const DoctorPatients: React.FC = () => {
                             <div className="text-xs text-gray-600">No past history data (demo placeholder)</div>
                           ) : null}
                         </div>
+                        {/* Upload document to patient profile */}
+                        <div className="pt-3 border-t">
+                          <div className="text-sm font-medium mb-2">Upload Document to Patient</div>
+                          <div className="flex items-center gap-2">
+                            <input type="file" onChange={(e)=> setFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)} />
+                            <Button variant="outline" disabled={!file || uploading} onClick={async ()=>{
+                              if (!user || !selectedPatientId || !file) return;
+                              try {
+                                setUploading(true);
+                                await userDocumentService.uploadDocument({ file, userId: selectedPatientId });
+                                setFile(null);
+                              } finally { setUploading(false); }
+                            }}>{uploading ? 'Uploading...' : 'Upload'}</Button>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -244,7 +261,7 @@ const DoctorPatients: React.FC = () => {
                     <Label className="text-sm">Aadhar ID</Label>
                     <Input value={aadhar} onChange={(e) => setAadhar(e.target.value)} placeholder="12-digit Aadhar" />
                   </div>
-                  <div className="flex items-end">
+                  <div className="flex items=end">
                     <Button onClick={doAbhaLookup} style={{ backgroundColor: '#BBF1F1', color: '#374151' }}>Lookup</Button>
                   </div>
                 </div>

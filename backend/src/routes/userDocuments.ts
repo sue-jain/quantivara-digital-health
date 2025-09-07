@@ -213,7 +213,7 @@ router.get('/:userId', asyncHandler(async (req: Request, res: Response): Promise
           status: doc.status,
           extractionAccuracy: doc.extraction_accuracy,
           createdAt: doc.created_at,
-          content: doc.content || null,
+          content: (() => { try { return doc.content ? JSON.parse(doc.content) : null; } catch { return null; } })(),
           metadata: doc.metadata ? JSON.parse(doc.metadata) : null
         })),
         userInfo: {
@@ -233,6 +233,65 @@ router.get('/:userId', asyncHandler(async (req: Request, res: Response): Promise
   }
 }));
 
+// Consolidated AI Insights for a user (from app_user_medical_documents.content)
+router.get('/:userId/insights', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const { userId } = req.params;
+  try {
+    const docs = db.prepare(`
+      SELECT id, document_type, file_name, content, created_at
+      FROM app_user_medical_documents
+      WHERE user_id = ?
+      ORDER BY created_at DESC
+    `).all(userId) as any[];
+
+    const insights = {
+      diagnoses: [] as Array<{ sourceId: string; text: string; date?: string }>,
+      medications: [] as Array<{ sourceId: string; name: string; dosage?: string; frequency?: string; duration?: string; instructions?: string }>,
+      labResults: [] as Array<{ sourceId: string; name: string; value?: string; unit?: string; status?: string; critical?: boolean }>,
+      advice: [] as Array<{ sourceId: string; text: string }>,
+      latestUpdatedAt: null as string | null
+    };
+
+    for (const d of docs) {
+      const data = d.content ? JSON.parse(d.content) : {};
+      if (data.diagnosis && Array.isArray(data.diagnosis)) {
+        data.diagnosis.forEach((diag: string) => insights.diagnoses.push({ sourceId: d.id, text: diag }));
+      }
+      if (data.medications && Array.isArray(data.medications)) {
+        data.medications.forEach((m: any) => insights.medications.push({
+          sourceId: d.id,
+          name: m.name,
+          dosage: m.dosage,
+          frequency: m.frequency,
+          duration: m.duration,
+          instructions: m.instructions
+        }));
+      }
+      if (data.tests && Array.isArray(data.tests)) {
+        data.tests.forEach((t: any) => insights.labResults.push({
+          sourceId: d.id,
+          name: t.name,
+          value: t.value,
+          unit: t.unit,
+          status: t.status,
+          critical: !!t.critical
+        }));
+      }
+      if (data.advice && Array.isArray(data.advice)) {
+        data.advice.forEach((a: string) => insights.advice.push({ sourceId: d.id, text: a }));
+      }
+      if (!insights.latestUpdatedAt || d.created_at > insights.latestUpdatedAt) {
+        insights.latestUpdatedAt = d.created_at;
+      }
+    }
+
+    res.json({ success: true, data: insights });
+  } catch (error) {
+    logger.error('Error consolidating insights:', error);
+    res.status(500).json({ success: false, message: 'Failed to consolidate insights' });
+  }
+}));
+
 // Delete a user's document by ID
 router.delete('/:documentId', asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { documentId } = req.params;
@@ -248,6 +307,31 @@ router.delete('/:documentId', asyncHandler(async (req: Request, res: Response): 
   } catch (error) {
     logger.error('Error deleting user document:', error);
     res.status(500).json({ success: false, message: 'Failed to delete document' });
+  }
+}));
+
+// Stream a user's document file by ID
+router.get('/:documentId/file', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const { documentId } = req.params;
+  try {
+    const row = db.prepare('SELECT file_name, metadata FROM app_user_medical_documents WHERE id = ?').get(documentId) as any;
+    if (!row) {
+      res.status(404).json({ success: false, message: 'Document not found' });
+      return;
+    }
+    const metadata = row.metadata ? JSON.parse(row.metadata) : {};
+    const filePath = metadata.filePath;
+    const mimeType = metadata.mimeType || 'application/octet-stream';
+    if (!filePath) {
+      res.status(404).json({ success: false, message: 'File not found' });
+      return;
+    }
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Disposition', `inline; filename="${row.file_name || 'document'}"`);
+    res.sendFile(path.resolve(filePath));
+  } catch (error) {
+    logger.error('Error streaming file:', error);
+    res.status(500).json({ success: false, message: 'Failed to stream file' });
   }
 }));
 

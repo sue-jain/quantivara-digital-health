@@ -39,6 +39,9 @@ import PatientDocumentsPage from "./pages/PatientDocumentsPage";
 import PatientLabTestsPage from "./pages/PatientLabTestsPage";
 import PatientVisitsPage from "./pages/PatientVisitsPage";
 import LabDashboard from "./pages/LabDashboard";
+import DoctorShell from "@/components/layout/DoctorShell";
+import LabShell from "@/components/layout/LabShell";
+import LabPatients from "./pages/LabPatients";
 
 const queryClient = new QueryClient();
 
@@ -62,7 +65,10 @@ const App = () => {
               <Route path="/demo/abha-lookup" element={<ABHALookup />} />
               <Route path="/demo/patient-lookup" element={<PatientLookup />} />
               <Route path="/demo/analytics" element={<AnalyticsDashboard />} />
-              <Route path="/lab" element={<LabDashboard />} />
+              <Route path="/lab" element={<LabShell />}>
+                <Route index element={<LabDashboard />} />
+                <Route path="patients" element={<LabPatients />} />
+              </Route>
               <Route path="/demo/voice-lookup" element={<VoicePatientLookupDemo />} />
               <Route path="/test-auth" element={<TestAuth />} />
               <Route path="/simple-test" element={<SimpleTest />} />
@@ -78,11 +84,13 @@ const App = () => {
                 <Route path="profile" element={<UserProfile />} />
                 <Route path="settings" element={<PatientProfile />} />
               </Route>
-              <Route path="/doctor" element={<RequireRole role="doctor"><DoctorHome /></RequireRole>} />
-              <Route path="/doctor/dashboard" element={<RequireRole role="doctor"><DoctorDashboard /></RequireRole>} />
-              <Route path="/doctor/patients" element={<RequireRole role="doctor"><DoctorPatients /></RequireRole>} />
-              <Route path="/doctor/patient-lookup" element={<RequireRole role="doctor"><DoctorPatients /></RequireRole>} />
-              <Route path="/doctor/profile" element={<RequireRole role="doctor"><DoctorProfilePage /></RequireRole>} />
+              <Route path="/doctor" element={<RequireRole role="doctor"><DoctorShell /></RequireRole>}>
+                <Route index element={<DoctorHome />} />
+                <Route path="dashboard" element={<DoctorDashboard />} />
+                <Route path="patients" element={<DoctorPatients />} />
+                <Route path="patient-lookup" element={<DoctorPatients />} />
+                <Route path="profile" element={<DoctorProfilePage />} />
+              </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

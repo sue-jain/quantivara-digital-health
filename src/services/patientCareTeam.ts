@@ -222,6 +222,18 @@ class PatientCareTeamService {
     }
     return { message: result.message };
   }
+
+  async approveLabAccess(userId: string, id: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/patient/${userId}/care-team/labs/${id}/approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to approve lab access');
+    }
+    return { message: result.message };
+  }
 }
 
 const patientCareTeamService = new PatientCareTeamService();

@@ -16,7 +16,7 @@ import {
   Bell,
   Heart
 } from 'lucide-react';
-import Header from '@/components/layout/Header';
+// import Header from '@/components/layout/Header';
 import santhicaLogo from '@/assets/santhica-logo.png';
 
 const DoctorHome: React.FC = () => {
@@ -35,7 +35,7 @@ const DoctorHome: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      {/* <Header /> */}
       
       {/* Personalized Welcome Section */}
       <section className="py-16 bg-gradient-to-r from-healthcare-blue-600 to-healthcare-green-600 text-white">

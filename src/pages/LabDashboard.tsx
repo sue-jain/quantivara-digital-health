@@ -20,12 +20,6 @@ const LabDashboard: React.FC = () => {
     } catch {}
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('lab_session_token');
-    localStorage.removeItem('lab_info');
-    navigate('/login');
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-5xl mx-auto space-y-6">
@@ -39,7 +33,7 @@ const LabDashboard: React.FC = () => {
               <div className="text-sm text-gray-600">HFR ID: {hfrUid}</div>
             </div>
           </div>
-          <Button variant="outline" onClick={handleLogout}><LogOut className="h-4 w-4 mr-2"/>Logout</Button>
+          <div />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

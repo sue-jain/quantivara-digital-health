@@ -298,11 +298,32 @@ router.delete('/:userId/care-team/labs/:id', asyncHandler(async (req: Request, r
     if (!rel) {
       return res.status(404).json({ success: false, message: 'Care team lab not found' });
     }
-    db.prepare(`DELETE FROM app_user_care_team WHERE id = ?`).run(id);
-    return res.json({ success: true, message: 'Lab removed from your care team' });
+    // Soft revoke instead of delete
+    db.prepare(`UPDATE app_user_care_team SET consent_status = 'revoked', updated_at = ? WHERE id = ? AND user_id = ?`).run(new Date().toISOString(), id, userId);
+    return res.json({ success: true, message: 'Lab access revoked' });
   } catch (error) {
-    logger.error('Error removing lab from care team:', error);
-    return res.status(500).json({ success: false, message: 'Failed to remove lab from care team' });
+    logger.error('Error revoking lab from care team:', error);
+    return res.status(500).json({ success: false, message: 'Failed to revoke lab from care team' });
+  }
+}));
+
+// Re-approve a revoked lab access
+router.post('/:userId/care-team/labs/:id/approve', asyncHandler(async (req: Request, res: Response) => {
+  const { userId, id } = req.params;
+  try {
+    const rel = db.prepare(`
+      SELECT id FROM app_user_care_team
+      WHERE id = ? AND user_id = ? AND provider_type = 'lab'
+    `).get(id, userId) as any;
+    if (!rel) {
+      return res.status(404).json({ success: false, message: 'Care team lab not found' });
+    }
+    const now = new Date().toISOString();
+    db.prepare(`UPDATE app_user_care_team SET consent_status = 'approved', consent_date = COALESCE(consent_date, ?), updated_at = ? WHERE id = ? AND user_id = ?`).run(now, now, id, userId);
+    return res.json({ success: true, message: 'Lab access restored' });
+  } catch (error) {
+    logger.error('Error approving lab access:', error);
+    return res.status(500).json({ success: false, message: 'Failed to approve lab access' });
   }
 }));
 

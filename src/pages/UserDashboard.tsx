@@ -58,6 +58,9 @@ const UserDashboard: React.FC = () => {
   const [openCompleted, setOpenCompleted] = useState(true);
   const [openCriticalConditions, setOpenCriticalConditions] = useState(false);
   const [openCriticalAllergies, setOpenCriticalAllergies] = useState(false);
+  const [insights, setInsights] = useState<{ diagnoses: any[]; medications: any[]; labResults: any[]; advice: any[]; latestUpdatedAt: string | null } | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
   const generateId = () => `T-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
   const addLabTest = () => {
     if (!newTestName.trim()) return;
@@ -100,6 +103,27 @@ const UserDashboard: React.FC = () => {
   useEffect(() => {
     setActiveTab('critical');
   }, [location.pathname]);
+
+  // Load consolidated AI insights when Insights tab is active
+  useEffect(() => {
+    const fetchInsights = async () => {
+      if (!user) return;
+      try {
+        setInsightsLoading(true);
+        setInsightsError(null);
+        const data = await userDocumentService.getConsolidatedInsights(user.id);
+        setInsights(data);
+      } catch (e: any) {
+        setInsightsError(e.message || 'Failed to load AI insights');
+        setInsights(null);
+      } finally {
+        setInsightsLoading(false);
+      }
+    };
+    if (activeTab === 'ai-insights' && user) {
+      fetchInsights();
+    }
+  }, [activeTab, user]);
 
 
   // Fetch care team data
@@ -599,11 +623,17 @@ const UserDashboard: React.FC = () => {
                   AI-Generated Insights
                 </CardTitle>
                 <CardDescription>
-                  AI analysis of your medical documents and health data
+                  Consolidated summary from all uploaded documents
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {medicalHistory.aiInsights.length === 0 ? (
+                {insightsLoading ? (
+                  <div className="text-sm text-gray-600">Loading insights…</div>
+                ) : insightsError ? (
+                  <div className="text-sm text-red-600">{insightsError}</div>
+                ) : !insights || (
+                  (insights.diagnoses?.length || 0) + (insights.medications?.length || 0) + (insights.labResults?.length || 0) + (insights.advice?.length || 0)
+                ) === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <Brain className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No AI insights yet</h3>
@@ -613,39 +643,59 @@ const UserDashboard: React.FC = () => {
                     </Link>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {medicalHistory.aiInsights.map((insight) => (
-                      <div key={insight.id} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h4 className="font-semibold text-gray-900">{insight.title}</h4>
-                            <p className="text-sm text-gray-600">Generated: {new Date(insight.date).toLocaleDateString()}</p>
-                            <p className="text-sm text-gray-600">Confidence: {(insight.confidence * 100).toFixed(0)}%</p>
-                          </div>
-                          <div className="text-right">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              insight.status === 'approved' 
-                                ? 'bg-green-100 text-green-800' 
-                                : insight.status === 'pending_approval'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                              {insight.status.replace('_', ' ')}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="bg-gray-50 p-3 rounded-md">
-                          <p className="text-sm text-gray-700">{insight.content}</p>
-                        </div>
-                        {insight.status === 'pending_approval' && (
-                          <div className="mt-3 flex gap-2">
-                            <Button size="sm" variant="outline">
-                              Request Doctor Review
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="border rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-900 mb-2">Diagnoses</h4>
+                      <ul className="list-disc ml-5 text-sm text-gray-700 space-y-1">
+                        {insights.diagnoses.map((d:any, idx:number) => (
+                          <li key={idx} className="flex items-start justify-between gap-3">
+                            <span>{d.text}</span>
+                            {d.sourceId && (
+                              <button className="text-xs text-blue-600 hover:underline" onClick={()=> navigate(`/user/documents?docId=${d.sourceId}`)}>View source</button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="border rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-900 mb-2">Medications</h4>
+                      <ul className="list-disc ml-5 text-sm text-gray-700 space-y-1">
+                        {insights.medications.map((m:any, idx:number) => (
+                          <li key={idx} className="flex items-start justify-between gap-3">
+                            <span>{m.name}{m.dosage ? ` - ${m.dosage}` : ''}{m.frequency ? ` (${m.frequency})` : ''}</span>
+                            {m.sourceId && (
+                              <button className="text-xs text-blue-600 hover:underline" onClick={()=> navigate(`/user/documents?docId=${m.sourceId}`)}>View source</button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="border rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-900 mb-2">Lab Results</h4>
+                      <ul className="list-disc ml-5 text-sm text-gray-700 space-y-1">
+                        {insights.labResults.map((t:any, idx:number) => (
+                          <li key={idx} className="flex items-start justify-between gap-3">
+                            <span>{t.name}: {t.value}{t.unit ? ` ${t.unit}` : ''} {t.status ? `(${t.status})` : ''}</span>
+                            {t.sourceId && (
+                              <button className="text-xs text-blue-600 hover:underline" onClick={()=> navigate(`/user/documents?docId=${t.sourceId}`)}>View source</button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="border rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-900 mb-2">Advice</h4>
+                      <ul className="list-disc ml-5 text-sm text-gray-700 space-y-1">
+                        {insights.advice.map((a:any, idx:number) => (
+                          <li key={idx} className="flex items-start justify-between gap-3">
+                            <span>{a.text}</span>
+                            {a.sourceId && (
+                              <button className="text-xs text-blue-600 hover:underline" onClick={()=> navigate(`/user/documents?docId=${a.sourceId}`)}>View source</button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 )}
               </CardContent>

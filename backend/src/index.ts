@@ -59,8 +59,19 @@ const startServer = async () => {
 
 // Security middleware
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  frameguard: false // allow embedding files in iframe from frontend (different port)
 }));
+
+// Allow frontend to embed backend pages/files in iframes (dev ports)
+app.use((req, res, next) => {
+  const allowedAncestors = [
+    'http://localhost:8080',
+    'http://localhost:5173',
+  ];
+  res.setHeader('Content-Security-Policy', `frame-ancestors 'self' ${allowedAncestors.join(' ')};`);
+  next();
+});
 
 // Rate limiting
 const limiter = rateLimit({

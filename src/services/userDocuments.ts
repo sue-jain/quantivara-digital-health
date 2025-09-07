@@ -90,6 +90,23 @@ class UserDocumentService {
     }
   }
 
+  getDocumentFileUrl(documentId: string): string {
+    return `${this.baseUrl}/${documentId}/file`;
+  }
+
+  async getConsolidatedInsights(userId: string): Promise<{
+    diagnoses: Array<{ sourceId: string; text: string; date?: string }>,
+    medications: Array<{ sourceId: string; name: string; dosage?: string; frequency?: string; duration?: string; instructions?: string }>,
+    labResults: Array<{ sourceId: string; name: string; value?: string; unit?: string; status?: string; critical?: boolean }>,
+    advice: Array<{ sourceId: string; text: string }>,
+    latestUpdatedAt: string | null
+  }> {
+    const res = await fetch(`${this.baseUrl}/${userId}/insights`, { method: 'GET' });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'Failed to fetch insights');
+    return json.data;
+  }
+
   detectDocumentType(fileName: string): string {
     const lowerName = fileName.toLowerCase();
     

@@ -157,6 +157,23 @@ const createAuthTables = async () => {
 
     logger.info('✅ Authentication system tables created successfully!');
     
+    // 7b. Patient Ordered Lab Tests
+    logger.info('🧪 Creating app_patient_ordered_tests table...');
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS app_patient_ordered_tests (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        test_id TEXT NOT NULL,
+        test_name TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'ordered', -- ordered | pending_review | completed
+        ordered_by TEXT NOT NULL, -- self | doctor
+        report_id TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES app_users(id)
+      )
+    `);
+
     // 8. Labs (HFR registry for labs)
     logger.info('🧪 Creating app_labs table...');
     db.exec(`

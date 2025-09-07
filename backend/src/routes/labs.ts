@@ -193,4 +193,78 @@ router.post('/login', asyncHandler(async (req: Request, res: Response): Promise<
   res.json({ success: true, data: { token, lab: { id: lab.id, hfrUid: lab.hfr_uid, name: lab.name } } });
 }));
 
+// List consented patients for a lab (based on app_user_care_team)
+router.get('/:labId/patients', asyncHandler(async (req: Request, res: Response) => {
+  const { labId } = req.params;
+  try {
+    // validate lab exists
+    const lab = db.prepare('SELECT id FROM app_labs WHERE id = ? AND is_active = 1').get(labId) as any;
+    if (!lab) {
+      return res.status(404).json({ success: false, message: 'Lab not found' });
+    }
+    const rows = db.prepare(`
+      SELECT c.user_id, u.first_name, u.last_name, p.abha_id
+      FROM app_user_care_team c
+      JOIN app_users u ON u.id = c.user_id
+      LEFT JOIN app_user_abha_profiles p ON p.user_id = u.id
+      WHERE c.provider_type = 'lab' AND c.provider_id = ? AND c.consent_status = 'approved'
+      ORDER BY c.consent_date DESC, c.created_at DESC
+    `).all(labId) as any[];
+
+    const data = rows.map(r => ({ patientId: r.user_id, name: `${r.first_name || ''} ${r.last_name || ''}`.trim(), abhaId: r.abha_id }));
+    return res.json({ success: true, data });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Failed to fetch lab patients' });
+  }
+}));
+
+// Ordered tests APIs
+router.get('/:labId/patient/:userId/tests', asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  try {
+    const rows = db.prepare(`
+      SELECT id, test_id, test_name, status, ordered_by, report_id, created_at, updated_at
+      FROM app_patient_ordered_tests WHERE user_id = ? ORDER BY created_at DESC
+    `).all(userId) as any[];
+    return res.json({ success: true, data: rows });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Failed to fetch ordered tests' });
+  }
+}));
+
+router.post('/:labId/patient/:userId/tests', asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const { testId, testName, orderedBy } = req.body as { testId: string; testName: string; orderedBy: 'self'|'doctor' };
+  if (!testId || !testName || !orderedBy) {
+    return res.status(400).json({ success: false, message: 'testId, testName, orderedBy are required' });
+  }
+  try {
+    const id = require('uuid').v4();
+    db.prepare(`
+      INSERT INTO app_patient_ordered_tests (id, user_id, test_id, test_name, status, ordered_by)
+      VALUES (?, ?, ?, ?, 'ordered', ?)
+    `).run(id, userId, testId, testName, orderedBy);
+    return res.json({ success: true, data: { id } });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Failed to add test' });
+  }
+}));
+
+router.put('/:labId/patient/:userId/tests/:id', asyncHandler(async (req: Request, res: Response) => {
+  const { id, userId } = req.params;
+  const { status, reportId } = req.body as { status?: 'ordered'|'pending_review'|'completed'; reportId?: string };
+  try {
+    const now = new Date().toISOString();
+    const stmt = db.prepare(`
+      UPDATE app_patient_ordered_tests SET status = COALESCE(?, status), report_id = COALESCE(?, report_id), updated_at = ?
+      WHERE id = ? AND user_id = ?
+    `);
+    const result = stmt.run(status || null, reportId || null, now, id, userId);
+    if (result.changes === 0) return res.status(404).json({ success: false, message: 'Test not found' });
+    return res.json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Failed to update test' });
+  }
+}));
+
 export default router;
