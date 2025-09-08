@@ -74,6 +74,48 @@ class LabsService {
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error(json.message || 'Failed to update test');
   }
+
+  async requestConsent(labId: string, payload: { userId?: string; abhaId?: string }): Promise<{ careTeamId: string }> {
+    const res = await fetch(`${API_BASE_URL}/labs/${labId}/consent-requests`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'Failed to request consent');
+    return { careTeamId: json.data.careTeamId };
+  }
+
+  async verifyConsentOtp(labId: string, careTeamId: string, code: string): Promise<{ userId: string }> {
+    const res = await fetch(`${API_BASE_URL}/labs/${labId}/consent-requests/${careTeamId}/otp/verify`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'OTP verification failed');
+    return { userId: json.data.userId };
+  }
+
+  async createPatientInvite(labId: string, payload: { firstName?: string; lastName?: string; dateOfBirth?: string; phone: string }): Promise<{ inviteId: string; inviteCode: string; otp: string; expiresAt: string }> {
+    const res = await fetch(`${API_BASE_URL}/labs/${labId}/patient-invites`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'Failed to create invite');
+    return json.data;
+  }
+
+  async verifyPatientInvite(labId: string, inviteId: string, code: string): Promise<{ userId: string; careTeamId: string }> {
+    const res = await fetch(`${API_BASE_URL}/labs/${labId}/patient-invites/${inviteId}/otp/verify`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'Invite verification failed');
+    return json.data;
+  }
+
+  async cancelConsentRequest(labId: string, careTeamId: string): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/labs/${labId}/consent-requests/${careTeamId}`, { method: 'DELETE' });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'Failed to cancel request');
+  }
 }
 
 const labsService = new LabsService();

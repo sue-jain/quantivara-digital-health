@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { FlaskConical, Link as LinkIcon, CheckCircle2 } from 'lucide-react';
 import labsService, { LabTestCatalogItem } from '@/services/labs';
+import { useAuth } from '@/contexts/AuthContext';
+import patientCareTeamService from '@/services/patientCareTeam';
 
 type LabTestStatus = 'ordered' | 'pending_review' | 'completed';
 interface LabTestItem {
@@ -16,39 +18,69 @@ interface LabTestItem {
 }
 
 const PatientLabTestsPage: React.FC = () => {
+  const { user } = useAuth();
   const [labTests, setLabTests] = useState<LabTestItem[]>([]);
   const [newTestName, setNewTestName] = useState('');
-  const [newTestOrderedBy, setNewTestOrderedBy] = useState<'self'|'doctor'>('self');
   const [catalog, setCatalog] = useState<LabTestCatalogItem[]>([]);
   const [openOrdered, setOpenOrdered] = useState(false);
   const [openPending, setOpenPending] = useState(false);
   const [openCompleted, setOpenCompleted] = useState(false);
 
   const generateId = () => `T-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-  const addLabTest = () => {
-    if (!newTestName.trim()) return;
+
+  const loadPersisted = async () => {
+    if (!user) return;
+    try {
+      const rows = await patientCareTeamService.listPatientOrderedTests(user.id);
+      const mapped: LabTestItem[] = rows.map(r => ({
+        testId: r.id,
+        name: r.testName,
+        orderedBy: (r.orderedBy as 'self'|'doctor') || 'self',
+        status: (r.status as LabTestStatus) || 'ordered',
+        reportId: r.reportId,
+        orderedAt: r.createdAt,
+        updatedAt: r.createdAt,
+      }));
+      setLabTests(mapped);
+    } catch {
+      // ignore
+    }
+  };
+
+  const addLabTest = async () => {
+    if (!newTestName.trim() || !user) return;
     const input = newTestName.trim().toLowerCase();
     const byLoinc = catalog.find(c => (c.loincCode || '').toLowerCase() && input.includes((c.loincCode || '').toLowerCase()));
     const byName = catalog.find(c => (c.name || '').toLowerCase() && input.includes((c.name || '').toLowerCase()));
     const resolvedName = byLoinc ? byLoinc.name : byName ? byName.name : newTestName.trim();
-    const now = new Date().toISOString();
-    const item: LabTestItem = {
-      testId: `TEST-${generateId()}`,
-      name: resolvedName,
-      orderedBy: newTestOrderedBy,
-      status: 'ordered',
-      orderedAt: now,
-      updatedAt: now,
-    };
-    setLabTests(prev => [item, ...prev]);
-    setNewTestName('');
-    setNewTestOrderedBy('self');
+    try {
+      const id = await patientCareTeamService.addPatientOrderedTest(user.id, { testId: `TEST-${generateId()}`, testName: resolvedName, orderedBy: 'self' });
+      setLabTests(prev => ([{
+        testId: id,
+        name: resolvedName,
+        orderedBy: 'self',
+        status: 'ordered',
+        orderedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }, ...prev]));
+      setNewTestName('');
+    } catch {}
   };
-  const linkReport = (testId: string, reportId: string) => {
-    setLabTests(prev => prev.map(t => t.testId === testId ? { ...t, reportId, updatedAt: new Date().toISOString() } : t));
+
+  const linkReport = async (testId: string, reportId: string) => {
+    if (!user) return;
+    try {
+      await patientCareTeamService.updatePatientOrderedTest(user.id, testId, { reportId, status: 'pending_review' });
+      setLabTests(prev => prev.map(t => t.testId === testId ? { ...t, reportId, status: 'pending_review', updatedAt: new Date().toISOString() } : t));
+    } catch {}
   };
-  const moveStatus = (testId: string, status: LabTestStatus) => {
-    setLabTests(prev => prev.map(t => t.testId === testId ? { ...t, status, updatedAt: new Date().toISOString() } : t));
+
+  const moveStatus = async (testId: string, status: LabTestStatus) => {
+    if (!user) return;
+    try {
+      await patientCareTeamService.updatePatientOrderedTest(user.id, testId, { status });
+      setLabTests(prev => prev.map(t => t.testId === testId ? { ...t, status, updatedAt: new Date().toISOString() } : t));
+    } catch {}
   };
 
   useEffect(() => {
@@ -63,6 +95,10 @@ const PatientLabTestsPage: React.FC = () => {
     loadCatalog();
   }, []);
 
+  useEffect(() => {
+    loadPersisted();
+  }, [user]);
+
   return (
     <div className="p-6">
       <Card>
@@ -73,34 +109,35 @@ const PatientLabTestsPage: React.FC = () => {
           <CardDescription>Order tests, link reports, and track review status</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-            <div className="relative">
-              <input
-                type="text"
-                value={newTestName}
-                onChange={(e)=>setNewTestName(e.target.value)}
-                placeholder="Search by test name or LOINC code"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                list="lab-tests-catalog"
-              />
-              <datalist id="lab-tests-catalog">
-                {catalog.map((t) => {
-                  const combined = `${t.name}${t.loincCode ? ` (${t.loincCode})` : ''}`;
-                  return (
-                    <option key={`${t.id}-combo`} value={combined} />
-                  );
-                })}
-              </datalist>
+          <div className="mb-6">
+            <div className="relative flex items-stretch gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={newTestName}
+                  onChange={(e)=>setNewTestName(e.target.value)}
+                  placeholder="Search by test name or LOINC code"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  list="lab-tests-catalog"
+                />
+                <datalist id="lab-tests-catalog">
+                  {catalog.map((t) => {
+                    const combined = `${t.name}${t.loincCode ? ` (${t.loincCode})` : ''}`;
+                    return (
+                      <option key={`${t.id}-combo`} value={combined} />
+                    );
+                  })}
+                </datalist>
+              </div>
+              <button
+                aria-label="Add test"
+                className="px-3 py-2 rounded-md text-sm font-medium"
+                style={{ backgroundColor: '#BBF1F1', color: '#374151' }}
+                onClick={addLabTest}
+              >
+                +
+              </button>
             </div>
-            <select
-              value={newTestOrderedBy}
-              onChange={(e)=>setNewTestOrderedBy(e.target.value as 'self'|'doctor')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="self">Ordered by: Patient</option>
-              <option value="doctor">Ordered by: Doctor</option>
-            </select>
-            <Button onClick={addLabTest} style={{ backgroundColor: '#BBF1F1', color: '#374151' }}>Add Test</Button>
           </div>
 
           {/* Ordered */}
@@ -120,7 +157,11 @@ const PatientLabTestsPage: React.FC = () => {
                         <div className="text-xs text-gray-600">Test ID: {t.testId}</div>
                         <div className="text-xs text-gray-600">Ordered by: {t.orderedBy}</div>
                       </div>
-                      <Button variant="outline" size="sm" onClick={()=> moveStatus(t.testId, 'pending_review')}>Mark Done</Button>
+                      <div className="flex items-center gap-2">
+                        {t.orderedBy === 'self' && (
+                          <Button variant="outline" size="sm" onClick={async ()=>{ try { await patientCareTeamService.deletePatientOrderedTest(user!.id, t.testId); setLabTests(prev=> prev.filter(x=> x.testId !== t.testId)); } catch {} }}>Remove</Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

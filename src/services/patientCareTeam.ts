@@ -234,6 +234,40 @@ class PatientCareTeamService {
     }
     return { message: result.message };
   }
+
+  async listPatientOrderedTests(userId: string): Promise<Array<{ id: string; testId: string; testName: string; status: string; orderedBy: string; reportId?: string; createdAt: string }>> {
+    const response = await fetch(`${API_BASE_URL}/patient/${userId}/tests`);
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to fetch patient tests');
+    }
+    return result.data.map((r: any) => ({ id: r.id, testId: r.test_id, testName: r.test_name, status: r.status, orderedBy: r.ordered_by, reportId: r.report_id, createdAt: r.created_at }));
+  }
+
+  async addPatientOrderedTest(userId: string, payload: { testId: string; testName: string; orderedBy: 'self'|'doctor' }): Promise<string> {
+    const response = await fetch(`${API_BASE_URL}/patient/${userId}/tests`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to add test');
+    }
+    return result.data.id as string;
+  }
+
+  async updatePatientOrderedTest(userId: string, id: string, payload: { status?: 'ordered'|'pending_review'|'completed'; reportId?: string }): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/patient/${userId}/tests/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to update test');
+    }
+  }
+
+  async deletePatientOrderedTest(userId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/patient/${userId}/tests/${id}`, { method: 'DELETE' });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to delete test');
+    }
+  }
 }
 
 const patientCareTeamService = new PatientCareTeamService();

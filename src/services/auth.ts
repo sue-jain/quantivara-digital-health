@@ -53,6 +53,18 @@ class AuthService {
     this.userType = storedType === 'patient' || storedType === 'doctor' ? storedType : null;
   }
 
+  async registerFromInvite(inviteCode: string, username: string, password: string): Promise<{ token: string; userId: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/register-from-invite`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ inviteCode, username, password })
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) throw new Error(result.message || 'Failed to complete registration');
+    const token = result.data.token as string;
+    this.setToken(token);
+    this.setUserType('patient');
+    return { token, userId: result.data.userId };
+  }
+
   // Register new user
   async register(data: RegisterData): Promise<AuthResponse> {
     try {

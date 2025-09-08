@@ -3,6 +3,7 @@ import { asyncHandler, AppError } from '../middleware/errorHandler';
 import { db } from '../config/sqlite';
 import { logRevenueEvent } from '../utils/logger';
 import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
 
@@ -158,6 +159,127 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
       }
     });
     
+  } catch (error) {
+    throw error;
+  }
+}));
+
+// Request patient consent for lab access (creates pending relation and OTP)
+router.post('/:labId/consent-requests', asyncHandler(async (req: Request, res: Response) => {
+  const { labId } = req.params;
+  const { userId, abhaId } = req.body as { userId?: string; abhaId?: string };
+  // Resolve userId from abhaId if needed
+  try {
+    const lab = db.prepare('SELECT id, name FROM app_labs WHERE id = ? AND is_active = 1').get(labId) as any;
+    if (!lab) return res.status(404).json({ success: false, message: 'Lab not found' });
+
+    let targetUserId = userId;
+    if (!targetUserId && abhaId) {
+      const normalized = String(abhaId).replace(/\D/g, '');
+      const row = db.prepare("SELECT user_id FROM app_user_abha_profiles WHERE REPLACE(REPLACE(abha_id, '-', ''), ' ', '') = ?").get(normalized) as any;
+      if (row) {
+        targetUserId = row.user_id;
+      } else {
+        // Fallback for demo seeds: users use id pattern `user-<abhaId>`
+        const fallback = db.prepare('SELECT id FROM app_users WHERE id = ?').get(`user-${normalized}`) as any;
+        if (fallback) targetUserId = fallback.id;
+      }
+    }
+    if (!targetUserId) return res.status(400).json({ success: false, message: 'userId or abhaId required' });
+
+    // Check existing relation
+    const existing = db.prepare(`
+      SELECT id, consent_status FROM app_user_care_team
+      WHERE user_id = ? AND provider_type = 'lab' AND provider_id = ?
+    `).get(targetUserId, labId) as any;
+
+    const now = new Date().toISOString();
+
+    let careTeamId: string;
+    if (existing) {
+      careTeamId = existing.id;
+      db.prepare(`UPDATE app_user_care_team SET consent_status = 'pending', updated_at = ? WHERE id = ?`).run(now, existing.id);
+    } else {
+      careTeamId = uuidv4();
+      db.prepare(`
+        INSERT INTO app_user_care_team (id, user_id, abha_id, provider_type, provider_id, provider_name, consent_status, consent_date, created_at, updated_at)
+        VALUES (?, ?, (SELECT abha_id FROM app_user_abha_profiles WHERE user_id = ? LIMIT 1), 'lab', ?, ?, 'pending', NULL, ?, ?)
+      `).run(careTeamId, targetUserId, targetUserId, labId, lab.name, now, now);
+    }
+
+    return res.json({ success: true, message: 'Consent request created', data: { careTeamId, otpSent: true } });
+  } catch (error) {
+    throw error;
+  }
+}));
+
+// Cancel a pending consent request
+router.delete('/:labId/consent-requests/:careTeamId', asyncHandler(async (req: Request, res: Response) => {
+  const { labId, careTeamId } = req.params;
+  const existing = db.prepare(`SELECT id, consent_status FROM app_user_care_team WHERE id = ? AND provider_id = ? AND provider_type = 'lab'`).get(careTeamId, labId) as any;
+  if (!existing) return res.status(404).json({ success: false, message: 'Consent request not found' });
+  if (existing.consent_status !== 'pending') return res.status(400).json({ success: false, message: 'Only pending requests can be canceled' });
+  db.prepare('DELETE FROM app_user_care_team WHERE id = ?').run(careTeamId);
+  return res.json({ success: true, message: 'Consent request canceled' });
+}));
+// Create a patient invite (lab-assisted)
+router.post('/:labId/patient-invites', asyncHandler(async (req: Request, res: Response) => {
+  const { labId } = req.params;
+  const { firstName, lastName, dateOfBirth, phone } = req.body as { firstName?: string; lastName?: string; dateOfBirth?: string; phone: string };
+  const lab = db.prepare('SELECT id, name FROM app_labs WHERE id = ? AND is_active = 1').get(labId) as any;
+  if (!lab) return res.status(404).json({ success: false, message: 'Lab not found' });
+  if (!phone) return res.status(400).json({ success: false, message: 'Phone is required' });
+  const inviteId = require('uuid').v4();
+  const inviteCode = `INV-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+  const otpCode = '123456'; // demo
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+  db.prepare(`
+    INSERT INTO app_patient_invites (id, lab_id, first_name, last_name, date_of_birth, phone, invite_code, otp_code, status, expires_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)
+  `).run(inviteId, labId, firstName || null, lastName || null, dateOfBirth || null, phone, inviteCode, otpCode, expiresAt);
+  return res.json({ success: true, data: { inviteId, inviteCode, otp: otpCode, expiresAt, lab: { id: lab.id, name: lab.name } } });
+}));
+
+// Verify patient invite by OTP and create provisional user
+router.post('/:labId/patient-invites/:inviteId/otp/verify', asyncHandler(async (req: Request, res: Response) => {
+  const { labId, inviteId } = req.params;
+  const { code } = req.body as { code: string };
+  const invite = db.prepare('SELECT * FROM app_patient_invites WHERE id = ? AND lab_id = ?').get(inviteId, labId) as any;
+  if (!invite) return res.status(404).json({ success: false, message: 'Invite not found' });
+  if (new Date(invite.expires_at).getTime() < Date.now()) return res.status(400).json({ success: false, message: 'Invite expired' });
+  if (invite.status !== 'pending') return res.status(400).json({ success: false, message: 'Invite already used' });
+  if (!code || code !== invite.otp_code) return res.status(400).json({ success: false, message: 'Invalid OTP' });
+  // Create provisional user if not already created
+  let userId = invite.user_id as string | null;
+  if (!userId) {
+    userId = `user-invite-${invite.id}`;
+    db.prepare(`
+      INSERT OR IGNORE INTO app_users (id, username, password_hash, email, phone, first_name, last_name, date_of_birth, role, is_active, created_at, updated_at)
+      VALUES (?, ?, ?, NULL, ?, ?, ?, ?, 'patient', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).run(userId, `p_${invite.invite_code.toLowerCase()}`, '$2a$10$demoHashForLaterSet', invite.phone, invite.first_name, invite.last_name, invite.date_of_birth);
+  }
+  // Mark verified and save user_id
+  db.prepare('UPDATE app_patient_invites SET status = \"verified\", user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(userId, inviteId);
+  // Create care team pending access for lab
+  const careTeamId = require('uuid').v4();
+  const abhaRow = db.prepare('SELECT abha_id FROM app_user_abha_profiles WHERE user_id = ?').get(userId) as any;
+  db.prepare(`
+    INSERT INTO app_user_care_team (id, user_id, abha_id, provider_type, provider_id, provider_name, consent_status, created_at, updated_at)
+    VALUES (?, ?, ?, 'lab', ?, (SELECT name FROM app_labs WHERE id = ?), 'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `).run(careTeamId, userId, abhaRow?.abha_id || null, labId, labId);
+  return res.json({ success: true, data: { userId, careTeamId } });
+}));
+// Verify OTP for lab consent and approve
+router.post('/:labId/consent-requests/:careTeamId/otp/verify', asyncHandler(async (req: Request, res: Response) => {
+  const { labId, careTeamId } = req.params;
+  const { code } = req.body as { code: string };
+  try {
+    const rel = db.prepare(`SELECT id, user_id FROM app_user_care_team WHERE id = ? AND provider_id = ? AND provider_type = 'lab'`).get(careTeamId, labId) as any;
+    if (!rel) return res.status(404).json({ success: false, message: 'Consent request not found' });
+    if (!code || code !== '123456') return res.status(400).json({ success: false, message: 'Invalid OTP' });
+    const now = new Date().toISOString();
+    db.prepare(`UPDATE app_user_care_team SET consent_status = 'approved', consent_date = COALESCE(consent_date, ?), updated_at = ? WHERE id = ?`).run(now, now, careTeamId);
+    return res.json({ success: true, message: 'Consent approved', data: { userId: rel.user_id } });
   } catch (error) {
     throw error;
   }

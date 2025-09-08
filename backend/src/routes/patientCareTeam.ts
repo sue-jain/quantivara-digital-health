@@ -70,6 +70,77 @@ router.get('/:userId/care-team', asyncHandler(async (req: Request, res: Response
   }
 }));
 
+// Patient ordered lab tests - list
+router.get('/:userId/tests', asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  try {
+    const rows = db.prepare(`
+      SELECT id, test_id, test_name, status, ordered_by, report_id, created_at, updated_at
+      FROM app_patient_ordered_tests WHERE user_id = ? ORDER BY created_at DESC
+    `).all(userId) as any[];
+    return res.json({ success: true, data: rows });
+  } catch (error) {
+    logger.error('Error fetching patient ordered tests:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch tests' });
+  }
+}));
+
+// Patient ordered lab tests - add
+router.post('/:userId/tests', asyncHandler(async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const { testId, testName, orderedBy } = req.body as { testId: string; testName: string; orderedBy: 'self'|'doctor' };
+  if (!testId || !testName || !orderedBy) {
+    return res.status(400).json({ success: false, message: 'testId, testName, orderedBy are required' });
+  }
+  try {
+    const id = uuidv4();
+    db.prepare(`
+      INSERT INTO app_patient_ordered_tests (id, user_id, test_id, test_name, status, ordered_by)
+      VALUES (?, ?, ?, ?, 'ordered', ?)
+    `).run(id, userId, testId, testName, orderedBy);
+    return res.json({ success: true, data: { id } });
+  } catch (error) {
+    logger.error('Error adding patient ordered test:', error);
+    return res.status(500).json({ success: false, message: 'Failed to add test' });
+  }
+}));
+
+// Patient ordered lab tests - update
+router.put('/:userId/tests/:id', asyncHandler(async (req: Request, res: Response) => {
+  const { userId, id } = req.params;
+  const { status, reportId } = req.body as { status?: 'ordered'|'pending_review'|'completed'; reportId?: string };
+  try {
+    const now = new Date().toISOString();
+    const stmt = db.prepare(`
+      UPDATE app_patient_ordered_tests SET status = COALESCE(?, status), report_id = COALESCE(?, report_id), updated_at = ?
+      WHERE id = ? AND user_id = ?
+    `);
+    const result = stmt.run(status || null, reportId || null, now, id, userId);
+    if (result.changes === 0) return res.status(404).json({ success: false, message: 'Test not found' });
+    return res.json({ success: true });
+  } catch (error) {
+    logger.error('Error updating patient ordered test:', error);
+    return res.status(500).json({ success: false, message: 'Failed to update test' });
+  }
+}));
+
+// Patient ordered lab tests - delete (allowed only if ordered_by='self' and status='ordered')
+router.delete('/:userId/tests/:id', asyncHandler(async (req: Request, res: Response) => {
+  const { userId, id } = req.params;
+  try {
+    const row = db.prepare(`SELECT id, ordered_by, status FROM app_patient_ordered_tests WHERE id = ? AND user_id = ?`).get(id, userId) as any;
+    if (!row) return res.status(404).json({ success: false, message: 'Test not found' });
+    if (row.ordered_by !== 'self' || row.status !== 'ordered') {
+      return res.status(400).json({ success: false, message: 'Only self-ordered tests in Ordered status can be removed' });
+    }
+    db.prepare(`DELETE FROM app_patient_ordered_tests WHERE id = ? AND user_id = ?`).run(id, userId);
+    return res.json({ success: true, message: 'Test removed' });
+  } catch (error) {
+    logger.error('Error deleting patient ordered test:', error);
+    return res.status(500).json({ success: false, message: 'Failed to remove test' });
+  }
+}));
+
 // Get available doctors (for adding to care team)
 router.get('/available-doctors', asyncHandler(async (req: Request, res: Response) => {
   try {

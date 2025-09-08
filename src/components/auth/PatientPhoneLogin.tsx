@@ -10,9 +10,10 @@ interface PatientPhoneLoginProps {
   onDoctor?: () => void;
   onUsernameLogin?: () => void;
   onSignup?: () => void;
+  onContinueInviteUrl?: string;
 }
 
-const PatientPhoneLogin: React.FC<PatientPhoneLoginProps> = ({ onBack, onSuccess, onDoctor, onUsernameLogin, onSignup }) => {
+const PatientPhoneLogin: React.FC<PatientPhoneLoginProps> = ({ onBack, onSuccess, onDoctor, onUsernameLogin, onSignup, onContinueInviteUrl }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -191,6 +192,10 @@ const PatientPhoneLogin: React.FC<PatientPhoneLoginProps> = ({ onBack, onSuccess
                 >
                   Patient Sign Up
                 </button>
+              </div>
+
+              <div className="text-center mt-2 text-xs">
+                <a href={onContinueInviteUrl || '/invite'} className="underline">Continue Invite</a>
               </div>
 
               {/* Doctor CTA removed per request; doctor login available from main selection */}

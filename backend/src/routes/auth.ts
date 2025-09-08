@@ -208,6 +208,22 @@ router.post('/login', asyncHandler(async (req: Request, res: Response) => {
   });
 }));
 
+// Complete registration from invite (set username/password, optional ABHA later)
+router.post('/register-from-invite', asyncHandler(async (req: Request, res: Response) => {
+  const { inviteCode, username, password } = req.body as { inviteCode: string; username: string; password: string };
+  if (!inviteCode || !username || !password) return res.status(400).json({ success: false, message: 'inviteCode, username, password are required' });
+  const invite = db.prepare('SELECT * FROM app_patient_invites WHERE invite_code = ?').get(inviteCode) as any;
+  if (!invite) return res.status(404).json({ success: false, message: 'Invite not found' });
+  if (invite.status !== 'verified') return res.status(400).json({ success: false, message: 'Invite not verified yet' });
+  const userId = invite.user_id as string;
+  const hash = await bcrypt.hash(password, 10);
+  db.prepare('UPDATE app_users SET username = ?, password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(username, hash, userId);
+  db.prepare('UPDATE app_patient_invites SET status = \"completed\", updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(invite.id);
+  // Create session
+  const token = `${userId}-${Date.now()}`;
+  db.prepare('INSERT INTO app_user_sessions (id, user_id, token, expires_at) VALUES (?, ?, ?, ?)').run(token, userId, token, new Date(Date.now() + 7*24*60*60*1000).toISOString());
+  return res.json({ success: true, data: { userId, token } });
+}));
 // Logout user (unified for patients and doctors)
 router.post('/logout', asyncHandler(async (req: Request, res: Response) => {
   const { token } = req.body;

@@ -69,6 +69,21 @@ const PatientCareTeamPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // Auto-refresh labs list when a lab consent may change from other tabs/windows
+  useEffect(() => {
+    const handler = () => {
+      fetchCareTeamLabs();
+    };
+    window.addEventListener('lab-consent-updated', handler);
+    return () => window.removeEventListener('lab-consent-updated', handler);
+  }, []);
+
+  // Polling as fallback to catch status changes if event missed
+  useEffect(() => {
+    const id = setInterval(() => { fetchCareTeamLabs(); }, 5000);
+    return () => clearInterval(id);
+  }, [user?.id]);
+
   const handleRemoveDoctor = async (relationshipId: string, doctorName: string) => {
     if (!user) return;
     if (!confirm(`Remove ${doctorName} from your care team?`)) return;
@@ -298,6 +313,14 @@ const PatientCareTeamPage: React.FC = () => {
                                   )}
                                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-red-50" title="Revoke Access" onClick={async()=>{ if(!user) return; try { const r = await patientCareTeamService.removeLabFromCareTeam(user.id, lab.id); toast({ title:'Access revoked', description:r.message }); await fetchCareTeamLabs(); } catch(e:any){ toast({ title:'Error', description:e.message||'Failed to revoke lab', variant:'destructive' }); } }}>
                                     <Trash2 className="h-4 w-4 text-red-600" />
+                                  </Button>
+                                </>
+                              ) : lab.consentStatus === 'pending' ? (
+                                <>
+                                  <Button variant="outline" size="sm" onClick={async()=>{ if(!user) return; try { await patientCareTeamService.approveLabAccess(user.id, lab.id); toast({ title:'Consent approved' }); await fetchCareTeamLabs(); } catch(e:any){ toast({ title:'Error', description:e.message||'Failed to approve', variant:'destructive' }); } }}>Approve</Button>
+                                  <Button variant="ghost" size="sm" onClick={async()=>{ if(!user) return; try { const r = await patientCareTeamService.removeLabFromCareTeam(user.id, lab.id); toast({ title:'Consent rejected', description:r.message }); await fetchCareTeamLabs(); } catch(e:any){ toast({ title:'Error', description:e.message||'Failed to reject', variant:'destructive' }); } }}>Reject</Button>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowStatusInfo(showStatusInfo === lab.id ? null : lab.id)} title="View Status">
+                                    <Info className="h-4 w-4 text-yellow-600" />
                                   </Button>
                                 </>
                               ) : (

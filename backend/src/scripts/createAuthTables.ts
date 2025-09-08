@@ -193,6 +193,33 @@ const createAuthTables = async () => {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // 8b. Patient Invites (lab-assisted onboarding)
+    logger.info('✉️ Creating app_patient_invites table...');
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS app_patient_invites (
+        id TEXT PRIMARY KEY,
+        lab_id TEXT NOT NULL,
+        first_name TEXT,
+        last_name TEXT,
+        date_of_birth TEXT,
+        phone TEXT NOT NULL,
+        invite_code TEXT UNIQUE NOT NULL,
+        otp_code TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending', -- pending | verified | expired | completed
+        expires_at DATETIME NOT NULL,
+        user_id TEXT, -- set after OTP verify when provisional user is created
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (lab_id) REFERENCES app_labs(id),
+        FOREIGN KEY (user_id) REFERENCES app_users(id)
+      )
+    `);
+    db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_app_patient_invites_code ON app_patient_invites(invite_code);
+      CREATE INDEX IF NOT EXISTS idx_app_patient_invites_phone ON app_patient_invites(phone);
+      CREATE INDEX IF NOT EXISTS idx_app_patient_invites_status ON app_patient_invites(status);
+    `);
     
     logger.info('🧪 Creating app_lab_sessions table...');
     db.exec(`

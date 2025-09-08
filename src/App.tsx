@@ -42,6 +42,7 @@ import LabDashboard from "./pages/LabDashboard";
 import DoctorShell from "@/components/layout/DoctorShell";
 import LabShell from "@/components/layout/LabShell";
 import LabPatients from "./pages/LabPatients";
+import InviteOnboarding from "./pages/InviteOnboarding";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +75,8 @@ const App = () => {
               <Route path="/simple-test" element={<SimpleTest />} />
               <Route path="/login-test" element={<LoginTest />} />
               <Route path="/login" element={<LoginSelection />} />
+              <Route path="/invite" element={<InviteOnboarding />} />
+              <Route path="/invite/:code" element={<InviteOnboarding />} />
               <Route path="/user" element={<RequireRole role="patient"><PatientShell /></RequireRole>}>
                 <Route index element={<PatientHome />} />
                 <Route path="dashboard" element={<UserDashboard />} />
