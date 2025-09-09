@@ -737,14 +737,14 @@ const DoctorPatients: React.FC = () => {
                           variant="outline" 
                           disabled={savingConsult || !selectedPatientId} 
                           onClick={async ()=>{
-                            if (!user || !selectedPatientId) return;
-                            try {
-                              setSavingConsult(true);
+                          if (!user || !selectedPatientId) return;
+                          try {
+                            setSavingConsult(true);
                               
                               // First, save the consultation
                               let consultationIdToUse = consultationId;
                               if (!consultationIdToUse) {
-                                const res = await fetch(`${import.meta.env.MODE === 'production' ? '/api/v1' : 'http://localhost:3001/api/v1'}/doctor/${user.id}/consultations`, {
+                              const res = await fetch(`${import.meta.env.MODE === 'production' ? '/api/v1' : 'http://localhost:3001/api/v1'}/doctor/${user.id}/consultations`, {
                                   method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ 
                                     patientId: selectedPatientId, 
                                     chiefComplaint: chiefComplaint || undefined,
@@ -752,13 +752,13 @@ const DoctorPatients: React.FC = () => {
                                     treatmentPlan: medsText ? medsText.split('\\n') : undefined,
                                     status: 'completed'
                                   })
-                                });
-                                const json = await res.json();
+                              });
+                              const json = await res.json();
                                 if (res.ok && json.success) {
                                   consultationIdToUse = json.data.consultationId;
                                   setConsultationId(consultationIdToUse);
                                 }
-                              } else {
+                            } else {
                                 await fetch(`${import.meta.env.MODE === 'production' ? '/api/v1' : 'http://localhost:3001/api/v1'}/doctor/${user.id}/consultations/${consultationIdToUse}`, {
                                   method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ 
                                     chiefComplaint: chiefComplaint || undefined,
@@ -807,7 +807,7 @@ const DoctorPatients: React.FC = () => {
                                   console.error('Failed to refresh lab tests:', e);
                                 }
                               }
-                            } finally { setSavingConsult(false); }
+                          } finally { setSavingConsult(false); }
                           }}
                           className="bg-blue-600 hover:bg-blue-700 text-white"
                         >

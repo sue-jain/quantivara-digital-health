@@ -201,10 +201,15 @@ router.post('/:labId/consent-requests', asyncHandler(async (req: Request, res: R
       db.prepare(`UPDATE app_user_care_team SET consent_status = 'pending', updated_at = ? WHERE id = ?`).run(now, existing.id);
     } else {
       careTeamId = uuidv4();
+      // Ensure we have a valid abha_id - use the provided one or get from profile
+      const userAbhaId = abhaId || (db.prepare('SELECT abha_id FROM app_user_abha_profiles WHERE user_id = ? LIMIT 1').get(targetUserId) as any)?.abha_id;
+      if (!userAbhaId) {
+        return res.status(400).json({ success: false, message: 'No ABHA ID found for user' });
+      }
       db.prepare(`
         INSERT INTO app_user_care_team (id, user_id, abha_id, provider_type, provider_id, provider_name, consent_status, consent_date, created_at, updated_at)
-        VALUES (?, ?, (SELECT abha_id FROM app_user_abha_profiles WHERE user_id = ? LIMIT 1), 'lab', ?, ?, 'pending', NULL, ?, ?)
-      `).run(careTeamId, targetUserId, targetUserId, labId, lab.name, now, now);
+        VALUES (?, ?, ?, 'lab', ?, ?, 'pending', NULL, ?, ?)
+      `).run(careTeamId, targetUserId, userAbhaId, labId, lab.name, now, now);
     }
 
     return res.json({ success: true, message: 'Consent request created', data: { careTeamId, otpSent: true } });
@@ -313,6 +318,36 @@ router.post('/login', asyncHandler(async (req: Request, res: Response): Promise<
   db.prepare('INSERT INTO app_lab_sessions (id, lab_id, session_token, expires_at) VALUES (?, ?, ?, ?)')
     .run(token, lab.id, token, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString());
   res.json({ success: true, data: { token, lab: { id: lab.id, hfrUid: lab.hfr_uid, name: lab.name } } });
+}));
+
+// Lookup patient by ABHA ID (for lab search)
+router.get('/lookup-patient/:abhaId', asyncHandler(async (req: Request, res: Response) => {
+  const { abhaId } = req.params;
+  const normalized = abhaId.replace(/\D/g, '');
+  
+  try {
+    const patient = db.prepare(`
+      SELECT u.id as user_id, u.first_name, u.last_name, p.abha_id
+      FROM app_users u
+      LEFT JOIN app_user_abha_profiles p ON p.user_id = u.id
+      WHERE p.abha_id = ?
+    `).get(normalized) as any;
+    
+    if (!patient) {
+      return res.status(404).json({ success: false, message: 'Patient not found' });
+    }
+    
+    return res.json({ 
+      success: true, 
+      data: { 
+        patientId: patient.user_id, 
+        name: `${patient.first_name} ${patient.last_name}`, 
+        abhaId: patient.abha_id 
+      } 
+    });
+  } catch (error) {
+    throw error;
+  }
 }));
 
 // List consented patients for a lab (based on app_user_care_team)

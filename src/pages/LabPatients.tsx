@@ -79,6 +79,9 @@ const LabPatients: React.FC = () => {
       } catch {}
     };
     load();
+    // Force clear all error states on load
+    setOtpError(null);
+    setTestAddError(null);
   }, []);
 
   useEffect(() => {
@@ -202,32 +205,33 @@ const LabPatients: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Lookup by ABHA ID</label>
                 <div className="flex gap-2 items-stretch min-w-0">
                   <input value={abhaSearch} onChange={(e)=>setAbhaSearch(e.target.value)} placeholder="14-digit ABHA ID" className="flex-1 min-w-0 px-3 py-2 h-10 border border-gray-300 rounded-md" />
-                  <Button className="h-10 shrink-0" variant="outline" disabled={requestingConsent} onClick={async()=>{
+                  <Button className="h-10 shrink-0" variant="outline" onClick={async()=>{
                     const normalized = abhaSearch.replace(/\D/g, '');
                     if (!normalized) return;
                     const match = patients.find(p => (p.abhaId || '').replace(/\D/g, '') === normalized);
                     if (match) {
                       setLookupResult({ name: match.name, abhaId: match.abhaId || normalized, consented: true, patientId: match.patientId });
                     } else {
+                      // Look up patient by ABHA ID using API
                       try {
-                        setRequestingConsent(true);
-                        const infoRaw = localStorage.getItem('lab_info');
-                        if (!infoRaw) return;
-                        const lab = JSON.parse(infoRaw);
-                        setOtpVisible(true); // show OTP UI immediately
-                        const r = await labsService.requestConsent(lab.id, { abhaId: normalized });
-                        setOtpCareTeamId(r.careTeamId);
-                        setOtpValue('');
-                        setOtpError(null);
-                        window.dispatchEvent(new CustomEvent('lab-consent-updated'));
-                        setLookupResult({ name: 'Patient', abhaId: normalized, consented: false });
+                        const response = await fetch(`http://localhost:3001/api/v1/labs/lookup-patient/${normalized}`);
+                        const data = await response.json();
+                        if (data.success) {
+                          setLookupResult({ 
+                            name: data.data.name, 
+                            abhaId: data.data.abhaId, 
+                            consented: false,
+                            patientId: data.data.patientId 
+                          });
+                        } else {
+                          setLookupResult(null);
+                        }
                       } catch (e) {
-                        setOtpError('Could not create consent request. Check ABHA ID.');
-                        setOtpCareTeamId(null);
-                        setLookupResult({ name: 'Patient', abhaId: normalized, consented: false });
-                      } finally {
-                        setRequestingConsent(false);
+                        setLookupResult(null);
                       }
+                      setOtpCareTeamId(null);
+                      setOtpVisible(false);
+                      setOtpError(null);
                     }
                   }}>Search</Button>
                 </div>
@@ -318,17 +322,19 @@ const LabPatients: React.FC = () => {
                       <Button size="sm" variant="outline" disabled={requestingConsent} onClick={async()=>{
                         try {
                           setRequestingConsent(true);
+                          setOtpError(null); // Clear any previous errors
                           setOtpVisible(true); // show OTP UI immediately
                           const infoRaw = localStorage.getItem('lab_info');
                           if (!infoRaw || !lookupResult?.abhaId) return;
                           const lab = JSON.parse(infoRaw);
                           const r = await labsService.requestConsent(lab.id, { abhaId: lookupResult.abhaId.replace(/\D/g, '') });
                           setOtpCareTeamId(r.careTeamId);
-                          setOtpValue('');
+                          setConsentOtpValue(''); // Clear OTP input
                           setOtpError(null);
                           window.dispatchEvent(new CustomEvent('lab-consent-updated'));
                         } catch (e) {
-                          setOtpError('Could not create consent request. Please try again.');
+                          console.error('Consent request error:', e);
+                          setOtpError(`Error: ${e.message || 'Could not create consent request. Please try again.'}`);
                         } finally {
                           setRequestingConsent(false);
                         }
@@ -337,7 +343,7 @@ const LabPatients: React.FC = () => {
                   </div>
                   {!lookupResult.consented && otpCareTeamId && (
                     <div className="mt-1 text-right">
-                      <Button variant="ghost" size="sm" onClick={async()=>{ try { const infoRaw = localStorage.getItem('lab_info'); if(!infoRaw || !otpCareTeamId) return; const lab = JSON.parse(infoRaw); await labsService.cancelConsentRequest(lab.id, otpCareTeamId); setOtpCareTeamId(null); setOtpVisible(false); setOtpValue(''); setOtpError(null); } catch {} }}>🗑️ Cancel request</Button>
+                      <Button variant="ghost" size="sm" onClick={async()=>{ try { const infoRaw = localStorage.getItem('lab_info'); if(!infoRaw || !otpCareTeamId) return; const lab = JSON.parse(infoRaw); await labsService.cancelConsentRequest(lab.id, otpCareTeamId); setOtpCareTeamId(null); setOtpVisible(false); setConsentOtpValue(''); setOtpError(null); } catch {} }}>🗑️ Cancel request</Button>
                     </div>
                   )}
                   {!lookupResult.consented && otpVisible && (
@@ -374,6 +380,7 @@ const LabPatients: React.FC = () => {
                             setLookupResult({ name: lookupResult.name, abhaId: lookupResult.abhaId, consented: true, patientId: res.userId });
                             setActivePatientId(res.userId);
                             setActivePatientName(lookupResult.name);
+                            setOtpError(null); // Clear any error on successful verification
                             window.dispatchEvent(new CustomEvent('lab-consent-updated'));
                           } catch (err: any) {
                             setOtpError('Invalid or expired OTP.');
