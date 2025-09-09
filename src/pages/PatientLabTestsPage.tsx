@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FlaskConical, Link as LinkIcon, CheckCircle2 } from 'lucide-react';
+import { FlaskConical, Link as LinkIcon, Trash2 } from 'lucide-react';
 import labsService, { LabTestCatalogItem } from '@/services/labs';
 import { useAuth } from '@/contexts/AuthContext';
 import patientCareTeamService from '@/services/patientCareTeam';
@@ -159,7 +159,9 @@ const PatientLabTestsPage: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         {t.orderedBy === 'self' && (
-                          <Button variant="outline" size="sm" onClick={async ()=>{ try { await patientCareTeamService.deletePatientOrderedTest(user!.id, t.testId); setLabTests(prev=> prev.filter(x=> x.testId !== t.testId)); } catch {} }}>Remove</Button>
+                          <Button variant="outline" size="sm" onClick={async ()=>{ try { await patientCareTeamService.deletePatientOrderedTest(user!.id, t.testId); setLabTests(prev=> prev.filter(x=> x.testId !== t.testId)); } catch {} }} title="Remove">
+                            <Trash2 className="h-3 w-3 mr-1"/>Delete
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -188,7 +190,6 @@ const PatientLabTestsPage: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <Button variant="outline" size="sm" onClick={()=> { const id = prompt('Enter Lab Report ID to link', t.reportId || ''); if (id) linkReport(t.testId, id); }} title="Link Lab Report"><LinkIcon className="h-3 w-3 mr-1"/>Link</Button>
-                        <Button variant="outline" size="sm" onClick={()=> moveStatus(t.testId, 'completed')}><CheckCircle2 className="h-3 w-3 mr-1"/>Mark Reviewed</Button>
                       </div>
                     </div>
                   ))}
@@ -208,10 +209,15 @@ const PatientLabTestsPage: React.FC = () => {
                 <div className="space-y-3">
                   {labTests.filter(t=>t.status==='completed').length===0 && (<div className="text-sm text-gray-500">No completed tests</div>)}
                   {labTests.filter(t=>t.status==='completed').map(t=> (
-                    <div key={t.testId} className="p-3 border rounded-md">
-                      <div className="font-medium text-gray-900">{t.name}</div>
-                      <div className="text-xs text-gray-600">Test ID: {t.testId}</div>
-                      {t.reportId && <div className="text-xs text-gray-600">Report ID: {t.reportId}</div>}
+                    <div key={t.testId} className="p-3 border rounded-md flex items-center justify-between">
+                      <div>
+                        <div className="font-medium text-gray-900">{t.name}</div>
+                        <div className="text-xs text-gray-600">Test ID: {t.testId}</div>
+                        {t.reportId && <div className="text-xs text-gray-600">Report ID: {t.reportId}</div>}
+                      </div>
+                      <div>
+                        <Button variant="outline" size="sm" onClick={()=> { const id = prompt('Enter Lab Report ID to link', t.reportId || ''); if (id) linkReport(t.testId, id); }} title="Link Lab Report"><LinkIcon className="h-3 w-3 mr-1"/>Link</Button>
+                      </div>
                     </div>
                   ))}
                 </div>

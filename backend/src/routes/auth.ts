@@ -214,15 +214,78 @@ router.post('/register-from-invite', asyncHandler(async (req: Request, res: Resp
   if (!inviteCode || !username || !password) return res.status(400).json({ success: false, message: 'inviteCode, username, password are required' });
   const invite = db.prepare('SELECT * FROM app_patient_invites WHERE invite_code = ?').get(inviteCode) as any;
   if (!invite) return res.status(404).json({ success: false, message: 'Invite not found' });
-  if (invite.status !== 'verified') return res.status(400).json({ success: false, message: 'Invite not verified yet' });
+  if (invite.status !== 'verified' && invite.status !== 'completed') return res.status(400).json({ success: false, message: 'Invite not verified yet' });
   const userId = invite.user_id as string;
+  // Ensure username is unique
+  const existing = db.prepare('SELECT id FROM app_users WHERE username = ? AND id != ?').get(username, userId) as any;
+  if (existing) return res.status(400).json({ success: false, message: 'Username already taken' });
   const hash = await bcrypt.hash(password, 10);
-  db.prepare('UPDATE app_users SET username = ?, password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(username, hash, userId);
-  db.prepare('UPDATE app_patient_invites SET status = \"completed\", updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(invite.id);
+  try {
+    db.prepare('UPDATE app_users SET username = ?, password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(username, hash, userId);
+  } catch (e: any) {
+    return res.status(400).json({ success: false, message: 'Failed to set credentials' });
+  }
+  db.prepare("UPDATE app_patient_invites SET status = 'completed', updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(invite.id);
   // Create session
   const token = `${userId}-${Date.now()}`;
   db.prepare('INSERT INTO app_user_sessions (id, user_id, token, expires_at) VALUES (?, ?, ?, ?)').run(token, userId, token, new Date(Date.now() + 7*24*60*60*1000).toISOString());
   return res.json({ success: true, data: { userId, token } });
+}));
+
+// Lookup invite by code (for patient-side continue invite)
+router.get('/invites/:inviteCode', asyncHandler(async (req: Request, res: Response) => {
+  const { inviteCode } = req.params;
+  const inv = db.prepare('SELECT id, lab_id, first_name, last_name, phone, status, expires_at FROM app_patient_invites WHERE invite_code = ?').get(inviteCode) as any;
+  if (!inv) return res.status(404).json({ success: false, message: 'Invite not found' });
+  return res.json({ success: true, data: inv });
+}));
+
+// Verify invite by code + OTP (patient-side)
+router.post('/invites/:inviteCode/otp/verify', asyncHandler(async (req: Request, res: Response) => {
+  const { inviteCode } = req.params;
+  const { code } = req.body as { code: string };
+  const invite = db.prepare('SELECT * FROM app_patient_invites WHERE invite_code = ?').get(inviteCode) as any;
+  if (!invite) return res.status(404).json({ success: false, message: 'Invite not found' });
+  if (new Date(invite.expires_at).getTime() < Date.now()) return res.status(400).json({ success: false, message: 'Invite expired' });
+  // If already verified, be idempotent and return success
+  if (invite.status === 'verified' || invite.status === 'completed') {
+    return res.json({ success: true, message: 'Invite already verified', data: { userId: invite.user_id } });
+  }
+  if (!code || code !== invite.otp_code) return res.status(400).json({ success: false, message: 'Invalid OTP' });
+  // Ensure provisional user exists
+  let userId = invite.user_id as string | null;
+  if (!userId) {
+    userId = `user-invite-${invite.id}`;
+    db.prepare(`
+      INSERT OR IGNORE INTO app_users (id, username, password_hash, email, phone, first_name, last_name, date_of_birth, role, is_active, created_at, updated_at)
+      VALUES (?, ?, ?, NULL, ?, ?, ?, ?, 'patient', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).run(userId, `p_${invite.invite_code.toLowerCase()}`, '$2a$10$demoHashForLaterSet', invite.phone, invite.first_name, invite.last_name, invite.date_of_birth);
+  }
+  db.prepare('UPDATE app_patient_invites SET status = "verified", user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(userId, invite.id);
+  // Ensure pending link exists for the originator (lab or doctor)
+  if (invite.lab_id) {
+    const existsLab = db.prepare('SELECT id FROM app_user_care_team WHERE user_id = ? AND provider_type = "lab" AND provider_id = ?').get(userId, invite.lab_id) as any;
+    if (!existsLab) {
+      const careTeamId = require('uuid').v4();
+      const abhaRow = db.prepare('SELECT abha_id FROM app_user_abha_profiles WHERE user_id = ?').get(userId) as any;
+      db.prepare(`
+        INSERT INTO app_user_care_team (id, user_id, abha_id, provider_type, provider_id, provider_name, consent_status, created_at, updated_at)
+        VALUES (?, ?, ?, 'lab', ?, (SELECT name FROM app_labs WHERE id = ?), 'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `).run(careTeamId, userId, abhaRow?.abha_id || null, invite.lab_id, invite.lab_id);
+    }
+  }
+  if (invite.doctor_id) {
+    const existing = db.prepare('SELECT id FROM app_doctor_patients WHERE doctor_id = ? AND patient_id = ?').get(invite.doctor_id, userId) as any;
+    if (!existing) {
+      const relationshipId = require('uuid').v4();
+      const now = new Date().toISOString();
+      db.prepare(`
+        INSERT INTO app_doctor_patients (id, doctor_id, patient_id, consent_status, consent_date, access_level, relationship_type, created_at, updated_at)
+        VALUES (?, ?, ?, 'pending', NULL, 'read', 'primary', ?, ?)
+      `).run(relationshipId, invite.doctor_id, userId, now, now);
+    }
+  }
+  return res.json({ success: true, data: { userId } });
 }));
 // Logout user (unified for patients and doctors)
 router.post('/logout', asyncHandler(async (req: Request, res: Response) => {

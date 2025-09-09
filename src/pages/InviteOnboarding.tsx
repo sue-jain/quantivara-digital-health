@@ -25,9 +25,9 @@ const InviteOnboarding: React.FC = () => {
     try {
       setVerifying(true);
       setError(null);
-      // For demo simplicity, we need lab id + invite id; in this minimal version, assume lab id is stored when lab created the invite and encoded in code as INV-XXXX:LABID:INVITEID or we skip and rely on lab-side verification path only
-      // Keep a simple demo: skip server verify here; directly allow credentials using code.
-      // In a fuller version, we would look up invite by code via a new endpoint.
+      await authService.verifyInviteOtp(inviteCode, otp);
+    } catch (e: any) {
+      setError(e.message || 'Invalid OTP');
     } finally {
       setVerifying(false);
     }
@@ -69,6 +69,7 @@ const InviteOnboarding: React.FC = () => {
             </div>
             {error && <div className="text-xs text-red-600">{error}</div>}
             <div className="flex gap-2">
+              <Button onClick={handleVerify} disabled={!inviteCode || otp.length!==6 || verifying} variant="outline">Verify OTP</Button>
               <Button onClick={handleComplete} disabled={!inviteCode || !otp || !username || !password || verifying} style={{ backgroundColor: '#BBF1F1', color: '#374151' }}>{verifying ? 'Finishing…' : 'Finish & Login'}</Button>
               <Button variant="outline" onClick={()=>navigate('/login')}>Back</Button>
             </div>

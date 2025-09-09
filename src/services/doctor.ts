@@ -118,6 +118,24 @@ class DoctorService {
     if (!res.ok || !json.success) throw new Error(json.message || 'Failed to load summary');
     return json.data;
   }
+
+  async createPatientInvite(doctorId: string, payload: { firstName?: string; lastName?: string; dateOfBirth?: string; phone: string }): Promise<{ inviteId: string; inviteCode: string; otp: string; expiresAt: string }>{
+    const res = await fetch(`${API_BASE_URL}/doctor/${doctorId}/patient-invites`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'Failed to create invite');
+    return json.data;
+  }
+
+  async verifyPatientInvite(doctorId: string, inviteId: string, code: string): Promise<{ userId: string; relationshipId: string }>{
+    const res = await fetch(`${API_BASE_URL}/doctor/${doctorId}/patient-invites/${inviteId}/otp/verify`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'Failed to verify invite');
+    return json.data;
+  }
 }
 
 const doctorService = new DoctorService();

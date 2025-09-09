@@ -5,6 +5,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Import profile tables setup function
 import { setupProfileTables } from './setupProfileTables';
+import createDemoUsers from './createDemoUsers';
+import createDemoDoctors from './createDemoDoctors';
+import createDemoLabs from './createDemoLabs';
 
 // Fixed demo ABHA IDs for consistent demos
 const DEMO_ABHA_IDS = [
@@ -32,6 +35,12 @@ const DEMO_HOSPITALS = [
 const addDemoData = async () => {
   try {
     logger.info('🔍 Checking for missing demo data...');
+    
+    // First, ensure new auth system has demo data
+    logger.info('🔐 Setting up new auth system demo data...');
+    await createDemoUsers();
+    await createDemoDoctors();
+    await createDemoLabs();
     
     // Ensure profile integration tables exist
     logger.info('🏗️  Setting up profile integration tables if needed...');

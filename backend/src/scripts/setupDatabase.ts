@@ -1,11 +1,26 @@
 import { db } from '../config/sqlite';
 import { logger } from '../utils/logger';
+import createAuthTables from './createAuthTables';
+import createDoctorTables from './createDoctorTables';
+import createDemoLabs from './createDemoLabs';
 
 const createTables = () => {
   try {
     logger.info('🏗️  Creating database tables...');
 
-    // Users table
+    // First, create the new auth system tables
+    logger.info('🔐 Setting up new authentication system tables...');
+    createAuthTables();
+    createDoctorTables();
+    
+    // Create demo labs
+    logger.info('🧪 Setting up demo labs...');
+    createDemoLabs();
+
+    // Keep existing tables for backward compatibility with DEMO_HUB
+    logger.info('🔄 Creating legacy tables for DEMO_HUB compatibility...');
+    
+    // Users table (legacy - for DEMO_HUB)
     db.exec(`
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import labsService from '@/services/labs';
@@ -26,24 +26,46 @@ const LabPatients: React.FC = () => {
   const [tests, setTests] = useState<OrderedTest[]>([]);
   const [labId, setLabId] = useState<string>('');
   const [abhaSearch, setAbhaSearch] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [dob, setDob] = useState('');
+  // Lookup by patient details (isolated state)
+  const [lookupFirstName, setLookupFirstName] = useState('');
+  const [lookupLastName, setLookupLastName] = useState('');
+  const [lookupDob, setLookupDob] = useState('');
+  // Invite section (separate state so typing does not cross-fill)
+  const [inviteFirstName, setInviteFirstName] = useState('');
+  const [inviteLastName, setInviteLastName] = useState('');
+  const [inviteDob, setInviteDob] = useState('');
   const [invitePhone, setInvitePhone] = useState('');
   const [lookupResult, setLookupResult] = useState<{ name: string; abhaId: string; consented: boolean; patientId?: string } | null>(null);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [fileByTest, setFileByTest] = useState<Record<string, File | undefined>>({});
   const [otpCareTeamId, setOtpCareTeamId] = useState<string | null>(null);
-  const [otpValue, setOtpValue] = useState('');
-  const [otpVerifying, setOtpVerifying] = useState(false);
+  // Separate OTP inputs for invite and consent to prevent cross-filling
+  const [inviteOtpValue, setInviteOtpValue] = useState('');
+  const [inviteVerifying, setInviteVerifying] = useState(false);
+  const [consentOtpValue, setConsentOtpValue] = useState('');
+  const [consentVerifying, setConsentVerifying] = useState(false);
   const [otpError, setOtpError] = useState<string | null>(null);
   const [requestingConsent, setRequestingConsent] = useState(false);
   const [otpVisible, setOtpVisible] = useState(false);
   const [inviteId, setInviteId] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [inviteOtp, setInviteOtp] = useState<string | null>(null);
+  const [inviteVerified, setInviteVerified] = useState(false);
   const [consentedQuery, setConsentedQuery] = useState('');
   const [showConsentedDropdown, setShowConsentedDropdown] = useState(false);
+  const [openConsented, setOpenConsented] = useState(true);
+  const [openAbha, setOpenAbha] = useState(false);
+  const [openDetails, setOpenDetails] = useState(false);
+  const [openInvite, setOpenInvite] = useState(false);
+  // Lab test catalog for adding new ordered tests
+  const [catalog, setCatalog] = useState<Array<{ id: string; name: string; loincCode?: string }>>([]);
+  const [testQuery, setTestQuery] = useState('');
+  const [showTestDropdown, setShowTestDropdown] = useState(false);
+  const testBoxRef = useRef<HTMLDivElement | null>(null);
+  const [addingTest, setAddingTest] = useState(false);
+  const [testAddError, setTestAddError] = useState<string | null>(null);
+  const [testAdded, setTestAdded] = useState(false);
+  const [selectedTestId, setSelectedTestId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -78,6 +100,39 @@ const LabPatients: React.FC = () => {
     };
     fetchTests();
   }, [labId, activePatientId]);
+
+  // Load catalog once
+  useEffect(() => {
+    (async () => {
+      try {
+        const items = await labsService.getCatalog();
+        setCatalog(items || []);
+      } catch {}
+    })();
+  }, []);
+
+  // Close the test dropdown on outside click or Escape
+  useEffect(() => {
+    const onDocMouseDown = (e: MouseEvent) => {
+      const el = testBoxRef.current;
+      if (!el) return;
+      if (e.target instanceof Node && !el.contains(e.target)) {
+        setShowTestDropdown(false);
+      }
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowTestDropdown(false);
+    };
+    document.addEventListener('mousedown', onDocMouseDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onDocMouseDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, []);
+
+  // Hide dropdown when patient changes
+  useEffect(() => { setShowTestDropdown(false); }, [activePatientId]);
 
   const reload = async () => {
     if (!labId || !activePatientId) return;
@@ -136,17 +191,18 @@ const LabPatients: React.FC = () => {
                   )}
                 </div>
               </div>
+
               {!activePatientId && (
                 <div className="text-xs text-gray-600">Select a consented patient to manage ordered tests below.</div>
               )}
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 min-w-0">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Lookup by ABHA ID</label>
-                <div className="flex gap-2">
-                  <input value={abhaSearch} onChange={(e)=>setAbhaSearch(e.target.value)} placeholder="14-digit ABHA ID" className="flex-1 px-3 py-2 border border-gray-300 rounded-md" />
-                  <Button variant="outline" disabled={requestingConsent} onClick={async()=>{
+                <div className="flex gap-2 items-stretch min-w-0">
+                  <input value={abhaSearch} onChange={(e)=>setAbhaSearch(e.target.value)} placeholder="14-digit ABHA ID" className="flex-1 min-w-0 px-3 py-2 h-10 border border-gray-300 rounded-md" />
+                  <Button className="h-10 shrink-0" variant="outline" disabled={requestingConsent} onClick={async()=>{
                     const normalized = abhaSearch.replace(/\D/g, '');
                     if (!normalized) return;
                     const match = patients.find(p => (p.abhaId || '').replace(/\D/g, '') === normalized);
@@ -179,16 +235,16 @@ const LabPatients: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Lookup by Patient Details</label>
-                <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-2 items-center">
-                  <input value={firstName} onChange={(e)=>setFirstName(e.target.value)} placeholder="First name" className="px-3 py-2 border border-gray-300 rounded-md" />
-                  <input value={lastName} onChange={(e)=>setLastName(e.target.value)} placeholder="Last name" className="px-3 py-2 border border-gray-300 rounded-md" />
-                  <input value={dob} onChange={(e)=>setDob(e.target.value)} type="date" className="px-3 py-2 border border-gray-300 rounded-md" />
-                  <Button variant="outline" onClick={async()=>{
-                    if (!firstName.trim() || !lastName.trim() || !dob) return;
+                <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 items-stretch min-w-0">
+                  <input value={lookupFirstName} onChange={(e)=>setLookupFirstName(e.target.value)} placeholder="First name" className="w-full min-w-0 h-10 px-3 py-2 border border-gray-300 rounded-md" />
+                  <input value={lookupLastName} onChange={(e)=>setLookupLastName(e.target.value)} placeholder="Last name" className="w-full min-w-0 h-10 px-3 py-2 border border-gray-300 rounded-md" />
+                  <input value={lookupDob} onChange={(e)=>setLookupDob(e.target.value)} type="date" className="w-full min-w-0 h-10 px-3 py-2 border border-gray-300 rounded-md" />
+                  <Button variant="outline" className="h-10 shrink-0" onClick={async()=>{
+                    if (!lookupFirstName.trim() || !lookupLastName.trim() || !lookupDob) return;
                     try {
-                      const res = await patientService.lookupAbhaIdByNameAndDOB(firstName, lastName, dob);
+                      const res = await patientService.lookupAbhaIdByNameAndDOB(lookupFirstName, lookupLastName, lookupDob);
                       const match = patients.find(p => p.abhaId === (res as any).abhaId);
-                      setLookupResult({ name: `${firstName} ${lastName}`, abhaId: (res as any).abhaId, consented: !!match, patientId: match?.patientId });
+                      setLookupResult({ name: `${lookupFirstName} ${lookupLastName}`, abhaId: (res as any).abhaId, consented: !!match, patientId: match?.patientId });
                     } catch {
                       setLookupResult(null);
                     }
@@ -199,51 +255,52 @@ const LabPatients: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Create new patient (Invite)</label>
                 <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
-                  <input value={firstName} onChange={(e)=>setFirstName(e.target.value)} placeholder="First name" className="px-3 py-2 border border-gray-300 rounded-md" />
-                  <input value={lastName} onChange={(e)=>setLastName(e.target.value)} placeholder="Last name" className="px-3 py-2 border border-gray-300 rounded-md" />
-                  <input value={dob} onChange={(e)=>setDob(e.target.value)} type="date" className="px-3 py-2 border border-gray-300 rounded-md" />
+                  <input value={inviteFirstName} onChange={(e)=>setInviteFirstName(e.target.value)} placeholder="First name" className="px-3 py-2 border border-gray-300 rounded-md" />
+                  <input value={inviteLastName} onChange={(e)=>setInviteLastName(e.target.value)} placeholder="Last name" className="px-3 py-2 border border-gray-300 rounded-md" />
+                  <input value={inviteDob} onChange={(e)=>setInviteDob(e.target.value)} type="date" className="px-3 py-2 border border-gray-300 rounded-md" />
                   <input value={invitePhone} onChange={(e)=>setInvitePhone(e.target.value)} placeholder="Mobile number" className="px-3 py-2 border border-gray-300 rounded-md" />
                   <Button variant="outline" onClick={async()=>{
                     try {
                       const infoRaw = localStorage.getItem('lab_info');
                       if (!infoRaw) return;
                       const lab = JSON.parse(infoRaw);
-                      const data = await labsService.createPatientInvite(lab.id, { firstName, lastName, dateOfBirth: dob, phone: invitePhone });
+                      const data = await labsService.createPatientInvite(lab.id, { firstName: inviteFirstName, lastName: inviteLastName, dateOfBirth: inviteDob, phone: invitePhone });
                       setInviteId(data.inviteId);
                       setInviteCode(data.inviteCode);
                       setInviteOtp(data.otp);
-                      setOtpVisible(true);
+                      setInviteVerified(false);
+                      // Do not show consent OTP yet; wait until invite verification
                       setOtpCareTeamId(null);
-                      setLookupResult({ name: `${firstName || 'Patient'} ${lastName || ''}`.trim(), abhaId: '', consented: false });
                     } catch (e) {
                       setOtpError('Failed to create invite');
                     }
                   }}>Send invite</Button>
                 </div>
                 {inviteId && (
-                  <div className="mt-2 text-xs text-gray-600">Invite Code: <span className="font-mono text-gray-800">{inviteCode}</span> • OTP: <span className="font-mono text-gray-800">{inviteOtp}</span></div>
+                  <div className="mt-2 text-xs text-gray-600">Invite Code: <span className="font-mono text-gray-800">{inviteCode}</span> • OTP: <span className="font-mono text-gray-800">{inviteOtp}</span> {inviteVerified && <span className="text-green-700 ml-2">Verified</span>}</div>
                 )}
                 {inviteId && (
                   <div className="mt-2 flex items-center gap-2">
-                    <input type="password" inputMode="numeric" pattern="[0-9]*" maxLength={6} value={otpValue} onChange={(e)=> setOtpValue(e.target.value)} placeholder="******" className="px-3 py-2 border border-gray-300 rounded-md w-32 tracking-widest" />
-                    <Button size="sm" disabled={otpVerifying || otpValue.length !== 6} onClick={async()=>{
+                    <input type="password" inputMode="numeric" pattern="[0-9]*" maxLength={6} value={inviteOtpValue} onChange={(e)=> setInviteOtpValue(e.target.value)} placeholder="******" className="px-3 py-2 border border-gray-300 rounded-md w-32 tracking-widest" />
+                    <Button size="sm" disabled={inviteVerifying || inviteOtpValue.length !== 6} onClick={async()=>{
                       try {
-                        setOtpVerifying(true);
+                        setInviteVerifying(true);
                         setOtpError(null);
                         const infoRaw = localStorage.getItem('lab_info');
                         if (!infoRaw || !inviteId) return;
                         const lab = JSON.parse(infoRaw);
-                        const res = await labsService.verifyPatientInvite(lab.id, inviteId, otpValue);
+                        const res = await labsService.verifyPatientInvite(lab.id, inviteId, inviteOtpValue);
                         // After invite verification, keep flow simple: set active patient and show ordered tests
                         setActivePatientId(res.userId);
-                        setActivePatientName(`${firstName || 'Patient'} ${lastName || ''}`.trim());
+                        setActivePatientName(`${inviteFirstName || 'Patient'} ${inviteLastName || ''}`.trim());
+                        setInviteVerified(true);
                         window.dispatchEvent(new CustomEvent('lab-consent-updated'));
                       } catch {
                         setOtpError('Invalid or expired OTP.');
                       } finally {
-                        setOtpVerifying(false);
+                        setInviteVerifying(false);
                       }
-                    }}>{otpVerifying ? 'Verifying…' : 'Verify Invite'}</Button>
+                    }}>{inviteVerifying ? 'Verifying…' : 'Verify Invite'}</Button>
                   </div>
                 )}
               </div>
@@ -298,32 +355,33 @@ const LabPatients: React.FC = () => {
                           inputMode="numeric"
                           pattern="[0-9]*"
                           maxLength={6}
-                          value={otpValue}
-                          onChange={(e)=> setOtpValue(e.target.value)}
+                          value={consentOtpValue}
+                          onChange={(e)=> setConsentOtpValue(e.target.value)}
                           placeholder="******"
                           className="px-3 py-2 border border-gray-300 rounded-md w-32 tracking-widest"
                         />
-                        <Button size="sm" disabled={otpVerifying || otpValue.length !== 6 || !otpCareTeamId} onClick={async()=>{
+                        <Button size="sm" disabled={consentVerifying || consentOtpValue.length !== 6 || !otpCareTeamId} onClick={async()=>{
                           try {
-                            setOtpVerifying(true);
+                            setConsentVerifying(true);
                             setOtpError(null);
                             const infoRaw = localStorage.getItem('lab_info');
                             if (!infoRaw) return;
                             const lab = JSON.parse(infoRaw);
-                            const res = await labsService.verifyConsentOtp(lab.id, otpCareTeamId!, otpValue);
+                            const res = await labsService.verifyConsentOtp(lab.id, otpCareTeamId!, consentOtpValue);
                             // refresh patients and set active to verified user
                             const updated = await labsService.listConsentedPatients(lab.id);
                             setPatients(updated);
                             setLookupResult({ name: lookupResult.name, abhaId: lookupResult.abhaId, consented: true, patientId: res.userId });
                             setActivePatientId(res.userId);
+                            setActivePatientName(lookupResult.name);
                             window.dispatchEvent(new CustomEvent('lab-consent-updated'));
                           } catch (err: any) {
                             setOtpError('Invalid or expired OTP.');
                           } finally {
-                            setOtpVerifying(false);
+                            setConsentVerifying(false);
                           }
-                        }}>{otpVerifying ? 'Verifying…' : 'Verify OTP'}</Button>
-                        <Button size="sm" variant="ghost" onClick={()=>{ setOtpVisible(false); setOtpCareTeamId(null); setOtpValue(''); setOtpError(null); }}>Cancel</Button>
+                        }}>{consentVerifying ? 'Verifying…' : 'Verify OTP'}</Button>
+                        <Button size="sm" variant="ghost" onClick={()=>{ setOtpVisible(false); setOtpCareTeamId(null); setConsentOtpValue(''); setOtpError(null); }}>Cancel</Button>
                       </div>
                       {otpError && <div className="text-xs text-red-600 mt-1">{otpError}</div>}
                     </div>
@@ -345,6 +403,88 @@ const LabPatients: React.FC = () => {
             <div className="text-sm text-gray-600">Select a consented patient on the left or via lookup to view ordered tests.</div>
           ) : (
             <div className="space-y-6">
+              {/* Add ordered test */}
+              <div className="border rounded-md p-3" ref={testBoxRef}>
+                <div className="text-sm font-medium text-gray-900 mb-2">Add a test</div>
+                <div className="relative flex items-center gap-2">
+                  <input
+                    value={testQuery}
+                    onChange={(e)=> { setTestQuery(e.target.value); setSelectedTestId(null); setShowTestDropdown(true); }}
+                    onFocus={()=> setShowTestDropdown(true)}
+                    onBlur={()=> setTimeout(()=> setShowTestDropdown(false), 100)}
+                    placeholder="Search test by name or LOINC (e.g., HbA1c or 4548-4)"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                  <Button
+                    variant="outline"
+                    disabled={!testQuery.trim() || !activePatientId || addingTest}
+                    onClick={async()=>{
+                      setTestAddError(null); setTestAdded(false);
+                      let match = null as | { id: string; name: string; loincCode?: string } | null;
+                      // 1) Prefer explicitly selected test from dropdown
+                      if (selectedTestId) {
+                        match = catalog.find(t => t.id === selectedTestId) || null;
+                      }
+                      // 2) Try to parse "Name (CODE)" pattern and match by code
+                      if (!match) {
+                        const raw = testQuery.trim();
+                        const codeInParens = raw.match(/\(([^)]+)\)\s*$/);
+                        if (codeInParens && codeInParens[1]) {
+                          const code = codeInParens[1].trim().toLowerCase();
+                          match = catalog.find(t => (t.loincCode || '').toLowerCase() === code) || null;
+                        }
+                      }
+                      // 3) Exact name or exact code
+                      if (!match) {
+                        const q = testQuery.trim().toLowerCase();
+                        match = catalog.find(t => (t.name || '').toLowerCase() === q || (t.loincCode || '').toLowerCase() === q) || null;
+                      }
+                      // 4) Fallback: first fuzzy match by includes
+                      if (!match) {
+                        const q = testQuery.trim().toLowerCase();
+                        const candidates = catalog.filter(t => (t.name || '').toLowerCase().includes(q) || (t.loincCode || '').toLowerCase().includes(q));
+                        if (candidates.length === 1) match = candidates[0];
+                      }
+                      if (!match) { setTestAddError('Select a valid test from the list'); return; }
+                      if (!activePatientId || !labId) { setTestAddError('No active patient'); return; }
+                      try {
+                        setAddingTest(true);
+                        await labsService.addOrderedTest(labId, activePatientId, { testId: match.id, testName: match.name + (match.loincCode ? ` (${match.loincCode})` : ''), orderedBy: 'doctor' });
+                        setTestQuery(''); setSelectedTestId(null); setShowTestDropdown(false); setTestAdded(true);
+                        await reload();
+                        setTimeout(()=> setTestAdded(false), 2000);
+                      } catch (e:any) {
+                        setTestAddError(e?.message || 'Failed to add test');
+                      } finally {
+                        setAddingTest(false);
+                      }
+                    }}
+                  >{addingTest ? 'Adding…' : 'Add'}</Button>
+                  {showTestDropdown && (
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-56 overflow-auto" onMouseDown={(e)=> e.preventDefault()}>
+                      {catalog.filter(t => {
+                        const q = testQuery.trim().toLowerCase();
+                        if (!q) return true;
+                        return (t.name||'').toLowerCase().includes(q) || (t.loincCode||'').toLowerCase().includes(q);
+                      }).map(t => (
+                        <div key={t.id} className="px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer" onClick={()=>{ setSelectedTestId(t.id); setTestQuery(t.name + (t.loincCode ? ` (${t.loincCode})` : '')); setShowTestDropdown(false); }}>
+                          <div className="font-medium">{t.name}</div>
+                          <div className="text-xs text-gray-500">{t.loincCode || 'No LOINC'}</div>
+                        </div>
+                      ))}
+                      {catalog.filter(t => {
+                        const q = testQuery.trim().toLowerCase();
+                        if (!q) return true;
+                        return (t.name||'').toLowerCase().includes(q) || (t.loincCode||'').toLowerCase().includes(q);
+                      }).length === 0 && (
+                        <div className="px-3 py-2 text-sm text-gray-500">No matches</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {testAddError && <div className="text-xs text-red-600 mt-1">{testAddError}</div>}
+                {testAdded && <div className="text-xs text-green-700 mt-1">Test added to Ordered</div>}
+              </div>
               {/* Ordered (Labs can only view/manage Ordered) */}
               <div>
                 <div className="text-sm font-medium text-gray-900 mb-2">Ordered</div>

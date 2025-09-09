@@ -65,6 +65,20 @@ class AuthService {
     return { token, userId: result.data.userId };
   }
 
+  async getInvite(inviteCode: string): Promise<any> {
+    const res = await fetch(`${API_BASE_URL}/auth/invites/${inviteCode}`);
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'Invite not found');
+    return json.data;
+  }
+
+  async verifyInviteOtp(inviteCode: string, code: string): Promise<{ userId: string }> {
+    const res = await fetch(`${API_BASE_URL}/auth/invites/${inviteCode}/otp/verify`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }) });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'OTP invalid');
+    return json.data;
+  }
+
   // Register new user
   async register(data: RegisterData): Promise<AuthResponse> {
     try {

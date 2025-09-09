@@ -141,6 +141,13 @@ if [ ! -f "$DB_FILE" ]; then
     NEEDS_SETUP=true
     NEEDS_SEED=true
 else
+    # Ensure new auth tables exist (app_users)
+    if ! sqlite3 "$DB_FILE" "SELECT name FROM sqlite_master WHERE type='table' AND name='app_users';" | grep -q "app_users"; then
+        echo -e "${YELLOW}Database exists but missing new auth tables (app_users). Will initialize new auth system...${NC}"
+        NEEDS_SETUP=true
+        NEEDS_SEED=true
+    fi
+
     # Check if database has the abha_id column in medical_documents table
     if ! sqlite3 "$DB_FILE" "SELECT abha_id FROM medical_documents LIMIT 1;" > /dev/null 2>&1; then
         echo -e "${YELLOW}Database exists but missing abha_id column. Will setup database...${NC}"
@@ -169,22 +176,22 @@ fi
 
 # Setup database if needed
 if [ "$NEEDS_SETUP" = true ]; then
-    echo -e "${BLUE}Setting up database schema...${NC}"
-    npm run db:setup || {
-        echo -e "${RED}❌ Database setup failed${NC}"
+    echo -e "${BLUE}Setting up complete database (new auth system + legacy compatibility)...${NC}"
+    npm run db:init || {
+        echo -e "${RED}❌ Database initialization failed${NC}"
         exit 1
     }
-    echo -e "${GREEN}✅ Database schema created${NC}"
-fi
-
-# Add missing demo data (preserves existing data)
-if [ "$NEEDS_SEED" = true ]; then
-    echo -e "${BLUE}Adding missing demo data (preserving existing data)...${NC}"
-    npm run db:add-demo || {
-        echo -e "${RED}❌ Demo data addition failed${NC}"
-        exit 1
-    }
-    echo -e "${GREEN}✅ Demo data added successfully${NC}"
+    echo -e "${GREEN}✅ Complete database setup completed${NC}"
+else
+    # Add missing demo data (preserves existing data)
+    if [ "$NEEDS_SEED" = true ]; then
+        echo -e "${BLUE}Adding missing demo data (preserving existing data)...${NC}"
+        npm run db:add-demo || {
+            echo -e "${RED}❌ Demo data addition failed${NC}"
+            exit 1
+        }
+        echo -e "${GREEN}✅ Demo data added successfully${NC}"
+    fi
 fi
 
 # Setup profile integration tables (Phase 1) - only if needed
@@ -327,17 +334,24 @@ echo -e "${BLUE}Frontend:${NC} http://localhost:$FRONTEND_PORT"
 echo -e "${BLUE}Password:${NC} ${YELLOW}$SITE_PASSWORD${NC}"
 echo ""
 echo -e "${BLUE}Demo Features:${NC}"
+echo "  • 🆕 NEW AUTH SYSTEM: Patient/Doctor/Lab login flows"
 echo "  • ABHA ID Lookup: http://localhost:$FRONTEND_PORT/demo/abha-lookup"
 echo "  • Document Processor: http://localhost:$FRONTEND_PORT/processor"
 echo "  • Analytics Dashboard: http://localhost:$FRONTEND_PORT/demo/analytics"
 echo "  • 🆕 AI Profile Integration: Enhanced user profiles with AI-extracted data"
 echo ""
-echo -e "${BLUE}Test ABHA IDs:${NC}"
-echo "  • 1234-5678-9012-34 (Ramesh Kumar - Diabetes)"
-echo "  • 9876-5432-1098-76 (Priya Sharma - Asthma)"
-echo "  • 4567-8901-2345-67 (Suresh Patel - Heart Disease)"
-echo "  • 1111-2222-3333-44 (Ashok Gupta - Hypertension)"
-echo "  • 5555-6666-7777-88 (Meera Singh - Thyroid)"
+echo -e "${BLUE}🆕 NEW AUTH SYSTEM CREDENTIALS:${NC}"
+echo -e "${YELLOW}👤 PATIENTS:${NC}"
+echo "  • Phone: 9876543210 (OTP: 123456)"
+echo "  • Username: ramesh_kumar / Password: demo123"
+echo -e "${YELLOW}👨‍⚕️ DOCTORS:${NC}"
+echo "  • HPR ID: 12345678-MH / Password: demo123"
+echo "  • HPR ID: 87654321-MH / Password: demo123"
+echo -e "${YELLOW}🧪 LABS:${NC}"
+echo "  • HFR ID: HFR-MUM-001 / Password: demo123"
+echo ""
+echo -e "${BLUE}LEGACY DEMO_HUB (unchanged):${NC}"
+echo "  • ABHA IDs: 1234-5678-9012-34, 9876-5432-1098-76, etc."
 echo ""
 echo -e "${BLUE}Profile Data Available:${NC}"
 echo "  • Active Medications: Extracted from prescriptions"

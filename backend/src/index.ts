@@ -14,7 +14,7 @@ import { logger } from './utils/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { notFoundHandler } from './middleware/notFoundHandler';
 import { webSocketManager } from './websocket/server';
-import initDatabase from './scripts/initDatabase';
+import { initDatabase } from './scripts/initDatabase';
 
 // Import routes
 import authRoutes from './routes/auth';

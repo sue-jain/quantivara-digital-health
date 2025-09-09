@@ -77,6 +77,44 @@ router.get('/:doctorId/patients/search', asyncHandler(async (req: Request, res: 
   return res.json({ success: true, data: results });
 }));
 
+// POST /api/v1/doctor/:doctorId/consultations
+// Create a consultation for a (possibly provisional) patient
+router.post('/:doctorId/consultations', asyncHandler(async (req: Request, res: Response) => {
+  const { doctorId } = req.params;
+  const { patientId, diagnosis, treatmentPlan, medicines } = req.body as { patientId: string; diagnosis?: string; treatmentPlan?: string; medicines?: any };
+  if (!patientId) return res.status(400).json({ success: false, message: 'patientId is required' });
+  const doctor = db.prepare('SELECT id FROM app_doctors WHERE id = ? AND is_active = 1').get(doctorId) as any;
+  if (!doctor) return res.status(404).json({ success: false, message: 'Doctor not found' });
+  const patient = db.prepare('SELECT id FROM app_users WHERE id = ? AND is_active = 1').get(patientId) as any;
+  if (!patient) return res.status(404).json({ success: false, message: 'Patient not found' });
+  const id = uuidv4();
+  const now = new Date().toISOString();
+  db.prepare(`
+    INSERT INTO app_consultations (id, doctor_id, patient_id, consultation_date, consultation_type, diagnosis, treatment_plan, status, notes, created_at, updated_at)
+    VALUES (?, ?, ?, ?, 'in_person', ?, ?, 'in_progress', ?, ?, ?)
+  `).run(id, doctorId, patientId, now, diagnosis || null, treatmentPlan || null, medicines ? JSON.stringify(medicines) : null, now, now);
+  return res.status(201).json({ success: true, data: { consultationId: id } });
+}));
+
+// PUT /api/v1/doctor/:doctorId/consultations/:id
+router.put('/:doctorId/consultations/:id', asyncHandler(async (req: Request, res: Response) => {
+  const { doctorId, id } = req.params;
+  const { diagnosis, treatmentPlan, medicines, status } = req.body as { diagnosis?: string; treatmentPlan?: string; medicines?: any; status?: string };
+  const existing = db.prepare('SELECT id FROM app_consultations WHERE id = ? AND doctor_id = ?').get(id, doctorId) as any;
+  if (!existing) return res.status(404).json({ success: false, message: 'Consultation not found' });
+  const now = new Date().toISOString();
+  db.prepare(`
+    UPDATE app_consultations
+    SET diagnosis = COALESCE(?, diagnosis),
+        treatment_plan = COALESCE(?, treatment_plan),
+        notes = COALESCE(?, notes),
+        status = COALESCE(?, status),
+        updated_at = ?
+    WHERE id = ? AND doctor_id = ?
+  `).run(diagnosis || null, treatmentPlan || null, medicines ? JSON.stringify(medicines) : null, status || null, now, id, doctorId);
+  return res.json({ success: true });
+}));
+
 // POST /api/v1/doctor/:doctorId/patients
 // Create a new patient (demo convenience). Body: { firstName, lastName, phone, email? }
 router.post('/:doctorId/patients', asyncHandler(async (req: Request, res: Response) => {
@@ -108,7 +146,7 @@ router.post('/:doctorId/patients', asyncHandler(async (req: Request, res: Respon
 // Save a voice diagnosis record. Body: { patientId, audioBase64?, transcript? }
 router.post('/:doctorId/voice', asyncHandler(async (req: Request, res: Response) => {
   const { doctorId } = req.params;
-  const { patientId, audioBase64, transcript } = req.body || {};
+  const { patientId, audioBase64, transcript, consultationId } = req.body || {};
 
   if (!patientId) {
     return res.status(400).json({ success: false, message: 'patientId is required' });
@@ -127,13 +165,14 @@ router.post('/:doctorId/voice', asyncHandler(async (req: Request, res: Response)
 
   const id = uuidv4();
   const stmt = db.prepare(`
-    INSERT INTO app_voice_diagnosis (id, doctor_id, patient_id, audio_file_path, transcribed_text, ai_analysis, symptoms_extracted, confidence_score, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'processed')
+    INSERT INTO app_voice_diagnosis (id, doctor_id, patient_id, consultation_id, audio_file_path, transcribed_text, ai_analysis, symptoms_extracted, confidence_score, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'processed')
   `);
   stmt.run(
     id,
     doctorId,
     patientId,
+    consultationId || null,
     audioPath,
     transcript || null,
     null, // ai_analysis (JSON) - not in demo
@@ -274,6 +313,56 @@ router.get('/:doctorId/patient/:patientId/summary', asyncHandler(async (req: Req
     allowed: scopes,
     sections
   }});
+}));
+
+// --- Doctor-assisted patient invite flow (mirrors lab, but for doctors) ---
+// Create a patient invite
+router.post('/:doctorId/patient-invites', asyncHandler(async (req: Request, res: Response) => {
+  const { doctorId } = req.params;
+  const { firstName, lastName, dateOfBirth, phone } = req.body as { firstName?: string; lastName?: string; dateOfBirth?: string; phone: string };
+  // Ensure doctor exists
+  const doctor = db.prepare('SELECT id, first_name, last_name FROM app_doctors WHERE id = ? AND is_active = 1').get(doctorId) as any;
+  if (!doctor) return res.status(404).json({ success: false, message: 'Doctor not found' });
+  if (!phone) return res.status(400).json({ success: false, message: 'Phone is required' });
+  const inviteId = uuidv4();
+  const inviteCode = `INV-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+  const otpCode = '123456'; // demo
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+  db.prepare(`
+    INSERT INTO app_patient_invites (id, doctor_id, first_name, last_name, date_of_birth, phone, invite_code, otp_code, status, expires_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)
+  `).run(inviteId, doctorId, firstName || null, lastName || null, dateOfBirth || null, phone, inviteCode, otpCode, expiresAt);
+  return res.json({ success: true, data: { inviteId, inviteCode, otp: otpCode, expiresAt, doctor: { id: doctor.id, name: `${doctor.first_name} ${doctor.last_name}`.trim() } } });
+}));
+
+// Verify patient invite by OTP (doctor-origin) and create provisional user and pending doctor-patient relation
+router.post('/:doctorId/patient-invites/:inviteId/otp/verify', asyncHandler(async (req: Request, res: Response) => {
+  const { doctorId, inviteId } = req.params;
+  const { code } = req.body as { code: string };
+  const invite = db.prepare('SELECT * FROM app_patient_invites WHERE id = ? AND doctor_id = ?').get(inviteId, doctorId) as any;
+  if (!invite) return res.status(404).json({ success: false, message: 'Invite not found' });
+  if (new Date(invite.expires_at).getTime() < Date.now()) return res.status(400).json({ success: false, message: 'Invite expired' });
+  if (invite.status !== 'pending') return res.status(400).json({ success: false, message: 'Invite already used' });
+  if (!code || code !== invite.otp_code) return res.status(400).json({ success: false, message: 'Invalid OTP' });
+  // Create provisional user if not already created
+  let userId = invite.user_id as string | null;
+  if (!userId) {
+    userId = `user-invite-${invite.id}`;
+    db.prepare(`
+      INSERT OR IGNORE INTO app_users (id, username, password_hash, email, phone, first_name, last_name, date_of_birth, role, is_active, created_at, updated_at)
+      VALUES (?, ?, ?, NULL, ?, ?, ?, ?, 'patient', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).run(userId, `p_${invite.invite_code.toLowerCase()}`, '$2a$10$demoHashForLaterSet', invite.phone, invite.first_name, invite.last_name, invite.date_of_birth);
+  }
+  // Mark verified and save user_id
+  db.prepare("UPDATE app_patient_invites SET status = 'verified', user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(userId, inviteId);
+  // Create doctor-patient pending relation
+  const relationshipId = uuidv4();
+  const now = new Date().toISOString();
+  db.prepare(`
+    INSERT OR IGNORE INTO app_doctor_patients (id, doctor_id, patient_id, consent_status, consent_date, access_level, relationship_type, created_at, updated_at)
+    VALUES (?, ?, ?, 'pending', NULL, 'read', 'primary', ?, ?)
+  `).run(relationshipId, doctorId, userId, now, now);
+  return res.json({ success: true, data: { userId, relationshipId } });
 }));
 
 
