@@ -81,7 +81,14 @@ router.get('/:doctorId/patients/search', asyncHandler(async (req: Request, res: 
 // Create a consultation for a (possibly provisional) patient
 router.post('/:doctorId/consultations', asyncHandler(async (req: Request, res: Response) => {
   const { doctorId } = req.params;
-  const { patientId, diagnosis, treatmentPlan, medicines } = req.body as { patientId: string; diagnosis?: string; treatmentPlan?: string; medicines?: any };
+  const { patientId, chiefComplaint, diagnosis, treatmentPlan, medicines, status } = req.body as { 
+    patientId: string; 
+    chiefComplaint?: string; 
+    diagnosis?: string; 
+    treatmentPlan?: string; 
+    medicines?: any; 
+    status?: string;
+  };
   if (!patientId) return res.status(400).json({ success: false, message: 'patientId is required' });
   const doctor = db.prepare('SELECT id FROM app_doctors WHERE id = ? AND is_active = 1').get(doctorId) as any;
   if (!doctor) return res.status(404).json({ success: false, message: 'Doctor not found' });
@@ -90,29 +97,77 @@ router.post('/:doctorId/consultations', asyncHandler(async (req: Request, res: R
   const id = uuidv4();
   const now = new Date().toISOString();
   db.prepare(`
-    INSERT INTO app_consultations (id, doctor_id, patient_id, consultation_date, consultation_type, diagnosis, treatment_plan, status, notes, created_at, updated_at)
-    VALUES (?, ?, ?, ?, 'in_person', ?, ?, 'in_progress', ?, ?, ?)
-  `).run(id, doctorId, patientId, now, diagnosis || null, treatmentPlan || null, medicines ? JSON.stringify(medicines) : null, now, now);
+    INSERT INTO app_consultations (id, doctor_id, patient_id, consultation_date, consultation_type, chief_complaint, diagnosis, treatment_plan, status, notes, created_at, updated_at)
+    VALUES (?, ?, ?, ?, 'in_person', ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, doctorId, patientId, now, chiefComplaint || null, diagnosis || null, treatmentPlan || null, status || 'in_progress', medicines ? JSON.stringify(medicines) : null, now, now);
   return res.status(201).json({ success: true, data: { consultationId: id } });
 }));
 
 // PUT /api/v1/doctor/:doctorId/consultations/:id
 router.put('/:doctorId/consultations/:id', asyncHandler(async (req: Request, res: Response) => {
   const { doctorId, id } = req.params;
-  const { diagnosis, treatmentPlan, medicines, status } = req.body as { diagnosis?: string; treatmentPlan?: string; medicines?: any; status?: string };
+  const { chiefComplaint, diagnosis, treatmentPlan, medicines, status } = req.body as { 
+    chiefComplaint?: string; 
+    diagnosis?: string; 
+    treatmentPlan?: string; 
+    medicines?: any; 
+    status?: string;
+  };
   const existing = db.prepare('SELECT id FROM app_consultations WHERE id = ? AND doctor_id = ?').get(id, doctorId) as any;
   if (!existing) return res.status(404).json({ success: false, message: 'Consultation not found' });
   const now = new Date().toISOString();
   db.prepare(`
     UPDATE app_consultations
-    SET diagnosis = COALESCE(?, diagnosis),
+    SET chief_complaint = COALESCE(?, chief_complaint),
+        diagnosis = COALESCE(?, diagnosis),
         treatment_plan = COALESCE(?, treatment_plan),
         notes = COALESCE(?, notes),
         status = COALESCE(?, status),
         updated_at = ?
     WHERE id = ? AND doctor_id = ?
-  `).run(diagnosis || null, treatmentPlan || null, medicines ? JSON.stringify(medicines) : null, status || null, now, id, doctorId);
+  `).run(chiefComplaint || null, diagnosis || null, treatmentPlan || null, medicines ? JSON.stringify(medicines) : null, status || null, now, id, doctorId);
   return res.json({ success: true });
+}));
+
+// GET /api/v1/doctor/:doctorId/patient/:patientId/visits
+// Get all consultations/visits for a patient
+router.get('/:doctorId/patient/:patientId/visits', asyncHandler(async (req: Request, res: Response) => {
+  const { doctorId, patientId } = req.params;
+  
+  const consultations = db.prepare(`
+    SELECT 
+      c.id,
+      c.consultation_date,
+      c.consultation_type,
+      c.chief_complaint,
+      c.diagnosis,
+      c.treatment_plan,
+      c.status,
+      c.notes,
+      c.created_at,
+      d.first_name || ' ' || d.last_name as doctor_name,
+      d.specialty as doctor_specialty
+    FROM app_consultations c
+    JOIN app_doctors d ON c.doctor_id = d.id
+    WHERE c.patient_id = ?
+    ORDER BY c.consultation_date DESC
+  `).all(patientId) as any[];
+
+  const visits = consultations.map(consultation => ({
+    id: consultation.id,
+    doctorName: consultation.doctor_name,
+    doctorSpecialty: consultation.doctor_specialty,
+    date: consultation.consultation_date,
+    type: consultation.consultation_type,
+    chiefComplaint: consultation.chief_complaint,
+    diagnosis: consultation.diagnosis,
+    treatmentPlan: consultation.treatment_plan,
+    status: consultation.status === 'completed' ? 'completed' : 'upcoming',
+    notes: consultation.notes,
+    createdAt: consultation.created_at
+  }));
+
+  return res.json({ success: true, data: visits });
 }));
 
 // POST /api/v1/doctor/:doctorId/patients

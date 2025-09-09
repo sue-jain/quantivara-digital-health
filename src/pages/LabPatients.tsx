@@ -449,7 +449,7 @@ const LabPatients: React.FC = () => {
                       if (!activePatientId || !labId) { setTestAddError('No active patient'); return; }
                       try {
                         setAddingTest(true);
-                        await labsService.addOrderedTest(labId, activePatientId, { testId: match.id, testName: match.name + (match.loincCode ? ` (${match.loincCode})` : ''), orderedBy: 'doctor' });
+                        await labsService.addOrderedTest(labId, activePatientId, { testId: match.id, testName: match.name + (match.loincCode ? ` (${match.loincCode})` : ''), orderedBy: 'self' });
                         setTestQuery(''); setSelectedTestId(null); setShowTestDropdown(false); setTestAdded(true);
                         await reload();
                         setTimeout(()=> setTestAdded(false), 2000);

@@ -524,6 +524,49 @@ router.get('/:abhaId/ai-profile', asyncHandler(async (req: Request, res: Respons
   }
 }));
 
+// GET /api/v1/patients/:patientId/visits
+// Get all consultations/visits for a patient
+router.get('/:patientId/visits', asyncHandler(async (req: Request, res: Response) => {
+  const { patientId } = req.params;
+  
+  const consultations = db.prepare(`
+    SELECT 
+      c.id,
+      c.consultation_date,
+      c.consultation_type,
+      c.chief_complaint,
+      c.diagnosis,
+      c.treatment_plan,
+      c.status,
+      c.notes,
+      c.created_at,
+      d.first_name || ' ' || d.last_name as doctor_name,
+      d.specialty as doctor_specialty,
+      d.hospital_name
+    FROM app_consultations c
+    JOIN app_doctors d ON c.doctor_id = d.id
+    WHERE c.patient_id = ?
+    ORDER BY c.consultation_date DESC
+  `).all(patientId) as any[];
+
+  const visits = consultations.map(consultation => ({
+    id: consultation.id,
+    doctorName: consultation.doctor_name,
+    doctorSpecialty: consultation.doctor_specialty,
+    hospitalName: consultation.hospital_name,
+    date: consultation.consultation_date,
+    type: consultation.consultation_type,
+    chiefComplaint: consultation.chief_complaint,
+    diagnosis: consultation.diagnosis,
+    treatmentPlan: consultation.treatment_plan,
+    status: consultation.status === 'completed' ? 'completed' : 'upcoming',
+    notes: consultation.notes,
+    createdAt: consultation.created_at
+  }));
+
+  return res.json({ success: true, data: visits });
+}));
+
 // NEW: Get specific AI data type for patient
 router.get('/:abhaId/ai-profile/:dataType', asyncHandler(async (req: Request, res: Response) => {
   const startTime = Date.now();

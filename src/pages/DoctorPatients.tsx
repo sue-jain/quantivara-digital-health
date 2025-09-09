@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 // import Header from '@/components/layout/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import doctorService, { DoctorPatient } from '@/services/doctor';
 import userDocumentService from '@/services/userDocuments';
 import patientCareTeamService from '@/services/patientCareTeam';
@@ -46,14 +47,23 @@ const DoctorPatients: React.FC = () => {
   const [lookupResult, setLookupResult] = useState<{ name: string; abhaId: string; consented: boolean; patientId?: string } | null>(null);
   // Consultation state
   const [consultationId, setConsultationId] = useState<string | null>(null);
+  const [chiefComplaint, setChiefComplaint] = useState('');
   const [diagText, setDiagText] = useState('');
   const [medsText, setMedsText] = useState('');
   const [savingConsult, setSavingConsult] = useState(false);
   // Test catalog for adding ordered tests (as doctor)
   const [catalog, setCatalog] = useState<Array<{ id: string; name: string; loincCode?: string }>>([]);
   const [testQuery, setTestQuery] = useState('');
+  const [showTestDropdown, setShowTestDropdown] = useState(false);
+  const testBoxRef = useRef<HTMLDivElement | null>(null);
   const [addingTest, setAddingTest] = useState(false);
   const [testAddError, setTestAddError] = useState<string | null>(null);
+  const [testAdded, setTestAdded] = useState(false);
+  const [selectedTestId, setSelectedTestId] = useState<string | null>(null);
+  // Temporary lab tests for current consultation (not persisted until save)
+  const [tempLabTests, setTempLabTests] = useState<Array<{ id: string; name: string; loincCode?: string }>>([]);
+  // Voice diagnosis section state
+  const [voiceDiagnosisExpanded, setVoiceDiagnosisExpanded] = useState(false);
   // Invite state (doctor-initiated)
   const [inviteFirstName, setInviteFirstName] = useState('');
   const [inviteLastName, setInviteLastName] = useState('');
@@ -151,6 +161,32 @@ const DoctorPatients: React.FC = () => {
       } catch {}
     })();
   }, []);
+
+  // Close the test dropdown on outside click or Escape
+  useEffect(() => {
+    const onDocMouseDown = (e: MouseEvent) => {
+      const el = testBoxRef.current;
+      if (!el) return;
+      if (e.target instanceof Node && !el.contains(e.target)) {
+        setShowTestDropdown(false);
+      }
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowTestDropdown(false);
+    };
+    document.addEventListener('mousedown', onDocMouseDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onDocMouseDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, []);
+
+  // Hide dropdown when patient changes
+  useEffect(() => { 
+    setShowTestDropdown(false); 
+    setTempLabTests([]); // Clear temp tests when patient changes
+  }, [selectedPatientId]);
 
   const doAbhaLookup = async () => {
     setAbhaError(null);
@@ -516,37 +552,273 @@ const DoctorPatients: React.FC = () => {
                     </TabsContent>
                   )}
                   <TabsContent value="consult" className="mt-4">
-                    <div className="p-3 border rounded-md">
-                      <div className="text-sm font-medium text-gray-900 mb-2">Current Consultation</div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                          <div className="text-xs text-gray-700 mb-1">Diagnosis / Notes</div>
-                          <textarea value={diagText} onChange={(e)=> setDiagText(e.target.value)} className="w-full min-h-[90px] px-3 py-2 border border-gray-300 rounded-md" placeholder="Enter diagnosis/notes" />
+                    <div className="space-y-6">
+                      {/* Consultation Header */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 className="text-lg font-semibold text-blue-900 mb-2">Current Consultation</h3>
+                        <p className="text-sm text-blue-700">Record diagnosis, medications, and lab orders for this patient</p>
+                      </div>
+
+                      {/* Consultation Details Grid */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Chief Complaint */}
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">Chief Complaint</label>
+                          <textarea 
+                            value={chiefComplaint} 
+                            onChange={(e)=> setChiefComplaint(e.target.value)} 
+                            className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            placeholder="Enter chief complaint and presenting symptoms..."
+                          />
                         </div>
-                        <div>
-                          <div className="text-xs text-gray-700 mb-1">Medications (one per line)</div>
-                          <textarea value={medsText} onChange={(e)=> setMedsText(e.target.value)} className="w-full min-h-[90px] px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Atorvastatin 10mg, once daily" />
+
+                        {/* Diagnosis & Clinical Notes */}
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">Diagnosis & Clinical Notes</label>
+                          <textarea 
+                            value={diagText} 
+                            onChange={(e)=> setDiagText(e.target.value)} 
+                            className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            placeholder="Enter detailed diagnosis and clinical findings..."
+                          />
                         </div>
                       </div>
-                      <div className="mt-3 flex items-center gap-2">
-                        <Button variant="outline" disabled={savingConsult || !selectedPatientId} onClick={async ()=>{
-                          if (!user || !selectedPatientId) return;
-                          try {
-                            setSavingConsult(true);
-                            if (!consultationId) {
-                              const res = await fetch(`${import.meta.env.MODE === 'production' ? '/api/v1' : 'http://localhost:3001/api/v1'}/doctor/${user.id}/consultations`, {
-                                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ patientId: selectedPatientId, diagnosis: diagText || undefined, medicines: medsText ? medsText.split('\\n') : undefined })
-                              });
-                              const json = await res.json();
-                              if (res.ok && json.success) setConsultationId(json.data.consultationId);
-                            } else {
-                              await fetch(`${import.meta.env.MODE === 'production' ? '/api/v1' : 'http://localhost:3001/api/v1'}/doctor/${user.id}/consultations/${consultationId}`, {
-                                method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ diagnosis: diagText || undefined, medicines: medsText ? medsText.split('\\n') : undefined })
-                              });
-                            }
-                          } finally { setSavingConsult(false); }
-                        }}>{savingConsult ? 'Saving…' : 'Save Consultation'}</Button>
-                        <DoctorVoiceDiagnosis doctorId={user.id} patientId={selectedPatientId || ''} />
+
+                      {/* Medications Section */}
+                      <div className="space-y-3">
+                        <label className="block text-sm font-medium text-gray-700">Medications & Prescriptions</label>
+                        <textarea 
+                          value={medsText} 
+                          onChange={(e)=> setMedsText(e.target.value)} 
+                          className="w-full h-20 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                          placeholder="Enter medications (one per line):&#10;e.g., Atorvastatin 10mg, once daily&#10;Metformin 500mg, twice daily"
+                        />
+                      </div>
+
+                      {/* Lab Tests Section */}
+                      <div className="space-y-3">
+                        <label className="block text-sm font-medium text-gray-700">Lab Tests Ordered</label>
+                        <div className="border rounded-md p-3" ref={testBoxRef}>
+                          <div className="relative flex items-center gap-2">
+                            <input
+                              value={testQuery}
+                              onChange={(e)=> { setTestQuery(e.target.value); setSelectedTestId(null); setShowTestDropdown(true); }}
+                              onFocus={()=> setShowTestDropdown(true)}
+                              onBlur={()=> setTimeout(()=> setShowTestDropdown(false), 100)}
+                              placeholder="Search test by name or LOINC (e.g., HbA1c or 4548-4)"
+                              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                            <Button
+                              variant="outline"
+                              disabled={!testQuery.trim() || !selectedPatientId || addingTest}
+                              onClick={async()=>{
+                                setTestAddError(null); setTestAdded(false);
+                                let match = null as | { id: string; name: string; loincCode?: string } | null;
+                                // 1) Prefer explicitly selected test from dropdown
+                                if (selectedTestId) {
+                                  match = catalog.find(t => t.id === selectedTestId) || null;
+                                }
+                                // 2) Try to parse "Name (CODE)" pattern and match by code
+                                if (!match) {
+                                  const raw = testQuery.trim();
+                                  const codeInParens = raw.match(/\(([^)]+)\)\s*$/);
+                                  if (codeInParens && codeInParens[1]) {
+                                    const code = codeInParens[1].trim().toLowerCase();
+                                    match = catalog.find(t => (t.loincCode || '').toLowerCase() === code) || null;
+                                  }
+                                }
+                                // 3) Exact name or exact code
+                                if (!match) {
+                                  const q = testQuery.trim().toLowerCase();
+                                  match = catalog.find(t => (t.name || '').toLowerCase() === q || (t.loincCode || '').toLowerCase() === q) || null;
+                                }
+                                // 4) Fallback: first fuzzy match by includes
+                                if (!match) {
+                                  const q = testQuery.trim().toLowerCase();
+                                  const candidates = catalog.filter(t => (t.name || '').toLowerCase().includes(q) || (t.loincCode || '').toLowerCase().includes(q));
+                                  if (candidates.length === 1) match = candidates[0];
+                                }
+                                if (!match) { setTestAddError('Select a valid test from the list'); return; }
+                                if (!selectedPatientId) { setTestAddError('No active patient'); return; }
+                                try {
+                                  setAddingTest(true);
+                                  // Add to temporary list (not persisted until save consultation)
+                                  setTempLabTests(prev => [...prev, match!]);
+                                  setTestQuery(''); setSelectedTestId(null); setShowTestDropdown(false); setTestAdded(true);
+                                  setTimeout(()=> setTestAdded(false), 2000);
+                                } catch (e:any) {
+                                  setTestAddError(e?.message || 'Failed to add test');
+                                } finally {
+                                  setAddingTest(false);
+                                }
+                              }}
+                            >{addingTest ? 'Adding…' : 'Add'}</Button>
+                            {showTestDropdown && (
+                              <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-56 overflow-auto" onMouseDown={(e)=> e.preventDefault()}>
+                                {catalog.filter(t => {
+                                  const q = testQuery.trim().toLowerCase();
+                                  if (!q) return true;
+                                  return (t.name||'').toLowerCase().includes(q) || (t.loincCode||'').toLowerCase().includes(q);
+                                }).map(t => (
+                                  <div key={t.id} className="px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer" onClick={()=>{ setSelectedTestId(t.id); setTestQuery(t.name + (t.loincCode ? ` (${t.loincCode})` : '')); setShowTestDropdown(false); }}>
+                                    <div className="font-medium">{t.name}</div>
+                                    <div className="text-xs text-gray-500">{t.loincCode || 'No LOINC'}</div>
+                                  </div>
+                                ))}
+                                {catalog.filter(t => {
+                                  const q = testQuery.trim().toLowerCase();
+                                  if (!q) return true;
+                                  return (t.name||'').toLowerCase().includes(q) || (t.loincCode||'').toLowerCase().includes(q);
+                                }).length === 0 && (
+                                  <div className="px-3 py-2 text-sm text-gray-500">No matches</div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          {testAddError && <div className="text-sm text-red-600 mt-1">{testAddError}</div>}
+                          {testAdded && <div className="text-sm text-green-700 mt-1">Test added to consultation</div>}
+                        </div>
+                        
+                        {/* Temporary Tests List (not yet saved) */}
+                        {tempLabTests.length > 0 && (
+                          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                            <div className="text-sm font-medium text-yellow-800 mb-2">Tests to be ordered (will be saved with consultation):</div>
+                            <div className="space-y-1">
+                              {tempLabTests.map((test, index) => (
+                                <div key={index} className="flex items-center justify-between bg-white border border-yellow-200 rounded px-3 py-2">
+                                  <span className="text-sm text-gray-900">{test.name}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-yellow-600">Pending Save</span>
+                                    <Button 
+                                      size="sm" 
+                                      variant="ghost" 
+                                      onClick={() => setTempLabTests(prev => prev.filter((_, i) => i !== index))}
+                                      className="text-red-600 hover:text-red-700"
+                                    >
+                                      Remove
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Voice Diagnosis Section - Collapsible */}
+                      <div className="space-y-3">
+                        <div 
+                          className="flex items-center justify-between cursor-pointer p-3 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors"
+                          onClick={() => setVoiceDiagnosisExpanded(!voiceDiagnosisExpanded)}
+                        >
+                          <div className="flex items-center gap-2">
+                            {voiceDiagnosisExpanded ? (
+                              <ChevronDown className="h-4 w-4 text-gray-600" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-gray-600" />
+                            )}
+                            <label className="text-sm font-medium text-gray-700 cursor-pointer">🎤 Voice Diagnosis</label>
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {voiceDiagnosisExpanded ? 'Click to collapse' : 'Click to expand'}
+                          </div>
+                        </div>
+                        
+                        {voiceDiagnosisExpanded && (
+                          <div className="border border-gray-200 rounded-md p-4 bg-white">
+                            <DoctorVoiceDiagnosis doctorId={user.id} patientId={selectedPatientId || ''} />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
+                        <Button 
+                          variant="outline" 
+                          disabled={savingConsult || !selectedPatientId} 
+                          onClick={async ()=>{
+                            if (!user || !selectedPatientId) return;
+                            try {
+                              setSavingConsult(true);
+                              
+                              // First, save the consultation
+                              let consultationIdToUse = consultationId;
+                              if (!consultationIdToUse) {
+                                const res = await fetch(`${import.meta.env.MODE === 'production' ? '/api/v1' : 'http://localhost:3001/api/v1'}/doctor/${user.id}/consultations`, {
+                                  method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ 
+                                    patientId: selectedPatientId, 
+                                    chiefComplaint: chiefComplaint || undefined,
+                                    diagnosis: diagText || undefined, 
+                                    treatmentPlan: medsText ? medsText.split('\\n') : undefined,
+                                    status: 'completed'
+                                  })
+                                });
+                                const json = await res.json();
+                                if (res.ok && json.success) {
+                                  consultationIdToUse = json.data.consultationId;
+                                  setConsultationId(consultationIdToUse);
+                                }
+                              } else {
+                                await fetch(`${import.meta.env.MODE === 'production' ? '/api/v1' : 'http://localhost:3001/api/v1'}/doctor/${user.id}/consultations/${consultationIdToUse}`, {
+                                  method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ 
+                                    chiefComplaint: chiefComplaint || undefined,
+                                    diagnosis: diagText || undefined, 
+                                    treatmentPlan: medsText ? medsText.split('\\n') : undefined,
+                                    status: 'completed'
+                                  })
+                                });
+                              }
+
+                              // Then, save all the lab tests
+                              if (tempLabTests.length > 0) {
+                                const labId = 'DOCTOR';
+                                for (const test of tempLabTests) {
+                                  try {
+                                    await fetch(`${import.meta.env.MODE === 'production' ? '/api/v1' : 'http://localhost:3001/api/v1'}/labs/${labId}/patient/${selectedPatientId}/tests`, {
+                                      method: 'POST', 
+                                      headers: { 'Content-Type': 'application/json' }, 
+                                      body: JSON.stringify({ 
+                                        testId: test.id, 
+                                        testName: test.name + (test.loincCode ? ` (${test.loincCode})` : ''), 
+                                        orderedBy: 'doctor' 
+                                      })
+                                    });
+                                  } catch (e) {
+                                    console.error('Failed to save lab test:', test.name, e);
+                                  }
+                                }
+                                
+                                // Clear temporary tests after successful save
+                                setTempLabTests([]);
+                                
+                                // Refresh the lab tests list
+                                try {
+                                  const rows = await labsService.getOrderedTests(labId, selectedPatientId);
+                                  const mapped: any[] = rows.map((r: any) => ({ 
+                                    testId: r.id, 
+                                    name: r.testName || r.test_name || 'Test', 
+                                    status: r.status, 
+                                    orderedAt: r.created_at, 
+                                    updatedAt: r.updated_at,
+                                    orderedBy: r.orderedBy || 'doctor'
+                                  }));
+                                  setLabTests(mapped as any);
+                                } catch (e) {
+                                  console.error('Failed to refresh lab tests:', e);
+                                }
+                              }
+                            } finally { setSavingConsult(false); }
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          {savingConsult ? 'Saving…' : 'Save Consultation'}
+                        </Button>
+                        <div className="text-sm text-gray-500">
+                          {tempLabTests.length > 0 
+                            ? `Consultation will be saved with diagnosis, medications, and ${tempLabTests.length} lab test(s)`
+                            : 'Consultation will be saved with diagnosis and medications'
+                          }
+                        </div>
                       </div>
                     </div>
                   </TabsContent>

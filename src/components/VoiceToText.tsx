@@ -11,6 +11,7 @@ interface VoiceToTextProps {
   onPatientLookup?: (patientName: string) => void;
   onProfileOpen?: (abhaId: string) => void;
   onAddMedication?: (patientName: string, medication: string) => void;
+  hideTitle?: boolean;
 }
 
 const VoiceToText: React.FC<VoiceToTextProps> = ({ 
@@ -18,7 +19,8 @@ const VoiceToText: React.FC<VoiceToTextProps> = ({
   onProcessing, 
   onPatientLookup,
   onProfileOpen,
-  onAddMedication
+  onAddMedication,
+  hideTitle = false
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -508,11 +510,13 @@ const VoiceToText: React.FC<VoiceToTextProps> = ({
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
-              <CardHeader>
+      {!hideTitle && (
+        <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {onPatientLookup ? '🎤 Voice Commands & Text Processing' : '🎤 Voice-to-Text for Medical Documents'}
           </CardTitle>
         </CardHeader>
+      )}
       <CardContent className="space-y-4">
         {/* Command Mode Indicator - Only show when patient lookup is enabled */}
         {commandMode && onPatientLookup && (

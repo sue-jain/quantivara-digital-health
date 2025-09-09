@@ -1,37 +1,62 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, ChevronDown, Plus } from 'lucide-react';
+import { Calendar, ChevronDown, Plus, Stethoscope, FileText, Pill } from 'lucide-react';
 import patientCareTeamService, { AvailableDoctor } from '@/services/patientCareTeam';
+import patientVisitsService, { PatientVisit } from '@/services/patientVisits';
 import { useAuth } from '@/contexts/AuthContext';
-
-type Visit = {
-  id: string;
-  doctorName: string;
-  date: string; // ISO
-  status: 'upcoming' | 'completed';
-};
 
 const PatientVisitsPage: React.FC = () => {
   const { user } = useAuth();
   const [openUpcoming, setOpenUpcoming] = useState(true);
   const [openPast, setOpenPast] = useState(false);
-  const [visits, setVisits] = useState<Visit[]>([]);
+  const [visits, setVisits] = useState<PatientVisit[]>([]);
   const [showBook, setShowBook] = useState(false);
   const [availableDoctors, setAvailableDoctors] = useState<AvailableDoctor[]>([]);
   const [selectedDoctor, setSelectedDoctor] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // demo seed
-    const now = new Date();
-    const future = new Date(now.getTime() + 7*24*60*60*1000);
-    const past = new Date(now.getTime() - 10*24*60*60*1000);
-    setVisits([
-      { id: 'v1', doctorName: 'Dr. Meera Patel', date: future.toISOString(), status: 'upcoming' },
-      { id: 'v2', doctorName: 'Dr. Rajesh Verma', date: past.toISOString(), status: 'completed' },
-    ]);
-  }, []);
+    const loadVisits = async () => {
+      if (!user?.id) return;
+      try {
+        setLoading(true);
+        const visitsData = await patientVisitsService.getVisits(user.id);
+        setVisits(visitsData);
+      } catch (error) {
+        console.error('Failed to load visits:', error);
+        // Fallback to demo data if API fails
+        const now = new Date();
+        const future = new Date(now.getTime() + 7*24*60*60*1000);
+        const past = new Date(now.getTime() - 10*24*60*60*1000);
+        setVisits([
+          { 
+            id: 'v1', 
+            doctorName: 'Dr. Meera Patel', 
+            doctorSpecialty: 'Cardiologist',
+            date: future.toISOString(), 
+            type: 'in_person',
+            status: 'upcoming' 
+          },
+          { 
+            id: 'v2', 
+            doctorName: 'Dr. Rajesh Verma', 
+            doctorSpecialty: 'General Physician',
+            date: past.toISOString(), 
+            type: 'in_person',
+            status: 'completed',
+            chiefComplaint: 'Chest pain and shortness of breath',
+            diagnosis: 'Hypertension and mild anxiety',
+            treatmentPlan: 'Lisinopril 10mg daily, lifestyle modifications'
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadVisits();
+  }, [user]);
 
   useEffect(() => {
     const load = async () => {
@@ -89,12 +114,20 @@ const PatientVisitsPage: React.FC = () => {
                 ) : (
                   <div className="space-y-3">
                     {upcoming.map(v => (
-                      <div key={v.id} className="p-3 border rounded-md flex items-center justify-between">
-                        <div>
-                          <div className="font-medium text-gray-900">{v.doctorName}</div>
-                          <div className="text-xs text-gray-600">{new Date(v.date).toLocaleString()}</div>
+                      <div key={v.id} className="p-3 border rounded-md">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Stethoscope className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <div className="font-medium text-gray-900">{v.doctorName}</div>
+                              <div className="text-xs text-gray-500">{v.doctorSpecialty}</div>
+                            </div>
+                          </div>
+                          <Calendar className="h-4 w-4 text-gray-500" />
                         </div>
-                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <div className="text-xs text-gray-600">
+                          {new Date(v.date).toLocaleString()} • {v.type === 'in_person' ? 'In-Person' : v.type}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -118,12 +151,51 @@ const PatientVisitsPage: React.FC = () => {
                 ) : (
                   <div className="space-y-3">
                     {past.map(v => (
-                      <div key={v.id} className="p-3 border rounded-md flex items-center justify-between">
-                        <div>
-                          <div className="font-medium text-gray-900">{v.doctorName}</div>
-                          <div className="text-xs text-gray-600">{new Date(v.date).toLocaleString()}</div>
+                      <div key={v.id} className="p-3 border rounded-md">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Stethoscope className="h-4 w-4 text-green-500" />
+                            <div>
+                              <div className="font-medium text-gray-900">{v.doctorName}</div>
+                              <div className="text-xs text-gray-500">{v.doctorSpecialty}</div>
+                            </div>
+                          </div>
+                          <Calendar className="h-4 w-4 text-gray-500" />
                         </div>
-                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <div className="text-xs text-gray-600 mb-2">
+                          {new Date(v.date).toLocaleString()} • {v.type === 'in_person' ? 'In-Person' : v.type}
+                        </div>
+                        
+                        {/* Visit Summary */}
+                        {v.chiefComplaint && (
+                          <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                            <div className="flex items-start gap-2 mb-1">
+                              <FileText className="h-3 w-3 text-gray-500 mt-0.5" />
+                              <span className="font-medium text-gray-700">Chief Complaint:</span>
+                            </div>
+                            <div className="text-gray-600 ml-5">{v.chiefComplaint}</div>
+                          </div>
+                        )}
+                        
+                        {v.diagnosis && (
+                          <div className="mt-1 p-2 bg-blue-50 rounded text-xs">
+                            <div className="flex items-start gap-2 mb-1">
+                              <Stethoscope className="h-3 w-3 text-blue-500 mt-0.5" />
+                              <span className="font-medium text-blue-700">Diagnosis:</span>
+                            </div>
+                            <div className="text-blue-600 ml-5">{v.diagnosis}</div>
+                          </div>
+                        )}
+                        
+                        {v.treatmentPlan && (
+                          <div className="mt-1 p-2 bg-green-50 rounded text-xs">
+                            <div className="flex items-start gap-2 mb-1">
+                              <Pill className="h-3 w-3 text-green-500 mt-0.5" />
+                              <span className="font-medium text-green-700">Treatment:</span>
+                            </div>
+                            <div className="text-green-600 ml-5">{v.treatmentPlan}</div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

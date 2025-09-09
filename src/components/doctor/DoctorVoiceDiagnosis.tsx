@@ -48,32 +48,28 @@ const DoctorVoiceDiagnosis: React.FC<Props> = ({ doctorId, patientId }) => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">🎤 Voice Diagnosis</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <VoiceToText 
-          onTextReady={handleTextReady}
-          onProcessing={handleProcessing}
-        />
+    <div className="space-y-3">
+      <VoiceToText 
+        onTextReady={handleTextReady}
+        onProcessing={handleProcessing}
+        hideTitle={true}
+      />
 
-        <textarea
-          className="w-full border border-gray-300 rounded-md p-2 h-28 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Dictation transcript or brief notes..."
-          value={transcript}
-          onChange={(e) => setTranscript(e.target.value)}
-        />
+      <textarea
+        className="w-full border border-gray-300 rounded-md p-2 h-28 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Dictation transcript or brief notes..."
+        value={transcript}
+        onChange={(e) => setTranscript(e.target.value)}
+      />
 
-        <div className="flex items-center gap-3">
-          <Button onClick={handleSave} disabled={saving || !patientId} style={{ backgroundColor: '#BBF1F1', color: '#374151' }}>
-            {saving ? 'Saving...' : 'Save Diagnosis'}
-          </Button>
-          {error && <span className="text-sm text-red-600">{error}</span>}
-          {success && <span className="text-sm text-green-600">{success}</span>}
-        </div>
-      </CardContent>
-    </Card>
+      <div className="flex items-center gap-3">
+        <Button onClick={handleSave} disabled={saving || !patientId} style={{ backgroundColor: '#BBF1F1', color: '#374151' }}>
+          {saving ? 'Saving...' : 'Save Diagnosis'}
+        </Button>
+        {error && <span className="text-sm text-red-600">{error}</span>}
+        {success && <span className="text-sm text-green-600">{success}</span>}
+      </div>
+    </div>
   );
 };
 
