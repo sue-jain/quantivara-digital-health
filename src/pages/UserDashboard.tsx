@@ -750,6 +750,13 @@ const UserDashboard: React.FC = () => {
             setShowAbhaModal(false);
             await refreshAbhaStatus();
           }}
+          prefillData={{
+            name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username,
+            dateOfBirth: user.dateOfBirth || '',
+            gender: user.gender || '',
+            mobile: user.phone || '',
+            email: user.email || '',
+          }}
         />
       )}
     </div>

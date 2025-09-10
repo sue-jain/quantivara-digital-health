@@ -14,18 +14,25 @@ interface ABHALinkingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  prefillData?: {
+    name?: string;
+    dateOfBirth?: string;
+    gender?: string;
+    mobile?: string;
+    email?: string;
+  };
 }
 
-const ABHALinkingModal: React.FC<ABHALinkingModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const ABHALinkingModal: React.FC<ABHALinkingModalProps> = ({ isOpen, onClose, onSuccess, prefillData }) => {
   const [step, setStep] = useState<'lookup' | 'create' | 'link' | 'success'>('lookup');
   const [aadharId, setAadharId] = useState('');
   const [lookupResult, setLookupResult] = useState<ABHALookupResult | null>(null);
   const [createData, setCreateData] = useState({
-    name: '',
-    dateOfBirth: '',
-    gender: '',
-    mobile: '',
-    email: '',
+    name: prefillData?.name || '',
+    dateOfBirth: prefillData?.dateOfBirth || '',
+    gender: prefillData?.gender || '',
+    mobile: prefillData?.mobile || '',
+    email: prefillData?.email || '',
   });
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -103,11 +110,11 @@ const ABHALinkingModal: React.FC<ABHALinkingModalProps> = ({ isOpen, onClose, on
     setAadharId('');
     setLookupResult(null);
     setCreateData({
-      name: '',
-      dateOfBirth: '',
-      gender: '',
-      mobile: '',
-      email: '',
+      name: prefillData?.name || '',
+      dateOfBirth: prefillData?.dateOfBirth || '',
+      gender: prefillData?.gender || '',
+      mobile: prefillData?.mobile || '',
+      email: prefillData?.email || '',
     });
     setError(null);
     onClose();

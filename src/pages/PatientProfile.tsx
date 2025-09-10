@@ -395,6 +395,13 @@ const PatientProfilePage: React.FC = () => {
               setShowABHAPrompt(false);
               await fetchProfile();
             }}
+            prefillData={{
+              name: `${formData.firstName} ${formData.lastName}`.trim(),
+              dateOfBirth: formData.dateOfBirth,
+              gender: formData.gender,
+              mobile: formData.phone,
+              email: formData.email,
+            }}
           />
         )}
 
