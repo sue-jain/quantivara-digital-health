@@ -121,7 +121,6 @@ const PatientCareTeamPage: React.FC = () => {
         toast({ title: 'Doctor added', description: result.message });
       }
       await fetchCareTeam();
-      setShowAddDoctor(false);
       setSelectedDoctor('');
       setSelectedRelationshipId(null);
       setAddDoctorStep('select');
