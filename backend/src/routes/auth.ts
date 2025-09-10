@@ -261,17 +261,21 @@ router.post('/invites/:inviteCode/otp/verify', asyncHandler(async (req: Request,
       VALUES (?, ?, ?, NULL, ?, ?, ?, ?, 'patient', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).run(userId, `p_${invite.invite_code.toLowerCase()}`, '$2a$10$demoHashForLaterSet', invite.phone, invite.first_name, invite.last_name, invite.date_of_birth);
   }
-  db.prepare('UPDATE app_patient_invites SET status = "verified", user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(userId, invite.id);
+  db.prepare('UPDATE app_patient_invites SET status = \'verified\', user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(userId, invite.id);
   // Ensure pending link exists for the originator (lab or doctor)
   if (invite.lab_id) {
     const existsLab = db.prepare('SELECT id FROM app_user_care_team WHERE user_id = ? AND provider_type = "lab" AND provider_id = ?').get(userId, invite.lab_id) as any;
     if (!existsLab) {
       const careTeamId = require('uuid').v4();
       const abhaRow = db.prepare('SELECT abha_id FROM app_user_abha_profiles WHERE user_id = ?').get(userId) as any;
+      
+      // Use existing ABHA ID if available, otherwise NULL (user will register ABHA later)
+      const abhaId = abhaRow?.abha_id || null;
+      
       db.prepare(`
         INSERT INTO app_user_care_team (id, user_id, abha_id, provider_type, provider_id, provider_name, consent_status, created_at, updated_at)
         VALUES (?, ?, ?, 'lab', ?, (SELECT name FROM app_labs WHERE id = ?), 'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      `).run(careTeamId, userId, abhaRow?.abha_id || null, invite.lab_id, invite.lab_id);
+      `).run(careTeamId, userId, abhaId, invite.lab_id, invite.lab_id);
     }
   }
   if (invite.doctor_id) {

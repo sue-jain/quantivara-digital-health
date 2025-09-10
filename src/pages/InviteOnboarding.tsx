@@ -4,10 +4,12 @@ import authService from '@/services/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import labsService from '@/services/labs';
+import { useAuth } from '@/contexts/AuthContext';
 
 const InviteOnboarding: React.FC = () => {
   const params = useParams();
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const [inviteCode, setInviteCode] = useState<string>('');
   const [otp, setOtp] = useState('');
   const [username, setUsername] = useState('');
@@ -37,10 +39,20 @@ const InviteOnboarding: React.FC = () => {
     try {
       setVerifying(true);
       setError(null);
+      console.log('Starting registration with:', { inviteCode, username, password: '***' });
       const res = await authService.registerFromInvite(inviteCode, username, password);
+      console.log('Registration successful:', res);
+      
+      // Refresh auth context to update user state
+      console.log('Refreshing auth context...');
+      await refreshUser();
+      
+      console.log('Navigating to /user');
       navigate('/user');
     } catch (e: any) {
-      setError(e.message || 'Failed to complete');
+      console.error('Registration error:', e);
+      console.error('Error details:', JSON.stringify(e, null, 2));
+      setError(e.message || 'Failed to complete registration');
     } finally {
       setVerifying(false);
     }

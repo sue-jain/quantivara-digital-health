@@ -264,14 +264,18 @@ router.post('/:labId/patient-invites/:inviteId/otp/verify', asyncHandler(async (
     `).run(userId, `p_${invite.invite_code.toLowerCase()}`, '$2a$10$demoHashForLaterSet', invite.phone, invite.first_name, invite.last_name, invite.date_of_birth);
   }
   // Mark verified and save user_id
-  db.prepare('UPDATE app_patient_invites SET status = \"verified\", user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(userId, inviteId);
+  db.prepare('UPDATE app_patient_invites SET status = \'verified\', user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(userId, inviteId);
   // Create care team pending access for lab
   const careTeamId = require('uuid').v4();
   const abhaRow = db.prepare('SELECT abha_id FROM app_user_abha_profiles WHERE user_id = ?').get(userId) as any;
+  
+  // Use existing ABHA ID if available, otherwise NULL (user will register ABHA later)
+  const abhaId = abhaRow?.abha_id || null;
+  
   db.prepare(`
     INSERT INTO app_user_care_team (id, user_id, abha_id, provider_type, provider_id, provider_name, consent_status, created_at, updated_at)
     VALUES (?, ?, ?, 'lab', ?, (SELECT name FROM app_labs WHERE id = ?), 'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-  `).run(careTeamId, userId, abhaRow?.abha_id || null, labId, labId);
+  `).run(careTeamId, userId, abhaId, labId, labId);
   return res.json({ success: true, data: { userId, careTeamId } });
 }));
 // Verify OTP for lab consent and approve

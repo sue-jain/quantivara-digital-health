@@ -90,7 +90,7 @@ const createAuthTables = async () => {
       CREATE TABLE IF NOT EXISTS app_user_care_team (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,
-        abha_id TEXT NOT NULL,
+        abha_id TEXT, -- nullable for pending invites before ABHA registration
         provider_type TEXT NOT NULL, -- doctor/lab/hospital
         provider_id TEXT,
         provider_name TEXT NOT NULL,
@@ -102,6 +102,13 @@ const createAuthTables = async () => {
         FOREIGN KEY (abha_id) REFERENCES app_abha_registry(abha_id)
       )
     `);
+    
+    // Migration: Make abha_id nullable if it was previously NOT NULL
+    try {
+      db.exec(`ALTER TABLE app_user_care_team ALTER COLUMN abha_id DROP NOT NULL`);
+    } catch (e) {
+      // Table might not exist yet or column might already be nullable
+    }
 
     // 6. User Medical Documents
     logger.info('📄 Creating app_user_medical_documents table...');
