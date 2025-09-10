@@ -6,13 +6,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, FileText } from 'lucide-react';
 import doctorService, { DoctorPatient } from '@/services/doctor';
 import userDocumentService from '@/services/userDocuments';
 import patientCareTeamService from '@/services/patientCareTeam';
 import DoctorVoiceDiagnosis from '@/components/doctor/DoctorVoiceDiagnosis';
 import patientService from '@/services/patients';
 import labsService from '@/services/labs';
+import { demoMedicationsStore } from './VoicePatientLookupDemo';
 
 const DoctorPatients: React.FC = () => {
   const { user, userType } = useAuth();
@@ -76,6 +77,16 @@ const DoctorPatients: React.FC = () => {
   const [inviteVerifying, setInviteVerifying] = useState(false);
   const [inviteVerified, setInviteVerified] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
+  // New state for medications and documents tabs
+  const [patientMedications, setPatientMedications] = useState<any[]>([]);
+  const [patientDocuments, setPatientDocuments] = useState<any[]>([]);
+  const [consolidatedInsights, setConsolidatedInsights] = useState<any>(null);
+  const [medicationsLoading, setMedicationsLoading] = useState(false);
+  const [documentsLoading, setDocumentsLoading] = useState(false);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [medicationsError, setMedicationsError] = useState<string | null>(null);
+  const [documentsError, setDocumentsError] = useState<string | null>(null);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -110,14 +121,75 @@ const DoctorPatients: React.FC = () => {
     }
   };
 
+  const loadPatientData = async (patientId: string) => {
+    if (!user) return;
+    console.log('loadPatientData called with patientId:', patientId);
+    
+    // Load medications from AI insights (same as patient portal)
+    setMedicationsLoading(true);
+    setMedicationsError(null);
+    try {
+      console.log('Fetching consolidated insights...');
+      const insights = await userDocumentService.getConsolidatedInsights(patientId);
+      console.log('Insights received:', insights);
+      
+      // Check demo store for additional medications
+      const demoMedications = demoMedicationsStore.get(patientId) || [];
+      console.log('Demo medications found:', demoMedications);
+      
+      // Convert demo medications to the expected format
+      const formattedDemoMedications = demoMedications.map(med => ({
+        sourceId: 'demo-store',
+        name: med.name,
+        dosage: med.dosage,
+        frequency: med.frequency,
+        duration: undefined,
+        instructions: `Added by ${med.addedBy} on ${med.addedAt}`
+      }));
+      
+      // Combine database medications with demo medications
+      const allMedications = [...(insights.medications || []), ...formattedDemoMedications];
+      console.log('All medications (DB + Demo):', allMedications);
+      
+      setPatientMedications(allMedications);
+      setConsolidatedInsights(insights);
+    } catch (e: any) {
+      console.error('Error loading insights:', e);
+      setMedicationsError(e.message || 'Failed to load medications');
+      setPatientMedications([]);
+      setConsolidatedInsights(null);
+    } finally {
+      setMedicationsLoading(false);
+    }
+
+    // Load documents (same as patient portal)
+    setDocumentsLoading(true);
+    setDocumentsError(null);
+    try {
+      console.log('Fetching user documents...');
+      const documents = await userDocumentService.getUserDocuments(patientId);
+      console.log('Documents received:', documents);
+      setPatientDocuments(documents);
+    } catch (e: any) {
+      console.error('Error loading documents:', e);
+      setDocumentsError(e.message || 'Failed to load documents');
+      setPatientDocuments([]);
+    } finally {
+      setDocumentsLoading(false);
+    }
+  };
+
   const handleView = async (patientId: string) => {
     if (!user) return;
+    console.log('handleView called with patientId:', patientId);
     setSelectedPatientId(patientId);
     setSummaryLoading(true);
     setSummaryError(null);
     setSummary(null);
     try {
+      console.log('Fetching patient summary...');
       const s = await doctorService.getPatientSummary(user.id, patientId);
+      console.log('Patient summary received:', s);
       setSummary(s);
       // Load lab tests for the selected patient
       try {
@@ -133,11 +205,25 @@ const DoctorPatients: React.FC = () => {
         }));
         setLabTests(mapped);
       } catch {}
-      if (s.consentStatus !== 'approved') {
+      
+      // Load patient data if consent is approved (same services as patient portal)
+      if (s.consentStatus === 'approved') {
+        console.log('Consent approved, loading patient data...');
+        loadPatientData(patientId);
+      } else {
+        console.log('No consent, clearing data...');
+        // Clear data if no consent
+        setPatientMedications([]);
+        setPatientDocuments([]);
+        setConsolidatedInsights(null);
+        setMedicationsError(null);
+        setDocumentsError(null);
+        setInsightsError(null);
         // prompt to request consent if not yet approved
         setConsentOpen(true);
       }
     } catch (e: any) {
+      console.error('Error in handleView:', e);
       setSummaryError(e.message || 'Failed to load summary');
     } finally {
       setSummaryLoading(false);
@@ -391,27 +477,29 @@ const DoctorPatients: React.FC = () => {
         {/* Bottom Patient Profile */}
         {summaryLoading && <div className="mt-4 text-sm text-gray-600">Loading summary…</div>}
         {summaryError && <div className="mt-2 text-sm text-red-600">{summaryError}</div>}
-        {summary && (
+        {(summary || selectedPatientId) && (
           <div className="mt-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-gray-900">Patient Profile • {summary.name}</CardTitle>
+                <CardTitle className="text-gray-900">Patient Profile • {summary?.name || 'Loading...'}</CardTitle>
                 <CardDescription>Details and labs</CardDescription>
               </CardHeader>
               <CardContent>
                 {/* Tabs: Show Current Consultation always; other tabs require consent */}
-                <Tabs defaultValue={summary.consentStatus !== 'approved' ? 'consult' : 'critical'} className="w-full">
+                <Tabs defaultValue={(summary?.consentStatus !== 'approved') ? 'consult' : 'critical'} className="w-full">
                   <TabsList>
-                    {summary.consentStatus === 'approved' && (
+                    {(summary?.consentStatus === 'approved') && (
                       <>
                         <TabsTrigger value="critical">Critical</TabsTrigger>
                         <TabsTrigger value="ai">AI Insights</TabsTrigger>
                         <TabsTrigger value="labs">Lab Tests</TabsTrigger>
+                        <TabsTrigger value="medications">Medications</TabsTrigger>
+                        <TabsTrigger value="documents">Documents</TabsTrigger>
                       </>
                     )}
                     <TabsTrigger value="consult">Current Consultation</TabsTrigger>
                   </TabsList>
-                  {summary.consentStatus === 'approved' && (
+                  {summary?.consentStatus === 'approved' && (
                     <TabsContent value="critical" className="mt-4">
                       <div className="space-y-3">
                         <div>
@@ -443,12 +531,126 @@ const DoctorPatients: React.FC = () => {
                       </div>
                     </TabsContent>
                   )}
-                  {summary.consentStatus === 'approved' && (
+                  {summary?.consentStatus === 'approved' && (
                     <TabsContent value="ai" className="mt-4">
-                      <div className="text-sm text-gray-600">Consolidated AI insights (demo)</div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold text-gray-900">AI Insights</h3>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => loadPatientData(selectedPatientId)}
+                            disabled={insightsLoading}
+                          >
+                            {insightsLoading ? 'Loading...' : 'Refresh'}
+                          </Button>
+                        </div>
+                        
+                        {insightsLoading && (
+                          <div className="text-sm text-gray-600">Loading AI insights...</div>
+                        )}
+                        
+                        {insightsError && (
+                          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                            {insightsError}
+                          </div>
+                        )}
+                        
+                        {!insightsLoading && !insightsError && consolidatedInsights && (
+                          <div className="space-y-6">
+                            {/* Diagnoses */}
+                            {consolidatedInsights.diagnoses && consolidatedInsights.diagnoses.length > 0 && (
+                              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                <h4 className="font-semibold text-red-900 mb-3 flex items-center gap-2">
+                                  🩺 Diagnoses ({consolidatedInsights.diagnoses.length})
+                                </h4>
+                                <div className="space-y-2">
+                                  {consolidatedInsights.diagnoses.map((diag: any, index: number) => (
+                                    <div key={index} className="flex items-center justify-between p-2 bg-white rounded border border-red-200">
+                                      <span className="text-red-800">{diag.text}</span>
+                                      {diag.date && (
+                                        <span className="text-xs text-red-600">{new Date(diag.date).toLocaleDateString()}</span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Medications */}
+                            {consolidatedInsights.medications && consolidatedInsights.medications.length > 0 && (
+                              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <h4 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
+                                  💊 Medications ({consolidatedInsights.medications.length})
+                                </h4>
+                                <div className="space-y-2">
+                                  {consolidatedInsights.medications.map((med: any, index: number) => (
+                                    <div key={index} className="flex items-center justify-between p-2 bg-white rounded border border-green-200">
+                                      <div>
+                                        <span className="font-medium text-green-900">{med.name}</span>
+                                        {med.dosage && <span className="text-green-700 ml-2">({med.dosage})</span>}
+                                        {med.frequency && <span className="text-green-700 ml-2">- {med.frequency}</span>}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Lab Results */}
+                            {consolidatedInsights.labResults && consolidatedInsights.labResults.length > 0 && (
+                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                                  🧪 Lab Results ({consolidatedInsights.labResults.length})
+                                </h4>
+                                <div className="space-y-2">
+                                  {consolidatedInsights.labResults.map((lab: any, index: number) => (
+                                    <div key={index} className="flex items-center justify-between p-2 bg-white rounded border border-blue-200">
+                                      <div>
+                                        <span className="font-medium text-blue-900">{lab.name}</span>
+                                        {lab.value && <span className="text-blue-700 ml-2">{lab.value}</span>}
+                                        {lab.unit && <span className="text-blue-700 ml-1">{lab.unit}</span>}
+                                        {lab.status && <span className="text-blue-700 ml-2">({lab.status})</span>}
+                                        {lab.critical && <span className="text-red-600 ml-2 font-bold">⚠️ Critical</span>}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Advice */}
+                            {consolidatedInsights.advice && consolidatedInsights.advice.length > 0 && (
+                              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <h4 className="font-semibold text-yellow-900 mb-3 flex items-center gap-2">
+                                  💡 Medical Advice ({consolidatedInsights.advice.length})
+                                </h4>
+                                <div className="space-y-2">
+                                  {consolidatedInsights.advice.map((advice: any, index: number) => (
+                                    <div key={index} className="p-2 bg-white rounded border border-yellow-200">
+                                      <span className="text-yellow-800">{advice.text}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {(!consolidatedInsights.diagnoses || consolidatedInsights.diagnoses.length === 0) &&
+                             (!consolidatedInsights.medications || consolidatedInsights.medications.length === 0) &&
+                             (!consolidatedInsights.labResults || consolidatedInsights.labResults.length === 0) &&
+                             (!consolidatedInsights.advice || consolidatedInsights.advice.length === 0) && (
+                              <div className="text-center py-8 text-gray-500">
+                                <div className="text-4xl mb-4">🤖</div>
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">No AI insights available</h3>
+                                <p className="text-gray-600">AI insights will appear here when documents are processed</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </TabsContent>
                   )}
-                  {summary.consentStatus === 'approved' && (
+                  {summary?.consentStatus === 'approved' && (
                     <TabsContent value="labs" className="mt-4 space-y-4">
                       {/* Add Lab Test */}
                       <div className="p-3 border rounded-md">
@@ -548,6 +750,184 @@ const DoctorPatients: React.FC = () => {
                             </CardContent>
                           )}
                         </Card>
+                      </div>
+                    </TabsContent>
+                  )}
+                  {summary?.consentStatus === 'approved' && (
+                    <TabsContent value="medications" className="mt-4">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold text-gray-900">Patient Medications</h3>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => loadPatientData(selectedPatientId)}
+                            disabled={medicationsLoading}
+                          >
+                            {medicationsLoading ? 'Loading...' : 'Refresh'}
+                          </Button>
+                        </div>
+                        
+                        {medicationsLoading && (
+                          <div className="text-sm text-gray-600">Loading medications...</div>
+                        )}
+                        
+                        {medicationsError && (
+                          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                            {medicationsError}
+                          </div>
+                        )}
+                        
+                        {!medicationsLoading && !medicationsError && patientMedications.length === 0 && (
+                          <div className="text-sm text-gray-500 bg-gray-50 p-4 rounded-md text-center">
+                            No medications found for this patient
+                          </div>
+                        )}
+                        
+                        {!medicationsLoading && !medicationsError && patientMedications.length > 0 && (
+                          <div className="space-y-3">
+                            {patientMedications.map((medication, index) => (
+                              <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                                <div className="flex items-center gap-3">
+                                  <div className="text-green-600">💊</div>
+                                  <div>
+                                    <p className="font-medium text-green-900">{medication.name} {medication.dosage}</p>
+                                    <p className="text-sm text-green-700">{medication.frequency}</p>
+                                    {medication.instructions && (
+                                      <p className="text-sm text-green-600 mt-1">{medication.instructions}</p>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="text-right text-xs text-green-600">
+                                  <p>From AI extraction</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </TabsContent>
+                  )}
+                  {summary?.consentStatus === 'approved' && (
+                    <TabsContent value="documents" className="mt-4">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold text-gray-900">Patient Documents</h3>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => loadPatientData(selectedPatientId)}
+                            disabled={documentsLoading}
+                          >
+                            {documentsLoading ? 'Loading...' : 'Refresh'}
+                          </Button>
+                        </div>
+                        
+                        {documentsLoading && (
+                          <div className="text-sm text-gray-600">Loading documents...</div>
+                        )}
+                        
+                        {documentsError && (
+                          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                            {documentsError}
+                          </div>
+                        )}
+                        
+                        {!documentsLoading && !documentsError && patientDocuments.length === 0 && (
+                          <div className="text-sm text-gray-500 bg-gray-50 p-4 rounded-md text-center">
+                            No documents found for this patient
+                          </div>
+                        )}
+                        
+                        {!documentsLoading && !documentsError && patientDocuments.length > 0 && (
+                          <div className="space-y-3">
+                            {patientDocuments.map((document) => (
+                              <div key={document.id} className="border border-gray-200 rounded-lg p-4 bg-white">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center">
+                                    <FileText className="h-4 w-4 text-gray-400 mr-3" />
+                                    <div>
+                                      <p className="font-medium text-gray-900">{document.fileName || 'Document'}</p>
+                                      <p className="text-sm text-gray-600">
+                                        {document.documentType} • {new Date(document.createdAt).toLocaleDateString()}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                      document.status === 'processed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                    }`}>
+                                      {document.status}
+                                    </span>
+                                    {document.extractionAccuracy && (
+                                      <span className="text-xs text-gray-500">
+                                        {Math.round(document.extractionAccuracy * 100)}% accuracy
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Document Preview */}
+                                {document.id && (
+                                  <div className="mt-3 p-3 bg-gray-50 rounded-md">
+                                    <div className="text-sm text-gray-700 mb-2">Document Preview</div>
+                                    <div className="border rounded bg-white">
+                                      <iframe 
+                                        title="doc-viewer" 
+                                        src={userDocumentService.getDocumentFileUrl(document.id)} 
+                                        className="w-full h-96" 
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* AI Insights for this document */}
+                                {document.content && (
+                                  <div className="mt-3 p-3 bg-white border rounded-md">
+                                    <div className="text-sm font-medium text-gray-900 mb-2">AI Insights (from this document)</div>
+                                    <div className="space-y-2 text-sm text-gray-700">
+                                      {Array.isArray(document.content?.diagnosis) && document.content.diagnosis.length > 0 && (
+                                        <div>
+                                          <div className="font-semibold mb-1">Diagnoses</div>
+                                          <ul className="list-disc ml-5">
+                                            {document.content.diagnosis.map((d: string, idx: number) => (<li key={idx}>{d}</li>))}
+                                          </ul>
+                                        </div>
+                                      )}
+                                      {Array.isArray(document.content?.medications) && document.content.medications.length > 0 && (
+                                        <div>
+                                          <div className="font-semibold mb-1">Medications</div>
+                                          <ul className="list-disc ml-5">
+                                            {document.content.medications.map((m: any, idx: number) => (<li key={idx}>{m.name} {m.dosage ? `- ${m.dosage}`: ''} {m.frequency ? `(${m.frequency})` : ''}</li>))}
+                                          </ul>
+                                        </div>
+                                      )}
+                                      {Array.isArray(document.content?.tests) && document.content.tests.length > 0 && (
+                                        <div>
+                                          <div className="font-semibold mb-1">Lab Results</div>
+                                          <ul className="list-disc ml-5">
+                                            {document.content.tests.map((t: any, idx: number) => (<li key={idx}>{t.name}: {t.value}{t.unit ? ` ${t.unit}` : ''} {t.status ? `(${t.status})` : ''}</li>))}
+                                          </ul>
+                                        </div>
+                                      )}
+                                      {Array.isArray(document.content?.advice) && document.content.advice.length > 0 && (
+                                        <div>
+                                          <div className="font-semibold mb-1">Advice</div>
+                                          <ul className="list-disc ml-5">
+                                            {document.content.advice.map((a: string, idx: number) => (<li key={idx}>{a}</li>))}
+                                          </ul>
+                                        </div>
+                                      )}
+                                      {!document.content?.diagnosis && !document.content?.medications && !document.content?.tests && (
+                                        <div className="text-sm text-gray-600">No structured insights extracted.</div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </TabsContent>
                   )}

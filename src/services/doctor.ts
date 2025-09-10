@@ -136,6 +136,7 @@ class DoctorService {
     if (!res.ok || !json.success) throw new Error(json.message || 'Failed to verify invite');
     return json.data;
   }
+
 }
 
 const doctorService = new DoctorService();
