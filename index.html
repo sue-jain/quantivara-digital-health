@@ -3,58 +3,60 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <!-- SPA redirect handler for GitHub Pages -->
+    <script type="text/javascript">
+      (function(l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      }(window.location))
+    </script>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quantivara - AI-Powered Healthcare Platform for India | Care That Connects</title>
-    <meta name="description" content="AI-powered healthcare platform bridging rural and urban India with intelligent, mobile-first solutions. Connect doctors, patients, pharmacies & labs seamlessly." />
-    <meta name="keywords" content="healthcare platform India, AI medical records, rural healthcare, doctor patient connectivity, digital prescriptions, healthcare technology" />
-    
+    <title>Santhica — Care That Connects | AI-Powered Healthcare for India</title>
+    <meta name="description" content="Santhica is building the data network India's healthcare system never had. AI that digitizes prescriptions, bridges labs, and connects pharmacies." />
+    <meta name="keywords" content="Santhica, healthcare AI India, prescription digitization, medical records, healthcare data network, digital prescriptions" />
+
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="Quantivara - AI-Powered Healthcare Platform for India" />
-    <meta property="og:description" content="Bridging India's healthcare gaps through mobile-first AI technology. Connect every corner of India with equitable, intelligent healthcare." />
+    <meta property="og:title" content="Santhica — Care That Connects" />
+    <meta property="og:description" content="Not another health app. The data backbone India's 1.4 billion people have been waiting for." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://quantivara.com" />
-    <meta property="og:image" content="/og-image.jpg" />
-    
+    <meta property="og:url" content="https://santhica.com" />
+
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Quantivara - AI-Powered Healthcare Platform for India" />
-    <meta name="twitter:description" content="Bridging India's healthcare gaps through mobile-first AI technology." />
-    <meta name="twitter:image" content="/twitter-image.jpg" />
-    
+    <meta name="twitter:title" content="Santhica — Care That Connects" />
+    <meta name="twitter:description" content="Not another health app. The data backbone India's 1.4 billion people have been waiting for." />
+
     <!-- Additional SEO Meta Tags -->
     <meta name="robots" content="index, follow" />
-    <meta name="author" content="Quantivara" />
-    <link rel="canonical" href="https://quantivara.com" />
-    
+    <meta name="author" content="Santhica" />
+    <link rel="canonical" href="https://santhica.com" />
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
+
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "Quantivara",
-      "description": "AI-powered healthcare platform bridging rural and urban India",
-      "url": "https://quantivara.com",
-      "logo": "https://quantivara.com/logo.png",
+      "name": "Santhica",
+      "description": "AI-powered healthcare data network for India — digitizing prescriptions, bridging labs, connecting pharmacies",
+      "url": "https://santhica.com",
       "sameAs": [
-        "https://linkedin.com/company/quantivara",
-        "https://twitter.com/quantivara"
+        "https://www.linkedin.com/company/santhica/"
       ],
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "+91-98765-43210",
         "contactType": "customer service",
-        "email": "hello@quantivara.com"
-      },
-      "address": {
-        "@type": "PostalAddress",
-        "addressCountry": "IN",
-        "addressRegion": "Pan-India Operations"
+        "email": "support@santhica.com"
       }
     }
     </script>
