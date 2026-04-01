@@ -1,0 +1,64 @@
+RESPIRATORY FUNCTION LABORATORY REPORT
+======================================
+
+Patient: Priya Sharma
+Age: 38 Years, Female
+Sample ID: LAB-2024-002
+Date: 05-08-2024
+
+Laboratory: Apollo Health Diagnostics
+Address: Sector 18, Noida, UP 201301
+Report Date: 05-08-2024
+
+RESPIRATORY FUNCTION TESTS:
+===========================
+
+1. Spirometry Results:
+   - FVC (Forced Vital Capacity): 2.8 L (85% predicted)
+   - FEV1 (Forced Expiratory Volume): 2.1 L (78% predicted)
+   - FEV1/FVC Ratio: 75% (Normal: >80%)
+   - PEF (Peak Expiratory Flow): 350 L/min (70% predicted)
+
+2. Bronchodilator Response:
+   - Pre-bronchodilator FEV1: 2.1 L
+   - Post-bronchodilator FEV1: 2.4 L
+   - Improvement: 14% (Significant: >12%)
+   - Status: POSITIVE RESPONSE
+
+3. Blood Tests:
+   - Eosinophil Count: 450/μL (Normal: 0-500)
+   - IgE Level: 280 IU/mL (Normal: <100)
+   - CRP: 8 mg/L (Normal: <3)
+   - ESR: 25 mm/hr (Normal: <20)
+
+4. Allergy Panel:
+   - Dust Mites: POSITIVE (Class 3)
+   - Pollen: POSITIVE (Class 2)
+   - Pet Dander: NEGATIVE
+   - Mold: POSITIVE (Class 1)
+
+5. Arterial Blood Gas:
+   - pH: 7.38 (Normal: 7.35-7.45)
+   - PaO2: 85 mmHg (Normal: 80-100)
+   - PaCO2: 42 mmHg (Normal: 35-45)
+   - HCO3: 24 mEq/L (Normal: 22-26)
+
+CRITICAL VALUES: 1
+ABNORMAL VALUES: 4
+
+INTERPRETATION:
+==============
+- Mild obstructive pattern on spirometry
+- Significant bronchodilator response
+- Elevated IgE suggesting atopy
+- Positive allergy tests for environmental triggers
+
+RECOMMENDATIONS:
+- Continue inhaled corticosteroids
+- Add long-acting beta-agonist
+- Environmental trigger avoidance
+- Regular peak flow monitoring
+- Allergy immunotherapy consideration
+
+[This is a simulated lab report for Priya Sharma - Asthma patient]
+[Patient information extracted for ABHA ID mapping] 

@@ -1,0 +1,72 @@
+HYPERTENSION MONITORING LABORATORY REPORT
+========================================
+
+Patient: Ashok Gupta
+Age: 58 Years, Male
+Sample ID: LAB-2024-004
+Date: 05-08-2024
+
+Laboratory: Fortis Healthcare Diagnostics
+Address: Sector 15, Noida, UP 201301
+Report Date: 05-08-2024
+
+HYPERTENSION WORKUP:
+====================
+
+1. Blood Pressure Monitoring:
+   - Systolic: 165 mmHg (Normal: <120)
+   - Diastolic: 105 mmHg (Normal: <80)
+   - Status: STAGE 2 HYPERTENSION
+   - Critical: Yes
+
+2. Kidney Function Tests:
+   - Serum Creatinine: 1.6 mg/dL (Normal: 0.7-1.3)
+   - eGFR: 48 mL/min/1.73m² (Normal: >90)
+   - BUN: 25 mg/dL (Normal: 7-20)
+   - Microalbuminuria: 45 mg/L (Normal: <30)
+
+3. Electrolytes:
+   - Sodium: 145 mEq/L (Normal: 135-145)
+   - Potassium: 3.8 mEq/L (Normal: 3.5-5.0)
+   - Chloride: 102 mEq/L (Normal: 96-106)
+   - Bicarbonate: 22 mEq/L (Normal: 22-28)
+
+4. Lipid Profile:
+   - Total Cholesterol: 260 mg/dL (Normal: <200)
+   - LDL Cholesterol: 170 mg/dL (Normal: <100)
+   - HDL Cholesterol: 42 mg/dL (Normal: >40)
+   - Triglycerides: 220 mg/dL (Normal: <150)
+
+5. Glucose Metabolism:
+   - Fasting Glucose: 118 mg/dL (Normal: 70-100)
+   - HbA1c: 6.2% (Normal: 4.0-5.6)
+   - Status: PRE-DIABETES
+
+6. Thyroid Function:
+   - TSH: 2.8 μIU/mL (Normal: 0.4-4.0)
+   - T4: 1.2 ng/dL (Normal: 0.8-1.8)
+   - Status: NORMAL
+
+7. Cardiac Markers:
+   - BNP: 180 pg/mL (Normal: <100)
+   - CRP: 6 mg/L (Normal: <3)
+
+CRITICAL VALUES: 2
+ABNORMAL VALUES: 8
+
+INTERPRETATION:
+==============
+- Stage 2 hypertension requiring aggressive management
+- Kidney function impairment (hypertensive nephropathy)
+- Pre-diabetes requiring lifestyle intervention
+- Elevated cardiac markers suggesting target organ damage
+
+RECOMMENDATIONS:
+- Immediate antihypertensive therapy optimization
+- Kidney function monitoring
+- Diabetes prevention program
+- Cardiac evaluation
+- Regular BP monitoring
+
+[This is a simulated lab report for Ashok Gupta - Hypertension patient]
+[Patient information extracted for ABHA ID mapping] 

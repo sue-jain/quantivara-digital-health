@@ -1,0 +1,60 @@
+CARDIOLOGY PRESCRIPTION
+========================
+
+Patient: Suresh Patel
+Age: 65 Years, Male
+Date: 05-08-2024
+
+Doctor: Dr. Rajesh Verma, MD (Cardiology)
+Reg No: MCI-67890
+Cardiac Care Institute, Sector 12, Noida
+
+DIAGNOSIS:
+- Coronary Artery Disease
+- Post-Myocardial Infarction
+- Hypertension
+- Hyperlipidemia
+
+MEDICATIONS:
+1. Tab. Aspirin 100mg
+   Once daily x 30 days
+   Morning with breakfast
+   Instructions: Take on empty stomach
+
+2. Tab. Clopidogrel 75mg
+   Once daily x 30 days
+   Evening after dinner
+   Instructions: Continue for 12 months post-stent
+
+3. Tab. Atorvastatin 40mg
+   Once daily x 30 days
+   Evening after dinner
+   Instructions: Take with food
+
+4. Tab. Metoprolol 50mg
+   Twice daily x 30 days
+   Morning and evening
+   Instructions: Monitor heart rate
+
+5. Tab. Ramipril 5mg
+   Once daily x 30 days
+   Morning
+   Instructions: Monitor blood pressure
+
+6. Tab. Isosorbide Mononitrate 30mg
+   Once daily x 30 days
+   Morning
+   Instructions: Avoid with erectile dysfunction drugs
+
+ADVICE:
+- Low salt diet (2g sodium/day)
+- Low cholesterol diet
+- Regular exercise 30 minutes daily
+- Avoid smoking completely
+- Monitor blood pressure daily
+- Report chest pain immediately
+
+Follow-up: After 15 days for cardiac assessment
+
+[This is a simulated prescription for Suresh Patel - Heart Disease patient]
+[Patient information extracted for ABHA ID mapping] 

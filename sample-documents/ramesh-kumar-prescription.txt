@@ -1,0 +1,37 @@
+HANDWRITTEN PRESCRIPTION
+========================
+
+Patient: Ramesh Kumar
+Age: 45 Years, Male
+Date: 05-08-2024
+
+Doctor: Dr. Shubham Nimesh, MBBS
+Reg No: MRN-12345
+Medical Facility, Sector 15, Noida
+
+DIAGNOSIS:
+- Acute Gastroenteritis
+- Mild Dehydration
+
+MEDICATIONS:
+1. Tab. Omeprazole 20mg
+   Twice daily (1-0-1) x 3 days
+   Before food
+
+2. Sucralfate + Simethicone 10ml
+   Three times daily (1-1-1) x 3 days
+   After food
+
+3. Tab. Loperamide
+   As directed, SOS
+   For diarrhea
+
+ADVICE:
+- Light diet recommended
+- Adequate hydration
+- Rest advised
+
+Follow up after 3 days if symptoms persist.
+
+[This is a simulated handwritten prescription for Ramesh Kumar]
+[Patient information extracted for ABHA ID mapping] 

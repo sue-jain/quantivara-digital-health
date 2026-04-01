@@ -1,0 +1,14 @@
+Patient: Priya Sharma
+Age: 45 Years, Female
+Date: 28-01-2024
+
+Diagnosis: Type 2 Diabetes Mellitus, Hypertension
+
+Medications:
+1. Tab. Metformin 500mg - Twice daily after meals - 30 days
+2. Tab. Amlodipine 5mg - Once daily morning - 30 days  
+3. Tab. Atorvastatin 20mg - Once at bedtime - 30 days
+4. Tab. Aspirin 75mg - Once daily after lunch - 30 days
+
+Doctor: Dr. Rajesh Kumar, MD
+Registration: MH/2015/78234
