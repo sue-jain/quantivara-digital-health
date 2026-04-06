@@ -2,7 +2,7 @@ import LegalLayout from "@/components/landing/LegalLayout";
 
 export default function PrivacyPolicy() {
   return (
-    <LegalLayout title="Privacy Policy" lastUpdated="March 11, 2026">
+    <LegalLayout title="Privacy Policy" lastUpdated="April 6, 2026">
       <p>
         Santhica ("we," "us," or "our") is committed to protecting the privacy
         and security of your personal information. This Privacy Policy describes
@@ -111,6 +111,12 @@ export default function PrivacyPolicy() {
           required by law, regulation, or valid legal process
         </li>
       </ul>
+      <p>
+        <strong>SMS Opt-In Data:</strong> Mobile information will not be shared
+        with third parties/affiliates for marketing/promotional purposes. All
+        the above categories exclude text messaging originator opt-in data and
+        consent; this information will not be shared with any third parties.
+      </p>
 
       <h2>6. Data Retention</h2>
       <p>
