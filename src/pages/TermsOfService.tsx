@@ -2,7 +2,7 @@ import LegalLayout from "@/components/landing/LegalLayout";
 
 export default function TermsOfService() {
   return (
-    <LegalLayout title="Terms of Service" lastUpdated="March 11, 2026">
+    <LegalLayout title="Terms of Service" lastUpdated="April 6, 2026">
       <p>
         These Terms of Service ("Terms") govern your use of the Santhica mobile
         application (the "App") provided by Santhica ("we," "us," or "our"). By
@@ -119,7 +119,15 @@ export default function TermsOfService() {
         affect the App's scanning functionality.
       </p>
 
-      <h2>9. Intellectual Property</h2>
+      <h2>9. SMS Verification Program</h2>
+      <p>
+        By providing your phone number, you agree to receive a one-time
+        passcode via SMS for account verification. Message frequency varies.
+        Message and data rates may apply. Reply STOP to opt-out, HELP for
+        help. Carriers are not liable for delayed or undelivered messages.
+      </p>
+
+      <h2>10. Intellectual Property</h2>
       <p>
         The Santhica App, including its design, code, branding, logo, and
         documentation, is the intellectual property of Santhica. These Terms do
@@ -127,7 +135,7 @@ export default function TermsOfService() {
         right to use the App as described herein.
       </p>
 
-      <h2>10. Limitation of Liability</h2>
+      <h2>11. Limitation of Liability</h2>
       <p>
         To the maximum extent permitted by law, Santhica and its developers
         shall not be liable for:
@@ -152,7 +160,7 @@ export default function TermsOfService() {
         </li>
       </ul>
 
-      <h2>11. Indemnification</h2>
+      <h2>12. Indemnification</h2>
       <p>
         You agree to indemnify and hold harmless Santhica, its developers,
         officers, and affiliates from any claims, damages, losses, or expenses
@@ -160,7 +168,7 @@ export default function TermsOfService() {
         of these Terms, or your violation of any applicable law or regulation.
       </p>
 
-      <h2>12. Termination</h2>
+      <h2>13. Termination</h2>
       <p>
         You may stop using the App at any time by uninstalling it from your
         device, which will remove all locally stored data. We reserve the right
@@ -168,7 +176,7 @@ export default function TermsOfService() {
         use the App in a manner that could harm us or other users.
       </p>
 
-      <h2>13. Updates & Modifications</h2>
+      <h2>14. Updates & Modifications</h2>
       <p>
         We may update the App and these Terms from time to time. Continued use
         of the App after any changes constitutes acceptance of the updated
@@ -176,7 +184,7 @@ export default function TermsOfService() {
         our website.
       </p>
 
-      <h2>14. Governing Law & Jurisdiction</h2>
+      <h2>15. Governing Law & Jurisdiction</h2>
       <p>
         These Terms shall be governed by and construed in accordance with the
         laws of India. Any disputes arising from these Terms or your use of the
@@ -184,7 +192,7 @@ export default function TermsOfService() {
         India.
       </p>
 
-      <h2>15. Severability</h2>
+      <h2>16. Severability</h2>
       <p>
         If any provision of these Terms is found to be unenforceable or invalid,
         that provision shall be limited or eliminated to the minimum extent
@@ -192,7 +200,7 @@ export default function TermsOfService() {
         effect.
       </p>
 
-      <h2>16. Contact Us</h2>
+      <h2>17. Contact Us</h2>
       <p>
         If you have any questions about these Terms of Service, please contact
         us at:

@@ -110,13 +110,13 @@ export default function PrivacyPolicy() {
           <strong>Legal Requirements:</strong> We may disclose information if
           required by law, regulation, or valid legal process
         </li>
+        <li>
+          <strong>SMS Opt-In Data:</strong> Mobile information will not be shared
+          with third parties/affiliates for marketing/promotional purposes. All
+          the above categories exclude text messaging originator opt-in data and
+          consent; this information will not be shared with any third parties.
+        </li>
       </ul>
-      <p>
-        <strong>SMS Opt-In Data:</strong> Mobile information will not be shared
-        with third parties/affiliates for marketing/promotional purposes. All
-        the above categories exclude text messaging originator opt-in data and
-        consent; this information will not be shared with any third parties.
-      </p>
 
       <h2>6. Data Retention</h2>
       <p>
