@@ -19,13 +19,11 @@ export default function TermsOfService() {
         jurisdiction.
       </p>
 
-      <h2>2. Account & API Key</h2>
+      <h2>2. Account & Access</h2>
       <p>
-        To use the AI-powered prescription scanning feature, you must provide
-        your own OpenAI API key. You are solely responsible for maintaining the
-        security and confidentiality of your API key. You are responsible for
-        all charges incurred through your OpenAI account as a result of using
-        the App.
+        You are solely responsible for maintaining the security of your device
+        and account. AI-powered prescription scanning is provided by Santhica —
+        you do not need to provide any third-party API key to use this feature.
       </p>
 
       <h2>3. Permitted Use</h2>
