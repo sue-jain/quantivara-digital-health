@@ -8,92 +8,176 @@
       name="description"
       content="How to delete your Santhica account and associated data."
     />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      * {
+        box-sizing: border-box;
+      }
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        margin: 0;
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           Helvetica, Arial, sans-serif;
-        color: #1f2937;
-        max-width: 760px;
+        background: #ffffff;
+        color: #111827;
+      }
+      .container {
+        max-width: 48rem;
         margin: 0 auto;
-        padding: 48px 20px;
-        line-height: 1.65;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
+      header {
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 1.25rem;
+        padding-bottom: 1.25rem;
+      }
+      .logo img {
+        height: 2.5rem;
+        width: auto;
+        display: block;
+      }
+      nav {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+      nav a {
+        color: #6b7280;
+        text-decoration: none;
+        transition: color 0.15s;
+      }
+      nav a:hover {
+        color: #111827;
+      }
+      main {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
       }
       h1 {
-        color: #1e3a8a;
-        font-size: 1.9rem;
-        margin-bottom: 4px;
-      }
-      h2 {
-        color: #1e40af;
-        font-size: 1.15rem;
-        margin-top: 32px;
-      }
-      a {
-        color: #2563eb;
+        font-size: 1.875rem;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        color: #111827;
+        margin: 0 0 0.5rem;
       }
       .updated {
+        font-size: 0.875rem;
         color: #6b7280;
-        font-size: 0.9rem;
-        margin: 0 0 28px;
+        margin: 0 0 2.5rem;
       }
-      .brand {
+      .content h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #111827;
+        margin: 2.5rem 0 1rem;
+      }
+      .content p {
+        font-size: 15px;
+        line-height: 1.7;
+        color: #374151;
+        margin: 0 0 1rem;
+      }
+      .content a {
         color: #2563eb;
-        font-weight: 700;
+      }
+      footer {
+        border-top: 1px solid #e5e7eb;
+        margin-top: 4rem;
+      }
+      .footer-inner {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        text-align: center;
+        font-size: 0.875rem;
+        color: #6b7280;
       }
     </style>
   </head>
   <body>
-    <h1>Account &amp; Data Deletion</h1>
-    <p class="updated">Last updated: July 6, 2026</p>
+    <header>
+      <div class="container header-inner">
+        <a class="logo" href="/"><img src="/slide1_Picture%203.png" alt="Santhica" /></a>
+        <nav>
+          <a href="/privacy-policy">Privacy Policy</a>
+          <a href="/terms-of-service">Terms of Service</a>
+        </nav>
+      </div>
+    </header>
 
-    <p>
-      <span class="brand">Santhica</span> (Santhica, Inc.) lets you delete your
-      account and all associated data at any time. This page explains how to
-      request deletion and what happens to your data.
-    </p>
+    <main class="container">
+      <h1>Account &amp; Data Deletion</h1>
+      <p class="updated">Last updated: July 6, 2026</p>
+      <div class="content">
+        <p>
+          <strong>Santhica</strong> (Santhica, Inc.) lets you delete your account
+          and all associated data at any time. This page explains how to request
+          deletion and what happens to your data.
+        </p>
 
-    <h2>How to delete your account</h2>
-    <p>
-      <strong>In the app:</strong> Open the Santhica app, go to
-      <strong>Settings &rarr; Delete Account</strong>, and confirm. Your account
-      and its associated data will be permanently deleted.
-    </p>
-    <p>
-      <strong>By email:</strong> Alternatively, email
-      <a href="mailto:support@santhica.com">support@santhica.com</a> from your
-      registered contact with the subject "Account Deletion Request," and we
-      will process your deletion.
-    </p>
+        <h2>How to delete your account</h2>
+        <p>
+          <strong>In the app:</strong> Open the Santhica app, go to
+          <strong>Settings &rarr; Delete Account</strong>, and confirm. Your
+          account and its associated data will be permanently deleted.
+        </p>
+        <p>
+          <strong>By email:</strong> Alternatively, email
+          <a href="mailto:support@santhica.com">support@santhica.com</a> from your
+          registered contact with the subject "Account Deletion Request," and we
+          will process your deletion.
+        </p>
 
-    <h2>What data is deleted</h2>
-    <p>
-      When you delete your account, we permanently delete your account and its
-      associated data, including your provider profile and the records you
-      created in the app (patients, visits, prescriptions, and uploaded
-      documents).
-    </p>
+        <h2>What data is deleted</h2>
+        <p>
+          When you delete your account, we permanently delete your account and its
+          associated data, including your provider profile and the records you
+          created in the app (patients, visits, prescriptions, and uploaded
+          documents).
+        </p>
 
-    <h2>Deleting specific data</h2>
-    <p>
-      You can also delete individual records (patients, visits, prescriptions,
-      and documents) directly within the app without deleting your entire
-      account, or email
-      <a href="mailto:support@santhica.com">support@santhica.com</a> to request
-      deletion of specific data.
-    </p>
+        <h2>Deleting specific data</h2>
+        <p>
+          You can also delete individual records (patients, visits, prescriptions,
+          and documents) directly within the app without deleting your entire
+          account, or email
+          <a href="mailto:support@santhica.com">support@santhica.com</a> to
+          request deletion of specific data.
+        </p>
 
-    <h2>Data retention</h2>
-    <p>
-      Your personal data is deleted upon account deletion. Certain records may
-      be retained only where required by law or for legitimate security and
-      audit purposes, for no longer than 90 days, after which they are
-      permanently deleted.
-    </p>
+        <h2>Data retention</h2>
+        <p>
+          Your personal data is deleted upon account deletion. Certain records may
+          be retained only where required by law or for legitimate security and
+          audit purposes, for no longer than 90 days, after which they are
+          permanently deleted.
+        </p>
 
-    <h2>Contact us</h2>
-    <p>
-      If you have any questions about account or data deletion, email
-      <a href="mailto:support@santhica.com">support@santhica.com</a>.
-    </p>
+        <h2>Contact us</h2>
+        <p>
+          If you have any questions about account or data deletion, email
+          <a href="mailto:support@santhica.com">support@santhica.com</a>.
+        </p>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        &copy; 2026 Santhica, Inc. All rights reserved.
+      </div>
+    </footer>
   </body>
 </html>
