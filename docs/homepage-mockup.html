@@ -1,0 +1,1166 @@
+<title>Santhica Homepage Redesign — Visual Mockup</title>
+<style>
+  /* ============================================================
+     REVIEW CHROME — theme-aware wrapper around the mockup canvas.
+     Deliberately separate from the site palette below.
+     ============================================================ */
+  :root {
+    --chrome-bg: #ECEEF2;
+    --chrome-panel: #FFFFFF;
+    --chrome-ink: #1B2230;
+    --chrome-ink-2: #5A6478;
+    --chrome-border: #D3D8E0;
+    --annot: #6D5BD0;
+    --annot-soft: #F0EDFB;
+    --annot-border: #C6BCF0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --chrome-bg: #14161C;
+      --chrome-panel: #1C1F27;
+      --chrome-ink: #E7EAF0;
+      --chrome-ink-2: #9AA3B4;
+      --chrome-border: #2C313C;
+      --annot: #A99AF0;
+      --annot-soft: #24203A;
+      --annot-border: #453C6B;
+    }
+  }
+  :root[data-theme="dark"] {
+    --chrome-bg: #14161C;
+    --chrome-panel: #1C1F27;
+    --chrome-ink: #E7EAF0;
+    --chrome-ink-2: #9AA3B4;
+    --chrome-border: #2C313C;
+    --annot: #A99AF0;
+    --annot-soft: #24203A;
+    --annot-border: #453C6B;
+  }
+  :root[data-theme="light"] {
+    --chrome-bg: #ECEEF2;
+    --chrome-panel: #FFFFFF;
+    --chrome-ink: #1B2230;
+    --chrome-ink-2: #5A6478;
+    --chrome-border: #D3D8E0;
+    --annot: #6D5BD0;
+    --annot-soft: #F0EDFB;
+    --annot-border: #C6BCF0;
+  }
+
+  /* ============================================================
+     SITE PALETTE — exactly the tokens proposed in §3.1 of the spec.
+     Fixed, not theme-reactive: the real santhica.com is a
+     light page with two deliberate dark bands.
+     ============================================================ */
+  .site {
+    --navy-900: #0B1220;
+    --navy-800: #14243D;
+    --navy-700: #1E3A5F;
+    --navy-500: #35597F;
+    --navy-100: #E8F4F8;
+    --green-800: #075C3E;
+    --green-700: #0A7A52;
+    --green-600: #0E8A5F;
+    --green-400: #2DB87F;
+    --surface: #FFFFFF;
+    --surface-subtle: #F6F8FA;
+    --ink: #0F1B2D;
+    --ink-2: #4A5A6E;
+    --ink-3: #6B7A8D;
+    --bd: #E3E8EE;
+    --bd-strong: #C9D2DC;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--chrome-bg);
+    color: var(--chrome-ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv02","cv03","cv04";
+  }
+
+  /* ---------- review header ---------- */
+  .review-head {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 24px 20px;
+  }
+  .review-kicker {
+    font-size: 11px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--annot); margin: 0 0 10px;
+  }
+  .review-head h1 {
+    font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.15;
+    letter-spacing: -.02em; font-weight: 700; margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  .review-head p {
+    margin: 0; max-width: 68ch; font-size: 15px; line-height: 1.6;
+    color: var(--chrome-ink-2);
+  }
+  .review-bar {
+    max-width: 1280px; margin: 0 auto; padding: 0 24px 20px;
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  }
+  .legend-key {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; color: var(--chrome-ink-2);
+    border: 1px dashed var(--annot-border); background: var(--annot-soft);
+    border-radius: 999px; padding: 5px 11px;
+  }
+  .legend-key b { color: var(--annot); font-weight: 700; }
+  .toggle-btn {
+    font: inherit; font-size: 13px; font-weight: 600;
+    color: var(--chrome-panel); background: var(--annot);
+    border: none; border-radius: 6px; padding: 8px 14px; cursor: pointer;
+    margin-left: auto;
+  }
+  .toggle-btn:hover { filter: brightness(1.08); }
+  .toggle-btn:focus-visible { outline: 2px solid var(--annot); outline-offset: 2px; }
+
+  /* ---------- annotation layer ---------- */
+  .flag {
+    display: inline-block; vertical-align: middle;
+    font-size: 10px; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--annot); background: var(--annot-soft);
+    border: 1px dashed var(--annot-border); border-radius: 4px;
+    padding: 2px 6px; margin: 0 2px;
+    white-space: nowrap;
+  }
+  .note {
+    display: block; font-size: 12px; line-height: 1.5;
+    color: var(--annot); background: var(--annot-soft);
+    border-left: 2px solid var(--annot-border);
+    padding: 8px 12px; margin: 12px 0 0; border-radius: 0 4px 4px 0;
+    max-width: 68ch;
+  }
+  .site.clean .flag,
+  .site.clean .note { display: none; }
+
+  /* ---------- device frame ---------- */
+  .frame {
+    max-width: 1280px; margin: 0 auto 48px; padding: 0 24px;
+  }
+  .frame-inner {
+    background: #FFFFFF; border: 1px solid var(--chrome-border);
+    border-radius: 10px; overflow: hidden;
+    box-shadow: 0 1px 2px rgba(11,18,32,.06), 0 12px 32px rgba(11,18,32,.10);
+  }
+
+  /* ============================================================
+     THE MOCKUP
+     ============================================================ */
+  .site {
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.65;
+  }
+  .site h1, .site h2, .site h3, .site h4 { margin: 0; text-wrap: balance; }
+  .site p { margin: 0; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding-left: 40px; padding-right: 40px; }
+  .eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--green-700); margin: 0 0 18px;
+  }
+  .h2 {
+    font-size: clamp(2rem, 3.6vw, 2.75rem); line-height: 1.12;
+    letter-spacing: -.015em; font-weight: 700; color: var(--ink);
+  }
+  .lede {
+    font-size: clamp(1.0625rem, 1.4vw, 1.25rem); line-height: 1.6;
+    color: var(--ink-2); max-width: 68ch;
+  }
+
+  /* ---------- nav ---------- */
+  .nav {
+    height: 64px; display: flex; align-items: center;
+    border-bottom: 1px solid var(--bd); background: var(--surface);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .nav .wrap { display: flex; align-items: center; gap: 36px; width: 100%; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; letter-spacing: -.01em; color: var(--navy-700); font-size: 17px; }
+  .brand-mark {
+    width: 26px; height: 26px; border-radius: 6px; flex: none;
+    background: var(--navy-700); position: relative;
+  }
+  .brand-mark::after {
+    content: ""; position: absolute; inset: 7px 6px;
+    border-left: 2px solid var(--green-400); border-bottom: 2px solid var(--green-400);
+    border-radius: 0 0 0 3px;
+  }
+  .nav-links { display: flex; gap: 26px; font-size: 14px; font-weight: 500; }
+  .nav-links a { color: var(--ink-2); text-decoration: none; padding: 4px 0; border-bottom: 2px solid transparent; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-links a.on { color: var(--ink); border-bottom-color: var(--navy-700); }
+  .nav-cta { margin-left: auto; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    font: inherit; font-size: 14px; font-weight: 600;
+    border-radius: 6px; padding: 0 18px; height: 40px;
+    text-decoration: none; cursor: pointer; border: 1px solid transparent;
+    transition: background-color .12s ease, border-color .12s ease, color .12s ease;
+  }
+  .btn-primary { background: var(--green-600); color: #fff; }
+  .btn-primary:hover { background: var(--green-800); }
+  .btn-ghost { background: transparent; color: var(--ink); border-color: var(--bd-strong); }
+  .btn-ghost:hover { border-color: var(--navy-700); }
+  .btn:focus-visible { outline: 2px solid var(--green-600); outline-offset: 2px; }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 88px 0 76px; position: relative; overflow: hidden; }
+  .hero .wrap { display: grid; grid-template-columns: 7fr 5fr; gap: 60px; align-items: center; }
+  .hero-wash {
+    position: absolute; top: -10%; right: -8%; width: 620px; height: 620px;
+    background: radial-gradient(circle, var(--navy-100) 0%, rgba(232,244,248,0) 68%);
+    pointer-events: none;
+  }
+  .hero-copy { position: relative; }
+  .h1 {
+    font-size: clamp(2.5rem, 5.2vw, 4rem); line-height: 1.05;
+    letter-spacing: -.02em; font-weight: 700; max-width: 15ch;
+    color: var(--ink); margin-bottom: 22px;
+  }
+  .hero-sub { font-size: clamp(1.0625rem, 1.4vw, 1.25rem); line-height: 1.6; color: var(--ink-2); max-width: 52ch; }
+  .hero-cta { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
+  .chips { display: flex; gap: 10px; margin-top: 30px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 14px; color: var(--ink-2);
+    border: 1px solid var(--bd); border-radius: 6px; padding: 7px 12px;
+  }
+  .chip::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--green-600); flex: none; }
+
+  /* hero artifact */
+  .artifact { position: relative; display: flex; justify-content: center; }
+  .phone {
+    width: 244px; border: 1.5px solid var(--navy-700); border-radius: 20px;
+    padding: 16px 14px; background: #fff; position: relative;
+  }
+  .phone::before {
+    content: ""; position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    width: 52px; height: 4px; border-radius: 2px; background: var(--bd-strong);
+  }
+  .ph-step {
+    border: 1px solid var(--bd); border-radius: 6px; padding: 11px 12px;
+    margin-top: 12px; background: var(--surface-subtle);
+  }
+  .ph-step:first-of-type { margin-top: 18px; }
+  .ph-label { font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+  .ph-doc { height: 54px; border: 1px dashed var(--bd-strong); border-radius: 4px; margin-top: 7px; display: grid; align-content: center; gap: 5px; padding: 0 10px; }
+  .ph-doc i { display: block; height: 4px; border-radius: 2px; background: var(--bd-strong); }
+  .ph-doc i:nth-child(1) { width: 76%; }
+  .ph-doc i:nth-child(2) { width: 58%; }
+  .ph-doc i:nth-child(3) { width: 67%; }
+  .ph-rows { margin-top: 7px; display: grid; gap: 6px; }
+  .ph-row { display: grid; grid-template-columns: 60px 1fr; gap: 8px; align-items: center; }
+  .ph-row span { font-size: 9px; font-weight: 700; letter-spacing: .05em; color: var(--ink-3); }
+  .ph-row i { height: 7px; border-radius: 2px; background: var(--bd-strong); display: block; }
+  .ph-row:nth-child(1) i { width: 82%; }
+  .ph-row:nth-child(2) i { width: 44%; }
+  .ph-row:nth-child(3) i { width: 62%; }
+  .ph-row:nth-child(4) i { width: 38%; }
+  .ph-arrow { text-align: center; font-size: 10px; color: var(--ink-3); margin: 7px 0 0; font-variant-numeric: tabular-nums; }
+  .ph-done { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--green-700); }
+  .ph-tick { width: 16px; height: 16px; border-radius: 50%; background: var(--green-600); color: #fff; font-size: 10px; display: grid; place-items: center; flex: none; }
+  .ph-timer {
+    position: absolute; bottom: -12px; right: -12px;
+    background: var(--navy-700); color: #fff; font-size: 12px; font-weight: 600;
+    border-radius: 6px; padding: 5px 10px; font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- crisis (dark) ---------- */
+  .crisis { background: linear-gradient(180deg, var(--navy-900) 0%, var(--navy-800) 100%); color: #fff; padding: 112px 0; }
+  .crisis .eyebrow { color: var(--green-400); }
+  .crisis .h2 { color: #fff; max-width: 20ch; }
+  .crisis-lede { font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.72); max-width: 62ch; margin-top: 18px; }
+  .metrics { display: grid; grid-template-columns: 1fr 1fr; margin-top: 72px; }
+  .metric { padding-right: 48px; }
+  .metric + .metric { padding-left: 48px; padding-right: 0; border-left: 1px solid rgba(255,255,255,.10); }
+  .metric-num {
+    font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 300; line-height: 1;
+    letter-spacing: -.03em; color: #fff; font-variant-numeric: tabular-nums;
+  }
+  .metric-rule { width: 48px; height: 1px; background: rgba(255,255,255,.2); margin: 26px 0 22px; }
+  .metric-label { font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.86); max-width: 34ch; }
+  .metric-src { font-size: 13px; color: rgba(255,255,255,.55); margin-top: 20px; }
+  .crisis-bridge {
+    margin-top: 72px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,.10);
+    font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.78); max-width: 72ch;
+  }
+  .crisis .note { color: #C9BEF7; background: rgba(109,91,208,.16); border-left-color: #6D5BD0; }
+  .crisis .flag { color: #C9BEF7; background: rgba(109,91,208,.18); border-color: #6D5BD0; }
+
+  /* ---------- journey ---------- */
+  .journey { padding: 104px 0; background: var(--surface); }
+  .journey-head { max-width: 62ch; margin-bottom: 68px; }
+  .journey-head .lede { margin-top: 16px; }
+
+  .track { position: relative; }
+  .spine-base {
+    position: absolute; left: 0; right: 0; top: 13px; height: 3px;
+    background: var(--bd); border-radius: 2px;
+  }
+  .spine-fill {
+    position: absolute; left: 0; top: 13px; height: 3px; width: 0;
+    background: var(--green-600); border-radius: 2px;
+    transition: width 1200ms cubic-bezier(.16,1,.3,1);
+  }
+  .stages { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+  .stage { position: relative; padding-top: 0; }
+  .node {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--navy-700);
+    box-shadow: 0 0 0 3px #fff; position: relative; z-index: 2;
+    transform: scale(0); transition: transform 320ms cubic-bezier(.16,1,.3,1);
+  }
+  .stage-name {
+    font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-3); margin: 20px 0 12px;
+  }
+  .events { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; opacity: 0; transition: opacity 300ms ease; }
+  .event {
+    font-size: 12px; color: var(--ink-2);
+    border: 1px solid var(--bd); border-radius: 4px; padding: 4px 9px; background: #fff;
+  }
+  .custodians { display: flex; gap: 6px; margin-top: 56px; opacity: 0; transition: opacity 400ms ease; }
+  .cust {
+    height: 34px; display: grid; place-items: center; border-radius: 4px;
+    border: 1px solid var(--bd); font-size: 11px; font-weight: 600;
+    color: var(--ink-2); text-align: center; padding: 0 8px;
+  }
+  .cust:nth-child(odd) { background: var(--surface-subtle); }
+  .cust:nth-child(even) { background: var(--navy-100); }
+  .cust:nth-child(1) { flex: 28; }
+  .cust:nth-child(2) { flex: 30; }
+  .cust:nth-child(3) { flex: 22; }
+  .cust:nth-child(4) { flex: 20; }
+  .cust-caption { margin-top: 18px; font-size: 15px; color: var(--ink-2); }
+  .cust-caption b { color: var(--ink); font-weight: 700; }
+
+  .track.in .spine-fill { width: 100%; }
+  .track.in .node { transform: scale(1); }
+  .track.in .events { opacity: 1; }
+  .track.in .custodians { opacity: 1; }
+  .stage:nth-child(1) .node { transition-delay: 60ms; }
+  .stage:nth-child(2) .node { transition-delay: 340ms; }
+  .stage:nth-child(3) .node { transition-delay: 620ms; }
+  .stage:nth-child(4) .node { transition-delay: 900ms; }
+  .stage:nth-child(5) .node { transition-delay: 1180ms; }
+  .stage:nth-child(1) .events { transition-delay: 260ms; }
+  .stage:nth-child(2) .events { transition-delay: 540ms; }
+  .stage:nth-child(3) .events { transition-delay: 820ms; }
+  .stage:nth-child(4) .events { transition-delay: 1100ms; }
+  .stage:nth-child(5) .events { transition-delay: 1380ms; }
+  .custodians { transition-delay: 800ms; }
+
+  .journey-mobile { display: none; }
+
+  /* ---------- modules ---------- */
+  .modules { background: var(--surface-subtle); padding: 88px 0 104px; }
+  .mod-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+  .mod-head-l { max-width: 60ch; }
+  .mod-head .lede { margin-top: 16px; }
+  .legend { display: flex; align-items: center; gap: 18px; font-size: 12px; color: var(--ink-3); padding-bottom: 4px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .dot-live { width: 7px; height: 7px; border-radius: 50%; background: var(--green-600); }
+  .dot-dev { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(--bd-strong); }
+
+  .rail { display: flex; gap: 8px; margin: 40px 0 12px; flex-wrap: wrap; }
+  .rail button {
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    border-radius: 6px; padding: 8px 15px;
+    background: transparent; color: var(--ink-2); border: 1px solid var(--bd-strong);
+    transition: background-color .12s ease, color .12s ease, border-color .12s ease;
+  }
+  .rail button:hover { border-color: var(--navy-700); color: var(--ink); }
+  .rail button.on { background: var(--navy-700); color: #fff; border-color: var(--navy-700); }
+  .rail button:focus-visible { outline: 2px solid var(--green-600); outline-offset: 2px; }
+
+  .band { margin-top: 52px; scroll-margin-top: 90px; }
+  .band-head { padding-bottom: 14px; border-bottom: 1px solid var(--bd); margin-bottom: 24px; }
+  .band-head h3 { font-size: 1.25rem; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+  .band-head p { font-size: 14px; color: var(--ink-3); margin-top: 5px; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .cards.two { grid-template-columns: repeat(2, 1fr); }
+  .card {
+    background: var(--surface); border: 1px solid var(--bd); border-radius: 8px;
+    padding: 22px; transition: border-color .12s ease;
+  }
+  .card:hover { border-color: var(--navy-700); }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  .ico { width: 20px; height: 20px; color: var(--navy-700); flex: none; }
+  .status {
+    display: inline-flex; align-items: center; gap: 6px; flex: none;
+    font-size: 11px; font-weight: 600; color: var(--ink-3);
+    border: 1px solid var(--bd); border-radius: 999px; padding: 3px 9px; background: var(--surface-subtle);
+  }
+  .card h4 { font-size: 1rem; font-weight: 600; line-height: 1.4; color: var(--ink); margin-bottom: 9px; }
+  .card p { font-size: 14px; line-height: 1.6; color: var(--ink-2); }
+
+  /* ---------- trust ---------- */
+  .trust { padding: 104px 0; background: var(--surface); }
+  .trust .wrap { max-width: 960px; }
+  .trust-head { margin-bottom: 44px; }
+  .trust-head .lede { margin-top: 16px; }
+  .ctrl { border-top: 1px solid var(--bd); }
+  .ctrl:last-of-type { border-bottom: 1px solid var(--bd); }
+  .ctrl-btn {
+    width: 100%; text-align: left; background: none; border: none; font: inherit;
+    padding: 22px 40px 22px 30px; cursor: pointer; position: relative; color: inherit;
+    display: block;
+  }
+  .ctrl-btn:focus-visible { outline: 2px solid var(--green-600); outline-offset: -2px; }
+  .ctrl-check {
+    position: absolute; left: 0; top: 24px; width: 16px; height: 16px; color: var(--green-700);
+  }
+  .ctrl-name { font-size: 1rem; font-weight: 600; color: var(--ink); }
+  .ctrl-status { font-size: 14px; line-height: 1.6; color: var(--ink-2); margin-top: 5px; max-width: 68ch; }
+  .chev {
+    position: absolute; right: 4px; top: 26px; width: 14px; height: 14px;
+    color: var(--ink-3); transition: transform 150ms ease;
+  }
+  .ctrl.open .chev { transform: rotate(180deg); }
+  .ctrl-detail { display: none; padding: 0 40px 22px 30px; }
+  .ctrl.open .ctrl-detail { display: block; }
+  .ctrl-detail p { font-size: 14px; line-height: 1.6; color: var(--ink-2); max-width: 62ch; }
+
+  .roadmap {
+    margin-top: 40px; background: var(--surface-subtle);
+    border: 1px solid var(--bd); border-radius: 8px; padding: 26px;
+  }
+  .roadmap h3 { font-size: 1.25rem; font-weight: 600; color: var(--ink); margin-bottom: 14px; }
+  .roadmap p { font-size: 15px; line-height: 1.65; color: var(--ink-2); max-width: 68ch; }
+  .disclaimer {
+    margin-top: 16px; padding: 14px 16px; background: var(--surface);
+    border: 1px solid var(--bd-strong); border-radius: 6px;
+    font-size: 15px; font-weight: 700; color: var(--ink);
+  }
+  .disclaimer span { display: block; font-weight: 400; color: var(--ink-2); margin-top: 4px; }
+  .no-claim { margin-top: 40px; }
+  .no-claim h3 { font-size: 1.25rem; font-weight: 600; color: var(--ink); margin-bottom: 14px; }
+  .no-claim ul { margin: 0; padding-left: 20px; display: grid; gap: 10px; }
+  .no-claim li { font-size: 15px; line-height: 1.6; color: var(--ink-2); max-width: 72ch; }
+  .trust-close { margin-top: 36px; font-size: 15px; color: var(--ink-2); }
+  .trust-close a { color: var(--green-700); }
+
+  /* ---------- team ---------- */
+  .team { background: var(--surface-subtle); padding: 104px 0; }
+  .team-head { max-width: 62ch; margin-bottom: 48px; }
+  .team-head .lede { margin-top: 16px; }
+  .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .member {
+    background: var(--surface); border: 1px solid var(--bd); border-radius: 8px;
+    padding: 24px; transition: border-color .12s ease;
+  }
+  .member:hover { border-color: var(--navy-700); }
+  .mono {
+    width: 56px; height: 56px; border-radius: 8px; background: var(--navy-700);
+    color: #fff; font-size: 18px; font-weight: 600; display: grid; place-items: center;
+    margin-bottom: 20px; letter-spacing: .02em;
+  }
+  .member h3 { font-size: 1.25rem; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+  .role { font-size: 14px; font-weight: 600; color: var(--green-700); margin-top: 3px; }
+  .member p { font-size: 14px; line-height: 1.6; color: var(--ink-2); margin-top: 14px; }
+  .li-link { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--ink-3); margin-top: 18px; text-decoration: none; }
+  .li-link:hover { color: var(--navy-700); }
+  .pedigree { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--bd); }
+  .pedigree .ped-label { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 12px; }
+  .pedigree .ped-list { font-size: 15px; font-weight: 500; letter-spacing: .04em; color: var(--ink-3); }
+
+  /* ---------- demo (dark) ---------- */
+  .demo { background: var(--navy-900); color: #fff; padding: 104px 0; }
+  .demo .wrap { display: grid; grid-template-columns: 5fr 7fr; gap: 64px; align-items: start; }
+  .demo .eyebrow { color: var(--green-400); }
+  .demo .h2 { color: #fff; }
+  .demo-lede { font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.72); margin-top: 16px; max-width: 44ch; }
+  .benefits { margin: 34px 0 0; padding: 0; list-style: none; display: grid; gap: 18px; }
+  .benefits li { display: grid; grid-template-columns: 18px 1fr; gap: 12px; font-size: 15px; line-height: 1.6; color: rgba(255,255,255,.78); }
+  .benefits b { color: #fff; font-weight: 600; }
+  .bcheck { width: 16px; height: 16px; color: var(--green-400); margin-top: 4px; }
+  .form-card { background: #fff; border-radius: 8px; padding: 30px; color: var(--ink); }
+  .form-card h3 { font-size: 1.25rem; font-weight: 600; color: var(--ink); margin-bottom: 22px; }
+  .field { margin-bottom: 18px; }
+  .field label { display: flex; align-items: baseline; gap: 8px; font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 7px; }
+  .req { font-size: 12px; font-weight: 400; color: var(--ink-3); }
+  .field input, .field select, .field textarea {
+    width: 100%; font: inherit; font-size: 15px; color: var(--ink);
+    background: #fff; border: 1px solid var(--bd-strong); border-radius: 6px;
+    padding: 11px 13px; height: 44px;
+  }
+  .field textarea { height: 88px; resize: vertical; padding-top: 10px; }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: 2px solid var(--green-600); outline-offset: 1px; border-color: var(--green-600);
+  }
+  .submit { width: 100%; height: 46px; margin-top: 6px; }
+  .consent { font-size: 13px; line-height: 1.55; color: var(--ink-3); margin-top: 14px; }
+  .consent a { color: var(--green-700); }
+
+  /* ---------- footer ---------- */
+  .foot { background: var(--navy-900); color: #fff; padding: 0 0 32px; border-top: 1px solid rgba(255,255,255,.10); }
+  .foot .wrap { padding-top: 60px; }
+  .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1.2fr; gap: 40px; }
+  .foot .brand { color: #fff; }
+  .foot-tag { font-size: 14px; line-height: 1.6; color: rgba(255,255,255,.62); margin-top: 14px; max-width: 30ch; }
+  .foot-mail { display: block; font-size: 14px; color: rgba(255,255,255,.82); margin-top: 16px; text-decoration: none; }
+  .foot h4 { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.55); margin-bottom: 16px; }
+  .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
+  .foot ul a { font-size: 14px; color: rgba(255,255,255,.78); text-decoration: none; }
+  .foot ul a:hover { color: #fff; }
+  .foot-bottom {
+    margin-top: 52px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.15);
+    font-size: 14px; color: rgba(255,255,255,.6);
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 900px) {
+    .wrap { padding-left: 24px; padding-right: 24px; }
+    .hero .wrap, .demo .wrap { grid-template-columns: 1fr; gap: 44px; }
+    .metrics { grid-template-columns: 1fr; }
+    .metric { padding-right: 0; }
+    .metric + .metric { padding-left: 0; border-left: none; border-top: 1px solid rgba(255,255,255,.10); margin-top: 48px; padding-top: 48px; }
+    .cards, .cards.two { grid-template-columns: 1fr; }
+    .team-grid { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .nav-links { display: none; }
+    .track { display: none; }
+    .journey-mobile { display: block; }
+    .jm-item { position: relative; padding: 0 0 30px 34px; }
+    .jm-item::before {
+      content: ""; position: absolute; left: 5px; top: 16px; bottom: -4px; width: 2px; background: var(--bd);
+    }
+    .jm-item:last-child::before { display: none; }
+    .jm-dot { position: absolute; left: 0; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--navy-700); }
+    .jm-name { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+    .jm-ev { font-size: 14px; color: var(--ink-2); margin-top: 6px; }
+    .custodians { flex-direction: column; opacity: 1; }
+    .cust { flex: none !important; height: 38px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site *, .site *::before, .site *::after {
+      transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
+      animation-duration: 0.01ms !important;
+    }
+    .spine-fill { width: 100%; }
+    .node { transform: scale(1); }
+    .events, .custodians { opacity: 1; }
+  }
+</style>
+
+<div class="review-head">
+  <p class="review-kicker">Design review · not yet built</p>
+  <h1>Santhica homepage redesign — visual mockup</h1>
+  <p>This renders the approved spec so you can judge it before any production code is written. Section order reflects your decisions: Journey moved ahead of Modules, Trust ahead of Team, Pedigree bar dropped. Nothing here is wired to the live site.</p>
+</div>
+
+<div class="review-bar">
+  <span class="legend-key"><b>SOURCE REQUIRED</b> you must supply a citation</span>
+  <span class="legend-key"><b>VERIFY</b> claim needs confirming before launch</span>
+  <span class="legend-key"><b>In development</b> default status until you promote a module</span>
+  <button class="toggle-btn" id="toggle">Hide review annotations</button>
+</div>
+
+<div class="frame">
+<div class="frame-inner">
+<div class="site" id="site">
+
+  <!-- ================= NAV ================= -->
+  <nav class="nav">
+    <div class="wrap">
+      <div class="brand"><span class="brand-mark"></span> santhica</div>
+      <div class="nav-links">
+        <a href="#" class="on">Platform ▾</a>
+        <a href="#problem">The Problem</a>
+        <a href="#security">Security</a>
+        <a href="#team">Team</a>
+      </div>
+      <div class="nav-cta"><a href="#demo" class="btn btn-primary">Request a demo</a></div>
+    </div>
+  </nav>
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="hero-wash"></div>
+    <div class="wrap">
+      <div class="hero-copy">
+        <p class="eyebrow">Health record infrastructure for India</p>
+        <h1 class="h1">One patient. One record. From birth to end of life.</h1>
+        <p class="hero-sub">Santhica turns every prescription, lab report, scan, and admission — handwritten or digital — into a single continuous medical record that follows the patient across every clinic, hospital, and city.</p>
+        <div class="hero-cta">
+          <a href="#demo" class="btn btn-primary">Request a demo</a>
+          <a href="#record" class="btn btn-ghost">See how the record works</a>
+        </div>
+        <div class="chips">
+          <span class="chip">30 seconds to digitize a record <span class="flag">Verify</span></span>
+          <span class="chip">Works on any phone</span>
+          <span class="chip">No change to how doctors already work</span>
+        </div>
+      </div>
+      <div class="artifact">
+        <div class="phone" aria-hidden="true">
+          <div class="ph-step">
+            <p class="ph-label">Photograph</p>
+            <div class="ph-doc"><i></i><i></i><i></i></div>
+          </div>
+          <p class="ph-arrow">↓ ~8s</p>
+          <div class="ph-step">
+            <p class="ph-label">Structured</p>
+            <div class="ph-rows">
+              <div class="ph-row"><span>DRUG</span><i></i></div>
+              <div class="ph-row"><span>DOSE</span><i></i></div>
+              <div class="ph-row"><span>FREQ</span><i></i></div>
+              <div class="ph-row"><span>DURATION</span><i></i></div>
+            </div>
+          </div>
+          <p class="ph-arrow">↓ ~22s</p>
+          <div class="ph-step">
+            <p class="ph-done"><span class="ph-tick">✓</span> Filed to patient record</p>
+          </div>
+          <span class="ph-timer">30s</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CRISIS ================= -->
+  <section class="crisis" id="problem">
+    <div class="wrap">
+      <p class="eyebrow">The problem</p>
+      <h2 class="h2">The record doesn't travel. The patient pays for it.</h2>
+      <p class="crisis-lede">Two numbers describe Indian outpatient care. Both trace to the same gap: at the moment of decision, the doctor cannot see what came before.</p>
+
+      <div class="metrics">
+        <div class="metric">
+          <p class="metric-num">~1,00,000</p>
+          <div class="metric-rule"></div>
+          <p class="metric-label">deaths a year in India attributed to medical error.</p>
+          <p class="metric-src">Source: [Publication], [Year] ↗ <span class="flag">Source required</span></p>
+        </div>
+        <div class="metric">
+          <p class="metric-num">~2 min</p>
+          <div class="metric-rule"></div>
+          <p class="metric-label">the average outpatient consultation. Two minutes to reconstruct a history that may span decades.</p>
+          <p class="metric-src">Source: [Publication], [Year] ↗ <span class="flag">Source required</span></p>
+        </div>
+      </div>
+
+      <p class="crisis-bridge">A doctor with two minutes cannot rebuild a history that lives in a plastic bag of paper. Santhica hands them the history in the first ten seconds.</p>
+      <span class="note">This section cannot ship until both figures carry a real publication and year. If they can't be sourced, the fallback is a qualitative version with no numerals — weaker, but honest. Note: no count-up animation on the mortality figure, deliberately.</span>
+    </div>
+  </section>
+
+  <!-- ================= JOURNEY ================= -->
+  <section class="journey" id="record">
+    <div class="wrap">
+      <div class="journey-head">
+        <p class="eyebrow">The record</p>
+        <h2 class="h2">One record, from the first immunization to the last discharge.</h2>
+        <p class="lede">Providers change. Cities change. Paper is lost. The record shouldn't be.</p>
+      </div>
+
+      <div class="track" id="track">
+        <div class="spine-base"></div>
+        <div class="spine-fill"></div>
+        <div class="stages">
+          <div class="stage">
+            <div class="node"></div>
+            <p class="stage-name">Birth</p>
+            <div class="events">
+              <span class="event">Birth record</span>
+              <span class="event">Immunizations</span>
+            </div>
+          </div>
+          <div class="stage">
+            <div class="node"></div>
+            <p class="stage-name">Childhood</p>
+            <div class="events">
+              <span class="event">Paediatric visits</span>
+              <span class="event">Growth</span>
+              <span class="event">Allergies</span>
+            </div>
+          </div>
+          <div class="stage">
+            <div class="node"></div>
+            <p class="stage-name">Adult care</p>
+            <div class="events">
+              <span class="event">Prescriptions</span>
+              <span class="event">Lab panels</span>
+              <span class="event">Imaging</span>
+            </div>
+          </div>
+          <div class="stage">
+            <div class="node"></div>
+            <p class="stage-name">Chronic &amp; surgical</p>
+            <div class="events">
+              <span class="event">Admissions</span>
+              <span class="event">Operative notes</span>
+              <span class="event">Discharge summaries</span>
+              <span class="event">Follow-up</span>
+            </div>
+          </div>
+          <div class="stage">
+            <div class="node"></div>
+            <p class="stage-name">Elder care</p>
+            <div class="events">
+              <span class="event">Polypharmacy review</span>
+              <span class="event">Interaction checks</span>
+              <span class="event">Care-team access</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="custodians">
+          <div class="cust">Village clinic</div>
+          <div class="cust">District hospital</div>
+          <div class="cust">Tertiary centre</div>
+          <div class="cust">Home care</div>
+        </div>
+      </div>
+
+      <div class="journey-mobile">
+        <div class="jm-item"><span class="jm-dot"></span><p class="jm-name">Birth</p><p class="jm-ev">Birth record · Immunizations</p></div>
+        <div class="jm-item"><span class="jm-dot"></span><p class="jm-name">Childhood</p><p class="jm-ev">Paediatric visits · Growth · Allergies</p></div>
+        <div class="jm-item"><span class="jm-dot"></span><p class="jm-name">Adult care</p><p class="jm-ev">Prescriptions · Lab panels · Imaging</p></div>
+        <div class="jm-item"><span class="jm-dot"></span><p class="jm-name">Chronic &amp; surgical care</p><p class="jm-ev">Admissions · Operative notes · Discharge summaries · Follow-up</p></div>
+        <div class="jm-item"><span class="jm-dot"></span><p class="jm-name">Elder care</p><p class="jm-ev">Polypharmacy review · Interaction checks · Care-team access</p></div>
+        <div class="custodians">
+          <div class="cust">Village clinic</div>
+          <div class="cust">District hospital</div>
+          <div class="cust">Tertiary centre</div>
+          <div class="cust">Home care</div>
+        </div>
+      </div>
+
+      <p class="cust-caption">Village clinic → District hospital → Tertiary centre → Home care. <b>Custodians change. The record does not.</b></p>
+      <span class="note">The custodian bars deliberately do not line up with the stage nodes — handoffs happen mid-stage, and the green spine running unbroken straight through them is the entire argument of this section. Categories only: no names, dates, doses, or diagnoses anywhere in this graphic.</span>
+    </div>
+  </section>
+
+  <!-- ================= MODULES ================= -->
+  <section class="modules" id="platform">
+    <div class="wrap">
+      <div class="mod-head">
+        <div class="mod-head-l">
+          <p class="eyebrow">The platform</p>
+          <h2 class="h2">Nine modules. One record underneath.</h2>
+          <p class="lede">Santhica isn't a single app. It's a capture-and-integration layer that works wherever the record is actually created — the consult room, the ward, the lab, the pharmacy.</p>
+        </div>
+        <div class="legend">
+          <span><i class="dot-live"></i> Live</span>
+          <span><i class="dot-dev"></i> In development</span>
+          <span>Status as of [DATE]</span>
+        </div>
+      </div>
+
+      <div class="rail" id="rail">
+        <button data-target="band-out" class="on">Outpatient (4)</button>
+        <button data-target="band-in">Inpatient (2)</button>
+        <button data-target="band-plat">Platform &amp; Network (3)</button>
+      </div>
+
+      <span class="note">Three labeled bands, all rendered on first paint — not tabs. Tabs would hide two-thirds of the platform, which defeats the point of showing breadth. Every module below ships defaulted to <b>In development</b> until you explicitly promote it.</span>
+
+      <div class="band" id="band-out">
+        <div class="band-head">
+          <h3>Outpatient</h3>
+          <p>Where most of Indian care happens, and where almost none of it is recorded.</p>
+        </div>
+        <div class="cards">
+          <div class="card">
+            <div class="card-top">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M3 12h18"/></svg>
+              <span class="status"><i class="dot-dev"></i> In development</span>
+            </div>
+            <h4>Handwritten prescription reading</h4>
+            <p>Photograph a handwritten prescription. Santhica reads it, structures it into drug, dose, frequency, and duration, and files it to the patient's record in about 30 seconds. Printed or handwritten, neat or not.</p>
+          </div>
+          <div class="card">
+            <div class="card-top">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
+              <span class="status"><i class="dot-dev"></i> In development</span>
+            </div>
+            <h4>Lab report digitization</h4>
+            <p>Upload a lab PDF or photograph a printed report. Values are extracted into discrete, trendable results — so a creatinine from 2021 sits on the same axis as one from today. Not a stored image.</p>
+          </div>
+          <div class="card">
+            <div class="card-top">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/></svg>
+              <span class="status"><i class="dot-dev"></i> In development</span>
+            </div>
+            <h4>Voice Consult Scribe</h4>
+            <p>Ambient capture of the consultation. The conversation becomes a structured note and a prescription draft, which the doctor reviews and signs before anything is filed.</p>
+          </div>
+          <div class="card">
+            <div class="card-top">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg>
+              <span class="status"><i class="dot-dev"></i> In development</span>
+            </div>
+            <h4>Manual outpatient entry</h4>
+            <p>For the cases where capture fails, or where a doctor would rather type. Full structured entry on the same mobile surface — no desktop, no separate system.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="band" id="band-in">
+        <div class="band-head">
+          <h3>Inpatient</h3>
+          <p>Ward-side capture and decision support.</p>
+        </div>
+        <div class="cards two">
+          <div class="card">
+            <div class="card-top">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 14h6M9 18h4"/></svg>
+              <span class="status"><i class="dot-dev"></i> In development</span>
+            </div>
+            <h4>Inpatient treatment chart</h4>
+            <p>The ward chart, digitized. Orders, administrations, vitals, and progress notes on one continuous timeline per admission — and that admission joins the patient's lifetime record on discharge.</p>
+          </div>
+          <div class="card">
+            <div class="card-top">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg>
+              <span class="status"><i class="dot-dev"></i> In development</span>
+            </div>
+            <h4>X-ray decision support</h4>
+            <p>A model that reads chest X-rays and flags findings for the treating clinician. <b>Decision support, not diagnosis</b> — every output is reviewed by a physician, and Santhica does not return a diagnosis on its own. <span class="flag">Verify regulatory wording</span></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="band" id="band-plat">
+        <div class="band-head">
+          <h3>Platform &amp; Network</h3>
+          <p>How data gets in, and how it stays connected.</p>
+        </div>
+        <div class="cards">
+          <div class="card">
+            <div class="card-top">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>
+              <span class="status"><i class="dot-dev"></i> In development</span>
+            </div>
+            <h4>Mobile-first capture</h4>
+            <p>Every module runs on the phone a clinician already carries. No workstation, no installation, no IT project, no change to how they already work.</p>
+          </div>
+          <div class="card">
+            <div class="card-top">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v5M12 12.5 6.5 17M12 12.5 17.5 17"/></svg>
+              <span class="status"><i class="dot-dev"></i> In development</span>
+            </div>
+            <h4>Universal data integration</h4>
+            <p>New hospitals, labs, pharmacies, doctors, and data sources onboarded in days, not quarters. Each new source makes every record downstream of it more complete. <span class="flag">Verify: demonstrated or goal?</span></p>
+          </div>
+          <div class="card">
+            <div class="card-top">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M10.5 21a2 2 0 0 0 3 0"/></svg>
+              <span class="status"><i class="dot-dev"></i> In development</span>
+            </div>
+            <h4>Agentic follow-up</h4>
+            <p>An agent that watches the record for the moments that need a human: post-surgical checkpoints, oncology follow-up windows, and abnormal results that were never acted on.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TRUST ================= -->
+  <section class="trust" id="security">
+    <div class="wrap">
+      <div class="trust-head">
+        <p class="eyebrow">Security &amp; data governance</p>
+        <h2 class="h2">What we can say about your data today.</h2>
+        <p class="lede">A medical record is the most sensitive data a person generates, and it outlives every system that touches it. Below is Santhica's current posture — stated plainly, including what we haven't done yet.</p>
+      </div>
+
+      <span class="note">Status at a glance, evidence one click away. Every row below is a placeholder until you confirm it is true <b>today</b> — not "will be," not "basically." A row that can't be confirmed gets deleted, never softened. Rows with unresolved checks carry no green check mark.</span>
+
+      <div class="controls" id="controls">
+        <div class="ctrl">
+          <button class="ctrl-btn" type="button">
+            <svg class="ctrl-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="ctrl-name">Encryption in transit <span class="flag">Verify</span></span>
+            <span class="ctrl-status">All traffic between apps, clinics, and Santhica services runs over TLS 1.2 or higher. No health data is transmitted unencrypted.</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="ctrl-detail"><p>TLS version floor, HSTS status, certificate authority, and whether internal service-to-service traffic is also encrypted.</p></div>
+        </div>
+
+        <div class="ctrl">
+          <button class="ctrl-btn" type="button">
+            <svg class="ctrl-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="ctrl-name">Encryption at rest <span class="flag">Verify</span></span>
+            <span class="ctrl-status">Records, documents, and images are encrypted at rest in storage.</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="ctrl-detail"><p>Cipher, key management system, rotation policy, and whether database, object storage, and backups are all covered.</p></div>
+        </div>
+
+        <div class="ctrl">
+          <button class="ctrl-btn" type="button">
+            <svg class="ctrl-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="ctrl-name">Consent-driven access <span class="flag">Verify</span></span>
+            <span class="ctrl-status">A clinician sees a patient's record only after that patient has granted access. Consent is recorded, scoped to a care relationship, and can be withdrawn by the patient.</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="ctrl-detail"><p>What a grant scopes, whether it is time-bounded, whether revocation is self-service, and what happens to already-accessed data on revocation. Your repo already contains real consent machinery, so this is likely the strongest genuine claim on the page — and worth the most detail.</p></div>
+        </div>
+
+        <div class="ctrl">
+          <button class="ctrl-btn" type="button">
+            <svg class="ctrl-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="ctrl-name">Role-based access control <span class="flag">Verify</span></span>
+            <span class="ctrl-status">Access is scoped by role and by care-team membership. Staff cannot browse records they have no relationship to.</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="ctrl-detail"><p>Which roles exist, whether break-glass access exists and is logged, and whether Santhica employees can reach production records and under what controls.</p></div>
+        </div>
+
+        <div class="ctrl">
+          <button class="ctrl-btn" type="button">
+            <svg class="ctrl-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="ctrl-name">Audit logging <span class="flag">Verify — delete row if not implemented</span></span>
+            <span class="ctrl-status">Every access to a patient record is logged with actor, time, and record.</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="ctrl-detail"><p>Retention period, whether the log is immutable, and whether it is visible to the patient. If audit logging is not implemented today this row is removed outright — it is not softened to "we log activity."</p></div>
+        </div>
+
+        <div class="ctrl">
+          <button class="ctrl-btn" type="button">
+            <svg class="ctrl-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span class="ctrl-name">Data residency <span class="flag">Verify — highest risk</span></span>
+            <span class="ctrl-status">Patient data is stored and processed in India, in the [provider] [region] region.</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="ctrl-detail"><p>Indian hospital procurement asks this question first. If data sits outside India, this row must say so or be removed — no phrasing that implies Indian residency without it being the case.</p></div>
+        </div>
+      </div>
+
+      <div class="roadmap">
+        <h3>On our roadmap</h3>
+        <p><b>ABDM integration.</b> Santhica is building toward ABDM interoperability so records can move under the national framework.</p>
+        <p class="disclaimer">Santhica is not ABDM certified today.<span>We will publish the certification date when we have one.</span></p>
+      </div>
+
+      <div class="no-claim">
+        <h3>What we don't claim</h3>
+        <ul>
+          <li>Santhica is not ABDM certified.</li>
+          <li>We do not hold SOC 2 Type II or ISO 27001 today. <span class="flag">Verify</span></li>
+          <li>Santhica's AI models provide clinical decision support. They are not regulated diagnostic devices, they carry no regulatory clearance, and they do not replace clinician judgment. <span class="flag">Verify</span></li>
+        </ul>
+      </div>
+
+      <p class="trust-close">Questions about our security posture, or need a vendor questionnaire completed? Write to <a href="mailto:support@santhica.com">support@santhica.com</a>.</p>
+    </div>
+  </section>
+
+  <!-- ================= TEAM ================= -->
+  <section class="team" id="team">
+    <div class="wrap">
+      <div class="team-head">
+        <p class="eyebrow">Who's building it</p>
+        <h2 class="h2">Built by engineers who have run systems at this scale.</h2>
+        <p class="lede">Santhica's founding team comes from Amazon, Oracle, and HubSpot, where they built and operated AI and distributed systems in production.</p>
+      </div>
+
+      <div class="team-grid">
+        <div class="member">
+          <div class="mono">SR</div>
+          <h3>Suranjana Roy</h3>
+          <p class="role">Founder &amp; CEO</p>
+          <p>Former Head of Engineering at Amazon. Led Agentic AI, LLM, inferencing, and MLOps for Alexa and AGI. 15+ years building AI systems at Amazon, Oracle, and now Santhica.</p>
+          <a class="li-link" href="https://www.linkedin.com/in/sbroy/">LinkedIn ↗</a>
+        </div>
+        <div class="member">
+          <div class="mono">SM</div>
+          <h3>Soubhagini Mahapatra</h3>
+          <p class="role">CTO &amp; Founding Engineer</p>
+          <p>Ex-HubSpot Senior Engineer. 14+ years building distributed systems at scale. Building Santhica's core infrastructure: mobile-first capture, cloud sync, and consent-driven data flows.</p>
+          <a class="li-link" href="https://www.linkedin.com/in/soubhagini-mahapatra-978035156/">LinkedIn ↗</a>
+        </div>
+        <div class="member">
+          <div class="mono">RJ</div>
+          <h3>Romir Jain</h3>
+          <p class="role">COO &amp; Founding Engineer</p>
+          <p>Recent CS graduate and serial entrepreneur. Brings startup velocity and AI product experience to the founding team.</p>
+        </div>
+      </div>
+
+      <div class="pedigree">
+        <p class="ped-label">Previously at</p>
+        <p class="ped-list">Amazon · Alexa · Audible · Oracle · HubSpot · Broadcom</p>
+      </div>
+      <span class="note">"Previously at" label is mandatory — without it a bare logo strip reads as a customer list. Bio corrected: Soubhagini's line now says "mobile-first," not "offline-first," per the standing constraint. Romir has no LinkedIn URL, so no link renders — not a disabled one.</span>
+    </div>
+  </section>
+
+  <!-- ================= DEMO ================= -->
+  <section class="demo" id="demo">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">Get started</p>
+        <h2 class="h2">See a prescription become a record.</h2>
+        <p class="demo-lede">A 30-minute walkthrough with the founding team. Bring one of your own documents.</p>
+        <ul class="benefits">
+          <li><svg class="bcheck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Live capture on your documents.</b> Bring a real prescription or lab report — we'll digitize it on the call.</span></li>
+          <li><svg class="bcheck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>Runs on a phone.</b> Nothing to install, no workstation, no IT involvement to see it work.</span></li>
+          <li><svg class="bcheck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><b>A written deployment plan for your setting</b> within 48 hours of the call. <span class="flag">Verify commitment</span></span></li>
+        </ul>
+      </div>
+
+      <div class="form-card">
+        <h3>Request a demo</h3>
+        <div class="field">
+          <label for="f-name">Full name <span class="req">Required</span></label>
+          <input id="f-name" type="text" autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="f-email">Work email <span class="req">Required</span></label>
+          <input id="f-email" type="email" autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="f-org">Organization</label>
+          <input id="f-org" type="text" autocomplete="organization">
+        </div>
+        <div class="field">
+          <label for="f-role">Role <span class="req">Required</span></label>
+          <select id="f-role">
+            <option>Select one</option>
+            <option>Physician</option>
+            <option>Hospital administrator</option>
+            <option>Clinic owner</option>
+            <option>IT / CIO</option>
+            <option>Lab or diagnostics</option>
+            <option>Investor</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-msg">Message</label>
+          <textarea id="f-msg"></textarea>
+        </div>
+        <button class="btn btn-primary submit" type="button">Request a demo</button>
+        <p class="consent">Opening your email app to send this — if nothing opens, write to <a href="mailto:support@santhica.com">support@santhica.com</a>. By submitting, you agree that Santhica may contact you about this request. We don't sell or share your details. See our <a href="/privacy-policy">Privacy Policy</a>.</p>
+        <span class="note">Per your decision, the form keeps <b>mailto:</b> — so the copy no longer claims the message was received. It says what actually happens and shows the fallback address. No placeholder example names in any field; required is marked with the word "Required," not a red asterisk.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="foot">
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <div class="brand"><span class="brand-mark"></span> santhica</div>
+          <p class="foot-tag">Health record infrastructure for India.</p>
+          <a class="foot-mail" href="mailto:support@santhica.com">support@santhica.com</a>
+          <a class="foot-mail" href="https://www.linkedin.com/company/santhica/">LinkedIn ↗</a>
+        </div>
+        <div>
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="#band-out">Outpatient</a></li>
+            <li><a href="#band-in">Inpatient</a></li>
+            <li><a href="#band-plat">Platform &amp; Network</a></li>
+            <li><a href="#platform">All nine modules</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#problem">The Problem</a></li>
+            <li><a href="#record">The Record</a></li>
+            <li><a href="#team">Team</a></li>
+            <li><a href="#demo">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Trust &amp; Legal</h4>
+          <ul>
+            <li><a href="#security">Security &amp; data governance</a></li>
+            <li><a href="/privacy-policy">Privacy Policy</a></li>
+            <li><a href="/terms-of-service">Terms of Service</a></li>
+            <li><a href="/account-deletion/">Account deletion</a></li>
+          </ul>
+        </div>
+      </div>
+      <p class="foot-bottom">© 2026 Santhica, Inc. All rights reserved.</p>
+    </div>
+  </footer>
+
+</div>
+</div>
+</div>
+
+<script>
+  // Annotation toggle
+  var toggle = document.getElementById('toggle');
+  var site = document.getElementById('site');
+  toggle.addEventListener('click', function () {
+    var clean = site.classList.toggle('clean');
+    toggle.textContent = clean ? 'Show review annotations' : 'Hide review annotations';
+  });
+
+  // Trust accordion
+  document.getElementById('controls').addEventListener('click', function (e) {
+    var btn = e.target.closest('.ctrl-btn');
+    if (!btn) return;
+    var row = btn.parentElement;
+    var open = row.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.ctrl-btn'), function (b) {
+    b.setAttribute('aria-expanded', 'false');
+  });
+
+  // Module jump rail
+  var rail = document.getElementById('rail');
+  rail.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    var target = document.getElementById(b.dataset.target);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Scroll-spy for the rail
+  if ('IntersectionObserver' in window) {
+    var bands = ['band-out', 'band-in', 'band-plat'];
+    var spy = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        Array.prototype.forEach.call(rail.querySelectorAll('button'), function (b) {
+          b.classList.toggle('on', b.dataset.target === en.target.id);
+        });
+      });
+    }, { rootMargin: '-120px 0px -55% 0px' });
+    bands.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) spy.observe(el);
+    });
+
+    // Journey draw-in, once
+    var track = document.getElementById('track');
+    if (track) {
+      if (reduce) {
+        track.classList.add('in');
+      } else {
+        var jo = new IntersectionObserver(function (entries, obs) {
+          if (entries[0].isIntersecting) {
+            track.classList.add('in');
+            obs.disconnect();
+          }
+        }, { threshold: 0.3 });
+        jo.observe(track);
+      }
+    }
+  } else {
+    var t = document.getElementById('track');
+    if (t) t.classList.add('in');
+  }
+</script>
