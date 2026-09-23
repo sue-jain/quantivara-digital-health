@@ -12,7 +12,8 @@
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "demo": "./demo/run-demo.sh",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "gh-pages -d site --dotfiles",
+    "deploy:legacy-react": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

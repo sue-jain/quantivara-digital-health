@@ -1,0 +1,402 @@
+/* Healthcare context, agents and hospital workflows. */
+.main-nav{gap:25px}.dropdown-menu{min-width:330px;max-width:calc(100vw - 40px)}.main-nav a[aria-current=page]{color:#00876e}.dropdown-toggle{font-size:inherit}
+.inner-page .site-header{height:96px;margin-bottom:0;background:#ffffffed}.inner-page .nav-inner{border-color:#e3eceb;box-shadow:0 4px 22px #12364d08}
+.page-intro{padding-block:80px 64px;max-width:1240px}.page-intro .eyebrow{display:block;margin-bottom:24px}.page-intro h1{font-size:clamp(42px,5.1vw,70px);font-weight:500;line-height:1.08;max-width:1000px}.page-intro h1 span{color:#007f6b}.page-intro>p{font-size:18px;line-height:1.8;max-width:720px;margin-top:27px;color:#627787}
+.hero-title-line{white-space:normal}.hero h1{font-size:clamp(46px,5.7vw,80px)}
+.product-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}.product-card{border:1px solid #dce7e9;background:white;border-radius:18px;overflow:hidden}.product-copy{padding:32px}.product-copy .eyebrow{font-size:10px}.product-copy h3{font-size:32px;font-weight:550;line-height:1.15;margin:17px 0}.product-copy p{font-size:14px;line-height:1.85;max-width:49ch}.product-copy .text-link{margin-top:24px;font-size:13px}
+.product-art{position:relative;min-width:0;height:390px;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;padding-top:35px;background:radial-gradient(ellipse at 50% 100%,#a9d3cf,transparent 65%),#eef7f4}.record-product-art{background:radial-gradient(ellipse at 70% 100%,#b7d1ed,transparent 65%),#eff5fa}.product-phone{position:relative;width:226px;flex:none;min-height:430px;background:#f6f8fd;border:5px solid #18384b;border-radius:29px;box-shadow:0 18px 38px #153f4d20;overflow:hidden;transform:rotate(-4deg)}.record-product-art .product-phone{transform:rotate(5deg);margin-left:100px}.screen-status{display:flex;justify-content:space-between;font-size:8px;font-weight:650;color:#16344e;padding:9px 13px 6px;background:white}.screen-brand{background:linear-gradient(115deg,#1052a5,#167bc1);color:white;padding:15px 16px;font-size:25px;font-weight:600;letter-spacing:-.04em;border-radius:0 0 18px 18px}.screen-brand small{color:#d9e9f5;font-size:8px;font-weight:400;letter-spacing:0;margin-top:1px}.screen-content{padding:16px}.sample-patient{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:#2a6287}.sample-patient>span{font-size:11px;color:#173b52;letter-spacing:0}.sample-patient small{font-size:7px;font-weight:400;color:#758896;margin-top:3px}.screen-label{display:block;font-size:8px;letter-spacing:.1em;color:#56768a;font-weight:600}.screen-content>.screen-label{margin:17px 0 8px}.screen-content h4{font-size:15px;line-height:1.35;color:#173b52}.screen-mic{display:grid;place-items:center;background:#e0f2ed;color:#00876e;width:40px;height:40px;border-radius:50%;margin:17px auto 8px}.product-phone .waveform{height:30px;margin:0;gap:3px}.product-phone .waveform i{background:#079c91;width:3px}.screen-languages{font-size:8px;text-align:center;margin:8px 0;color:#55718a}.screen-note{padding:12px;border:1px solid #d7e5e9;border-radius:9px;background:white}.screen-note>small{font-size:7px;color:#577885;letter-spacing:.05em}.screen-note p{font-size:9px;line-height:1.8;margin-top:7px;color:#355368}.screen-note>span{display:flex;align-items:center;justify-content:space-between;font-size:7px;color:#00876e;border-top:1px solid #e4eeeb;padding-top:8px;margin-top:8px}.screen-note .icon{width:12px;height:12px}.screen-homebar{height:4px;width:65px;border-radius:6px;background:#17354b;margin:15px auto 7px}.product-float{position:absolute;left:22px;bottom:40px;background:#fffefb;border:1px solid #cee2de;border-radius:11px;padding:14px 17px;box-shadow:0 8px 25px #1e4a5914;display:flex;align-items:center;gap:10px;font-size:11px;color:#185a53}.product-float>.icon{color:#00927b}.product-float small{font-size:9px;color:#788d94;margin-top:4px}.sample-caption{position:absolute;bottom:10px;left:10px;right:10px;text-align:center;font-size:8px;color:#55788a}.source-paper{position:absolute;width:170px;height:215px;left:9%;top:63px;transform:rotate(-9deg);border:1px solid #d1dbdf;background:#fffdf7;box-shadow:0 14px 24px #22456712;padding:20px;color:#225c7f}.source-paper>span{font-size:6px;letter-spacing:.09em}.source-paper>strong{display:block;font:32px Georgia,serif;margin:12px 0 5px}.source-paper>p{font:italic 12px Georgia,serif;color:#2d648c}.source-paper i{display:block;border-bottom:1px solid #90afc0;transform:rotate(-2deg);margin:16px 0;width:85%}.source-paper i:nth-of-type(2){width:65%}.source-paper em{font:italic 9px Georgia,serif}.screen-summary{margin-top:18px}.screen-summary h4{margin-top:9px}.screen-summary p{font-size:9px;line-height:1.6;margin-top:9px}.screen-timeline{margin-top:20px;border-left:1px solid #b2d3cf;padding-left:14px}.screen-timeline>div{position:relative;padding-bottom:18px}.screen-timeline>div:before{content:'';position:absolute;left:-18px;top:4px;width:7px;height:7px;background:#009d7f;border-radius:50%}.screen-timeline b{display:block;font-size:8px;color:#00866d}.screen-timeline strong{display:block;font-size:10px;margin-top:4px;color:#28465e}.screen-timeline small{font-size:8px;color:#6d8292;margin-top:4px}
+.agent-name{display:block;font-size:10px;letter-spacing:.04em;color:#007f6b;font-weight:650;margin-top:16px}.intelligence-copy h3{font-size:26px;margin-top:9px}.intelligence-copy .text-link{font-size:12px;margin-top:15px}.development-label{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.04em;background:#e8f0f7;color:#466781;border:1px solid #ccdde8;border-radius:30px;padding:5px 10px;vertical-align:middle}.intelligence-copy>.development-label{margin-left:10px}.agent-visual{margin-top:25px;border:1px solid #d9e5e9;border-radius:12px;background:#fffffff0;padding:18px;min-width:0}.context-review>div{display:flex;gap:9px;align-items:center;font-size:10px;padding:12px 0;border-bottom:1px solid #edf1f3;color:#3d5d71}.context-review>div:last-child:not(.context-alert){border:0;padding-bottom:0}.context-review .icon{width:16px;height:16px;color:#237a91}.context-review b{font-size:8px;font-weight:500;margin-left:auto;color:#00876e}.input-chips{display:flex;gap:7px;flex-wrap:wrap}.input-chips span{font-size:9px;border:1px solid #d9e4e9;border-radius:5px;padding:6px 9px;color:#486b80;background:#f7fafc}.transform-line{display:flex;align-items:center;gap:10px;font-size:10px;color:#4f7689;padding:18px 0}.transform-line .icon{width:18px;height:18px;color:#00876e}.transform-line .icon:last-child{margin-left:auto}.structured-record{border-radius:8px;background:#eaf6f0;padding:12px;color:#17654e}.structured-record strong{font-size:11px}.structured-record span{display:flex;align-items:center;gap:7px;font-size:9px;margin-top:7px}.structured-record .icon{width:13px;height:13px}.intelligence-card-wide .agent-visual{margin:0}.closure-preview>div{display:flex;align-items:center;gap:8px;margin:17px 0;color:#2c5562}.closure-preview strong{font-size:11px}.closure-preview b{margin-left:auto;font-size:8px;color:#007c65;font-weight:500}.closure-preview ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;counter-reset:closure}.closure-preview li{font-size:9px;color:#557785;display:flex;gap:8px;align-items:center;padding:9px;background:#f1f7f5;border-radius:5px;counter-increment:closure}.closure-preview li:before{content:counter(closure);display:grid;place-items:center;width:16px;height:16px;background:#d7eae3;border-radius:50%;font-size:8px;color:#00785f;flex:none}
+.workflow-section{background:#f3f8f6;border-block:1px solid #e0ece6}.workflow-panel{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center;padding:42px;background:white;border:1px solid #d7e5df;border-radius:17px}.workflow-panel h3{font-size:33px;margin:20px 0}.workflow-panel p{font-size:14px;line-height:1.9}.workflow-panel .text-link{margin-top:25px;font-size:13px}.care-steps{list-style:none;display:grid;gap:12px;margin:0;padding:0}.care-steps li{display:flex;align-items:center;gap:18px;background:#f3f8f7;border:1px solid #dfebe6;padding:16px 20px;border-radius:10px}.care-steps li>span{font-size:12px;color:#00876e}.care-steps strong{font-size:14px;font-weight:500;color:#315466}.tabs{width:max-content;max-width:100%}
+.page-cta{margin-block:70px;padding:35px 40px;background:#edf7f3;border:1px solid #d3e8dd;border-radius:15px;display:flex;justify-content:space-between;gap:25px;align-items:center}.page-cta h2{font-size:32px;margin-top:15px}.page-cta .button{flex:none}.detail-split{display:grid;grid-template-columns:1fr 1fr;gap:65px;align-items:center;margin-bottom:60px}.detail-split>.product-art{height:570px;border-radius:20px;padding-top:65px}.detail-split .product-phone{width:270px;min-height:460px;transform:rotate(-3deg) scale(1.08);transform-origin:top center}.detail-split .product-float{bottom:65px}.detail-copy h2{font-size:36px;margin:18px 0 30px}.numbered-list{list-style:none;display:grid;gap:26px;padding:0;margin:0}.numbered-list li{display:flex;gap:18px}.numbered-list li>b{font-size:12px;color:#00967a;padding-top:3px}.numbered-list h3{font-size:18px;margin-bottom:8px}.numbered-list p{font-size:14px;line-height:1.8}.page-note{font-size:12px!important;line-height:1.8;color:#677e8b;margin-top:23px;max-width:950px}
+.architecture-section{margin-bottom:70px}.architecture-diagram{padding:42px;margin:0;border:1px solid #294e67;border-radius:21px;background:radial-gradient(ellipse at 50% 70%,#104858,transparent 75%),#082d47;color:white;box-shadow:0 24px 60px #1a476514}.architecture-diagram figcaption{font-size:11px;letter-spacing:.1em;margin-bottom:30px;color:#7cd9c5}.architecture-diagram figcaption>span{float:right;color:#b2c8d5;font-size:10px;letter-spacing:0}.architecture-governance{display:flex;justify-content:space-around;gap:15px;padding:19px;margin-bottom:16px;border:1px solid #62bdab;border-radius:11px;background:#1e67532c;color:#b4ebdd;font-size:12px}.architecture-layer{display:flex;align-items:center;gap:25px;border:1px solid #52768c;border-radius:11px;padding:24px 27px;margin-top:14px;background:#ffffff06}.architecture-layer>b{font-size:14px;color:#7ddbc5;font-weight:400}.architecture-layer h3{font-size:23px;font-weight:500}.architecture-layer p{font-size:13px;color:#b6cbd6;margin-top:8px}.architecture-context{background:#e8f6f1;color:#173f51;border-color:#e8f6f1}.architecture-context>b{color:#00876e}.architecture-context p{color:#587682}.architecture-inputs{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin:23px 0}.architecture-inputs span{padding:7px 14px;border:1px solid #487186;border-radius:7px;font-size:11px;color:#b9cfda}.architecture-caption{font-size:12px;text-align:center;color:#7ed9c2!important;letter-spacing:.02em}.editorial-columns{display:grid;grid-template-columns:1fr 1fr;gap:65px;margin-bottom:65px}.editorial-columns h2{font-size:30px;margin-bottom:20px}.editorial-columns p{font-size:15px;line-height:1.9}.editorial-columns .text-link{margin-top:22px;font-size:13px}.agent-detail{display:grid;grid-template-columns:1.1fr 1fr;gap:70px;align-items:center;padding-block:50px;border-top:1px solid #d9e5e9}.agent-detail .development-label{margin-bottom:18px}.agent-detail .eyebrow{display:block}.agent-detail h2{font-size:36px;margin:18px 0}.agent-detail p{font-size:15px;line-height:1.9;margin-top:15px}.agent-detail .agent-visual{background:#f3f8f6;padding:32px;margin:0}.agent-detail .context-review>div{font-size:13px;padding-block:20px}.agent-detail .context-review b{font-size:10px}.agent-detail .screen-label{font-size:10px}.agent-detail .structured-record strong{font-size:16px}.agent-detail .structured-record span{font-size:12px}.agent-detail .closure-preview strong{font-size:14px}.agent-detail .closure-preview li{font-size:12px;padding:14px}.capacity-model{margin-block:55px 85px;background:#eef6f8;border:1px solid #d3e4ea;border-radius:18px;padding:40px}.capacity-model h2{font-size:35px;margin:20px 0}.capacity-model>p{font-size:14px;max-width:740px}.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:35px}.metric-grid>div{border-top:1px solid #b9d8d8;padding-top:23px}.metric-grid strong{display:block;font-size:42px;letter-spacing:-.05em;font-weight:500;color:#007b6c}.metric-grid span{display:block;font-size:13px;color:#567785;margin-top:10px;max-width:24ch}
+.journey-section{margin-bottom:60px}.journey-section>h2{font-size:34px;margin:18px 0}.journey-section>p{max-width:750px;font-size:15px;line-height:1.9}.journey-entry{list-style:none;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:35px 0 0;counter-reset:journey}.journey-entry li{position:relative;background:#eff6fa;border:1px solid #d4e3ea;border-radius:12px;padding:24px 20px;color:#315a76;font-size:14px;counter-increment:journey}.journey-entry li:before{content:'0' counter(journey);display:block;font-size:11px;color:#198b7d;margin-bottom:10px}.journey-entry li:not(:last-child):after{content:'→';position:absolute;right:-16px;top:40%;color:#3a9b8a}.journey-decision{width:max-content;max-width:90%;margin:25px auto;padding:14px 25px;border:1px solid #91c3b4;border-radius:40px;color:#146e59;background:#f0f9f4;font-size:13px}.journey-branches{display:grid;grid-template-columns:1fr 1fr;gap:25px}.journey-branches article{background:#f5f9f7;border:1px solid #d6e6de;border-radius:15px;padding:30px}.journey-branches article:nth-child(2){background:#f2f7fa}.journey-branches h3{font-size:24px;margin:18px 0 20px}.journey-branches ol{padding-left:22px;font-size:14px;color:#587283;line-height:2.2}.journey-return{border-bottom:1px solid #badbd2;text-align:center;color:#087962;font-size:16px;padding:26px 12px}.placeholder-card{max-width:850px;margin-bottom:110px;background:#f2f8f6;border:1px solid #d9e9e2;border-radius:18px;padding:45px}.placeholder-card h2{font-size:33px;margin:23px 0}.placeholder-card p{font-size:16px;line-height:1.9;max-width:650px}.placeholder-card .text-link{margin-top:28px}.company-team{grid-template-columns:1fr 1fr}.company-team .team-card{padding:35px}.company-team .team-card h3{font-size:26px}.inner-page .about-section{padding-top:15px}.inner-page .demo-section{padding-top:0}.story-row{padding:32px;border:1px solid #dce7e6;border-radius:15px;margin-top:28px;background:#f4f9f7}.story-row h2{font-size:28px;margin:15px 0}.story-row p{font-size:14px;margin-bottom:24px}.featured-post{margin-bottom:28px}.featured-post>.product-art{height:100%;min-height:420px}.secondary-post .blog-art{min-height:350px}
+@media(min-width:992px) and (min-height:740px) and (prefers-reduced-motion:no-preference){.has-scroll-entrance .intelligence-grid{top:calc(50% + 20px)}.has-scroll-entrance .intelligence-copy h3{font-size:22px;margin-top:8px}.has-scroll-entrance .intelligence-copy p{font-size:12px}.has-scroll-entrance .intelligence-card{padding:21px 25px}.has-scroll-entrance .agent-visual{margin-top:18px;padding:14px}.has-scroll-entrance .intelligence-card-wide .agent-visual{margin:0}.has-scroll-entrance .agent-name{margin-top:12px;font-size:9px}.has-scroll-entrance .intelligence-copy .text-link{margin-top:11px}}
+@media(max-width:1000px){.main-nav{gap:18px}.product-copy{padding:26px}.product-copy h3{font-size:28px}.product-art{height:350px}.record-product-art .product-phone{margin-left:70px}.source-paper{left:5%;width:145px}.product-float{left:13px;padding:12px;font-size:10px}.product-float small{font-size:8px}.detail-split,.agent-detail,.editorial-columns{gap:35px}.agent-detail h2{font-size:31px}.workflow-panel{gap:35px;padding:32px}.agent-detail .agent-visual{padding:22px}}
+@media(max-width:850px){.menu-toggle{display:flex;flex-direction:column;justify-content:center;gap:5px;margin-left:auto;color:#23445b}.main-nav{display:none;position:absolute;left:24px;right:24px;top:81px;padding:17px;background:white;border:1px solid #dbe7e8;border-radius:11px;box-shadow:0 15px 35px #18364d1a;flex-direction:column;align-items:stretch;gap:0;max-height:calc(100svh - 100px);overflow:auto}.main-nav.is-open{display:flex}.main-nav>a,.dropdown-toggle{padding:13px 12px;font-size:14px}.dropdown-toggle{width:100%;justify-content:space-between}.nav-cta{margin-top:10px}.dropdown-menu{position:static;min-width:0;width:100%;max-width:none;box-shadow:none;background:#f4f9f7;margin:0 0 6px}.dropdown-menu a{padding:12px}.product-copy h3{font-size:25px}.product-art{height:320px}.product-phone{width:198px;border-width:4px}.record-product-art .product-phone{margin-left:65px}.screen-content{padding:13px}.source-paper{width:125px;padding:14px}.product-float{font-size:9px;bottom:32px}.sample-caption{font-size:7px}.intelligence-card{padding:25px}.intelligence-copy h3{font-size:24px}.intelligence-card-wide{gap:25px}.intelligence-copy p{font-size:13px}.context-review>div{font-size:9px}.context-review b{display:none}.workflow-panel{grid-template-columns:1fr;gap:30px}.care-steps{grid-template-columns:1fr 1fr}.care-steps li{padding:17px 12px;gap:10px}.care-steps strong{font-size:12px}.detail-split,.agent-detail{grid-template-columns:1fr}.detail-split>.product-art{height:515px}.agent-detail{gap:25px}.agent-detail .context-review b{display:block}.architecture-diagram{padding:28px}.architecture-diagram figcaption>span{float:none;display:block;margin-top:10px}.architecture-governance{font-size:10px;gap:10px}.editorial-columns{gap:30px}.metric-grid strong{font-size:35px}.journey-entry{grid-template-columns:1fr 1fr}.journey-entry li:after{display:none}}
+@media(max-width:650px){.inner-page .site-header{height:81px}.page-intro{padding-block:46px 40px}.page-intro h1{font-size:clamp(35px,8.5vw,48px)}.page-intro>p{font-size:15px;margin-top:22px}.main-nav{left:16px;right:16px}.hero h1{font-size:clamp(40px,10vw,58px)}.product-pair{grid-template-columns:1fr;gap:25px}.product-art{height:365px;padding-top:28px}.product-phone{width:222px}.record-product-art .product-phone{margin-left:75px}.product-copy{padding:26px}.product-copy h3{font-size:29px}.product-copy p{font-size:13px}.source-paper{width:150px;left:6%;padding:20px}.product-float{font-size:10px;left:16px}.product-float small{font-size:8px}.sample-caption{font-size:7px}.intelligence-copy h3{font-size:24px}.intelligence-card-wide{gap:23px}.intelligence-card-wide .agent-visual{padding:16px}.context-review b{display:block}.closure-preview strong{font-size:10px}.tabs{width:100%}.tabs button{flex-direction:row;font-size:12px;gap:8px;padding:13px 12px}.workflow-panel{padding:26px 23px}.workflow-panel h3{font-size:28px}.workflow-panel p{font-size:13px}.care-steps{grid-template-columns:1fr}.care-steps strong{font-size:13px}.page-cta{margin-block:45px;padding:28px;flex-direction:column;align-items:flex-start}.page-cta h2{font-size:28px}.detail-split{gap:30px}.detail-copy h2{font-size:30px}.detail-split>.product-art{height:500px}.detail-split .product-phone{width:250px}.editorial-columns{grid-template-columns:1fr;gap:35px}.editorial-columns h2{font-size:28px}.editorial-columns p{font-size:14px}.architecture-diagram{padding:22px 17px;border-radius:15px}.architecture-governance{padding:14px 9px;display:grid;grid-template-columns:1fr;text-align:center;gap:10px;font-size:11px}.architecture-layer{padding:20px 14px;gap:15px}.architecture-layer h3{font-size:19px}.architecture-layer p{font-size:12px;line-height:1.6}.architecture-inputs{gap:6px}.architecture-inputs span{font-size:9px;padding:6px 9px}.architecture-caption{font-size:10px;line-height:1.8}.agent-detail{padding-block:32px}.agent-detail h2{font-size:29px}.agent-detail p{font-size:14px}.agent-detail .context-review>div{font-size:11px}.agent-detail .context-review b{font-size:8px}.agent-detail .closure-preview strong{font-size:11px}.agent-detail .closure-preview li{font-size:10px;padding:10px}.capacity-model{padding:26px;margin-block:35px 50px}.capacity-model h2{font-size:29px}.metric-grid{grid-template-columns:1fr;gap:20px}.metric-grid strong{font-size:40px}.metric-grid span{max-width:none}.journey-entry{gap:12px}.journey-entry li{font-size:12px;padding:20px 15px}.journey-decision{font-size:11px;text-align:center}.journey-branches{grid-template-columns:1fr}.journey-branches article{padding:25px}.journey-branches h3{font-size:24px}.journey-branches ol{font-size:13px}.journey-return{font-size:14px}.placeholder-card{padding:28px;margin-bottom:65px}.placeholder-card h2{font-size:28px}.placeholder-card p{font-size:14px}.company-team{grid-template-columns:1fr}.company-team .team-card{padding:28px}.featured-post>.product-art{min-height:360px;height:360px}.story-row{padding:25px}.story-row h2{font-size:25px}}
+@media(prefers-reduced-motion:reduce){.product-phone .waveform i{animation:none}}
+@media(max-width:420px){.record-product-art .product-phone{margin-left:42px}.product-float{gap:7px;padding:11px}.product-float>.icon{width:18px;height:18px}}
+
+/* ===== Agents, safety net and treatment charts ===== */
+
+
+/* The agent suite is a core capability; the cards were reading as footnotes. */
+.intelligence-copy{--agent-title:30px}
+.agent-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.agent-name{font-size:var(--agent-title);letter-spacing:-.01em;color:#006b58;font-weight:700;line-height:1.2;margin:0}
+.intelligence-copy h3{font-size:var(--agent-title);font-weight:550;line-height:1.2;margin:0 0 12px;color:#122f47}
+.intelligence-copy p{font-size:15px;line-height:1.75;color:#4d6475}
+.intelligence-copy .text-link{font-size:14px;font-weight:600;margin-top:20px}
+.intelligence-card .feature-icon{width:46px;height:46px;border-radius:13px}
+.intelligence-card .feature-icon .icon{width:25px;height:25px}
+.development-label{font-size:11px;padding:6px 12px}
+
+/* An escalated result has to look different from a context row. */
+.context-review>div.context-alert{--alert-bleed:13px;position:relative;border-bottom-color:transparent;color:#9c3c1e}
+.context-review>div.context-alert:before{content:"";position:absolute;inset:-1px calc(-1*var(--alert-bleed)) 0;border:1px solid #f0c7b8;border-radius:9px;background:#fdf1ed}
+.context-review>div.context-alert>*{position:relative}
+.context-review .context-alert .icon{color:#c2551f}
+.context-review .context-alert b{color:#b3321a;font-weight:700;display:block}
+.agent-detail .context-review>div.context-alert{--alert-bleed:16px}
+
+/* Voice Scribe: a structured record, not a paragraph of free text. */
+.screen-fields{margin:8px 0 0;display:grid;gap:3px}
+.screen-fields>div{display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-bottom:1px dotted #dfeaee;padding-bottom:4px}
+.screen-fields>div:last-child{border-bottom:0;padding-bottom:0}
+.screen-fields dt{font-size:7px;letter-spacing:.06em;text-transform:uppercase;color:#7b8f9b}
+.screen-fields dd{margin:0;font-size:9px;font-weight:650;color:#1d4560;text-align:right}
+
+/* Care settings replace the fictional customer wordmarks in the hero. */
+.setting-strip .marquee-group{gap:60px;padding-right:60px}
+.care-setting{display:flex;align-items:center;gap:13px;min-width:210px;color:#f0f5f3;user-select:none}
+.care-setting>.icon{width:32px;height:32px;stroke-width:1.4;opacity:.85;flex:none}
+.care-setting strong{display:block;font-size:19px;line-height:1.25;letter-spacing:-.02em;font-weight:550}
+.care-setting small{display:block;font-size:8px;line-height:1.7;letter-spacing:.16em;margin-top:4px;opacity:.72}
+
+/* Clinical safety net. */
+.safety-section{background:#f5f9f8;border-block:1px solid #e0ece6}
+.safety-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.safety-card{display:flex;flex-direction:column;background:#fff;border:1px solid #dce7e9;border-radius:16px;padding:28px 26px}
+.safety-card h3{font-size:22px;font-weight:550;line-height:1.25;margin:16px 0 12px;color:#122f47}
+.safety-card>p{font-size:14px;line-height:1.8;color:#5b7183;margin:0 0 22px}
+.safety-demo{margin-top:auto;border:1px solid #dfe9ec;border-radius:11px;background:#fbfdfd;padding:16px}
+.safety-flag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.1em;border-radius:5px;padding:5px 9px;margin-bottom:13px}
+.safety-flag.critical{color:#b3321a;background:#fdece6;border:1px solid #f2c8b8}
+.safety-flag.warn{color:#8a5a10;background:#fdf5e7;border:1px solid #ecd8ae}
+.safety-demo>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:11px;color:#65798a;padding:8px 0;border-bottom:1px solid #eef3f4}
+.safety-demo>div b{font-weight:650;color:#1d4560;text-align:right}
+.safety-gate{display:flex!important;align-items:center;gap:8px;justify-content:flex-start!important;border-bottom:0!important;margin-top:10px;padding:11px 12px!important;border-radius:8px;background:#eef7f3;color:#0d6a55!important;font-size:10px;font-weight:600}
+.safety-gate .icon{width:14px;height:14px;flex:none}
+
+/* Follow-up does not end at the alert. */
+.safety-followup{display:flex;align-items:center;gap:22px;margin-top:24px;padding:26px 30px;border:1px solid #cfe4dc;border-radius:15px;background:#edf7f3}
+.safety-followup>.icon{width:30px;height:30px;color:#00876e;flex:none}
+.safety-followup strong{display:block;font-size:17px;font-weight:600;color:#122f47}
+.safety-followup p{font-size:13.5px;line-height:1.75;color:#55707f;margin:7px 0 0;max-width:70ch}
+.safety-followup .text-link{flex:none;font-size:13px}
+
+/* The same cards, laid out for the agents page. */
+.safety-detail{padding-block:50px 10px;border-top:1px solid #d9e5e9}
+.safety-detail>.eyebrow{display:block}
+.safety-detail>h2{font-size:36px;margin:18px 0}
+.safety-detail>p{font-size:15px;line-height:1.9;max-width:80ch;margin-bottom:34px}
+.safety-detail .safety-card{background:#f7fbfa}
+
+/* ---- Task 9: code-native micro-animation, motion-preference aware ---- */
+@media(prefers-reduced-motion:no-preference){
+  /* Voice Scribe is listening. */
+  .screen-mic{position:relative}
+  .screen-mic:after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid #079c91;animation:mic-pulse 2.4s ease-out infinite}
+  /* A prescription resolving into structured fields. */
+  .transform-line .icon:last-child{animation:transform-nudge 2.8s ease-in-out infinite}
+  .structured-record{background:linear-gradient(105deg,#eaf6f0,#e2f2ef 45%,#eaf6f0);background-size:220% 100%;animation:record-settle 5s ease-in-out infinite}
+}
+@keyframes mic-pulse{0%{transform:scale(1);opacity:.55}70%{transform:scale(1.85);opacity:0}100%{transform:scale(1.85);opacity:0}}
+@keyframes transform-nudge{0%,62%,100%{transform:translateX(0)}78%{transform:translateX(5px)}}
+@keyframes record-settle{0%,100%{background-position:0 0}50%{background-position:100% 0}}
+@keyframes card-rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+
+/* Scroll-linked entry where the browser supports it; static everywhere else. */
+@supports (animation-timeline:view()){
+  @media(min-width:992px) and (prefers-reduced-motion:no-preference){
+    .safety-card{animation:card-rise linear both;animation-timeline:view();animation-range:entry 4% cover 26%}
+  }
+}
+
+@media(min-width:992px) and (min-height:740px) and (prefers-reduced-motion:no-preference){
+  /* Pinned entrance still has to fit the taller agent type. */
+  .has-scroll-entrance .intelligence-copy{--agent-title:25px}
+  .has-scroll-entrance .intelligence-copy h3{font-size:var(--agent-title);margin:0 0 10px}
+  .has-scroll-entrance .intelligence-copy p{font-size:13.5px}
+  .has-scroll-entrance .agent-name{font-size:var(--agent-title);margin:0}
+  .has-scroll-entrance .agent-head{gap:11px;margin-bottom:10px}
+  .has-scroll-entrance .intelligence-copy .text-link{margin-top:14px;font-size:13px}
+  .has-scroll-entrance .intelligence-card .feature-icon{width:40px;height:40px}
+  .has-scroll-entrance .context-review>div.context-alert{--alert-bleed:9px}
+}
+
+@media(max-width:1000px){
+  .safety-grid{gap:16px}
+  .safety-card{padding:24px 21px}
+  .safety-card h3{font-size:20px}
+  .intelligence-copy{--agent-title:26px}
+  .safety-detail>h2{font-size:31px}
+}
+
+@media(max-width:850px){
+  .safety-grid{grid-template-columns:1fr}
+  .intelligence-copy{--agent-title:25px}
+  .intelligence-copy p{font-size:14px}
+  .agent-head{gap:11px}
+  .context-review .context-alert b{display:block}
+  .safety-followup{flex-direction:column;align-items:flex-start;gap:16px}
+  .care-setting{min-width:180px;gap:10px}
+  .care-setting strong{font-size:17px}
+  .care-setting>.icon{width:27px;height:27px}
+}
+
+@media(max-width:650px){
+  .safety-card h3{font-size:21px}
+  .safety-card>p{font-size:13.5px}
+  .safety-detail>h2{font-size:28px}
+  .safety-detail>p{font-size:14px}
+  .safety-followup{padding:22px}
+  .safety-followup strong{font-size:16px}
+}
+
+/* The hero is a column flex box and the customer strip used to hold its bottom
+   edge. With the strip commented out, centre the content instead of leaving a
+   gap below it. Restoring the strip switches this off on its own. */
+.video-hero:not(:has(.customer-strip)) .hero-content{margin-block:auto}
+
+/* ===== Animations ported from the committed index.html (origin/main, 91b3e14)
+   The reference builds these in CSS, not GIFs: a looping step-reveal engine
+   (`pop`), a scan sweep over handwriting (`scan`) and a typed transcript
+   (`type`). Re-tuned here for the light theme and the smaller phone mock.
+   Everything below is motion-preference gated, so a reduced-motion visitor
+   sees the finished state rather than an empty screen. ===== */
+
+.screen-transcript{margin:0 0 9px;font:italic 8.5px/1.7 Georgia,serif;color:#4d7183;overflow:hidden;white-space:nowrap}
+.screen-transcript>span{display:inline-block;max-width:100%}
+
+@media(prefers-reduced-motion:no-preference){
+  /* The step engine: each child fades up, holds, then clears for the next loop. */
+  .screen-fields>div,.screen-timeline>div{opacity:0;animation:seq-pop var(--seq-cycle,9s) cubic-bezier(.2,.7,.3,1) infinite;animation-delay:var(--d,0s)}
+  .screen-fields>div:nth-child(1){--d:2.9s}
+  .screen-fields>div:nth-child(2){--d:3.5s}
+  .screen-fields>div:nth-child(3){--d:4.1s}
+  .screen-fields>div:nth-child(4){--d:4.7s}
+  .screen-note>span{opacity:0;animation:seq-pop var(--seq-cycle,9s) cubic-bezier(.2,.7,.3,1) infinite;animation-delay:5.4s}
+
+  .screen-timeline{--seq-cycle:10s}
+  .screen-timeline>div:nth-child(1){--d:.4s}
+  .screen-timeline>div:nth-child(2){--d:1.3s}
+  .screen-timeline>div:nth-child(3){--d:2.2s}
+
+  /* The consultation is transcribed before the record takes shape. */
+  .screen-transcript>span{max-width:0;animation:seq-type var(--seq-cycle,9s) steps(34,end) infinite}
+
+  /* Reading the paper prescription: a capture frame and a scan sweep. */
+  .record-product-art .source-paper{overflow:hidden}
+  .record-product-art .source-paper:after{content:'';position:absolute;left:0;right:0;top:6%;height:2px;background:linear-gradient(90deg,transparent,#00a98d,transparent);animation:seq-scan 9s ease-in-out infinite}
+}
+
+@keyframes seq-pop{0%{opacity:0;transform:translateY(7px) scale(.985)}7%{opacity:1;transform:none}88%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-4px)}}
+@keyframes seq-type{0%,5%{max-width:0}30%,100%{max-width:100%}}
+@keyframes seq-scan{0%{top:6%;opacity:0}8%{opacity:1}38%{top:92%;opacity:1}46%,100%{opacity:0}}
+
+/* The hero pauses its own motion when off-screen or backgrounded; these follow. */
+body.motion-paused .screen-fields>div,
+body.motion-paused .screen-timeline>div,
+body.motion-paused .screen-note>span,
+body.motion-paused .screen-transcript>span,
+body.motion-paused .source-paper:after{animation-play-state:paused}
+
+/* voice-scribe.html shows the mock on its own: no tinted panel, no callout and
+   nothing clipped, so the wrapper just centres the device in its column. */
+.voice-solo{width:fit-content;margin-inline:auto;padding-block:12px}
+.voice-solo .sn-voice{width:267px}
+
+/* These columns now carry more than one paragraph. */
+.editorial-columns p+p{margin-top:18px}
+
+
+/* ---------------------------------------------------------------------------
+   App screen mock (.sn-*)
+
+   A white-screen phone used twice: the safety net's tracked list (index.html,
+   agents.html) and the Voice Scribe consult (index.html, voice-scribe.html).
+   The chrome below — frame, status bar, app bar, body, items, pills and the
+   .sn-seq stagger — is shared; the voice-only parts are grouped further down.
+
+   Every class carries an `sn-` prefix on purpose: the original markup used
+   bare .phone, .tabs, .screen and .item, and the first two already belong to
+   the why-section device and the workflow tab bar. Prefixing leaves both
+   alone instead of fighting them with specificity.
+--------------------------------------------------------------------------- */
+.sn-device{position:relative;flex:none;width:282px;border:5px solid #3f4c5b;outline:1px solid #6b7988;border-radius:38px;background:#fff;box-shadow:14px 20px 45px #17375124;overflow:hidden}
+.sn-screen{display:flex;flex-direction:column;min-height:424px;background:#fff;color:#16324a}
+
+.sn-sbar{display:flex;align-items:center;justify-content:space-between;padding:11px 20px 7px;font-size:8.5px;font-weight:650;color:#3d566b}
+.sn-appbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 18px 13px;border-bottom:1px solid #e6eef0}
+.sn-appbar .sn-t{font-size:14px;font-weight:600;letter-spacing:-.02em;color:#122f47}
+.sn-appbar .sn-sp{font-size:13px;line-height:1;color:#8ba0ae}
+
+/* The body is the only scrolling-looking surface, so it takes the faint tint
+   the .safety-demo panels already use and the cards sit on it in plain white. */
+.sn-body{flex:1;display:flex;flex-direction:column;gap:9px;padding:14px 13px;background:#fbfdfd}
+.sn-hdr{padding:0 4px 2px;font-size:9px;font-weight:650;color:#6b8090}
+
+.sn-item,.sn-alert{border:1px solid #e4edef;border-radius:10px;background:#fff;padding:11px 12px}
+.sn-alert{border-color:#f2c8b8;background:#fdece6}
+.sn-n{font-size:11px;font-weight:600;line-height:1.35;color:#122f47}
+.sn-d{margin-top:4px;font-size:9.5px;line-height:1.5;color:#65798a}
+.sn-alert .sn-n{color:#93290f}
+.sn-alert .sn-d{color:#8c503c}
+
+/* Pill colours are lifted from .safety-flag / .safety-gate so the phone and
+   the cards beside it flag the same severity the same way. */
+.sn-pills{margin-top:7px}
+.sn-pill{display:inline-block;border-radius:5px;padding:4px 8px;font-size:8px;font-weight:700;letter-spacing:.07em}
+.sn-pill.crit{color:#b3321a;background:#fff;border:1px solid #f2c8b8}
+.sn-pill.warn{color:#8a5a10;background:#fdf5e7;border:1px solid #ecd8ae}
+.sn-pill.ok{color:#0d6a55;background:#eef7f3;border:1px solid #c8e5da}
+
+.sn-tabs{display:flex;padding:7px 4px 10px;border-top:1px solid #e6eef0}
+.sn-tb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:7.5px;font-weight:600;color:#94a8b5}
+.sn-tb i{font-style:normal;font-size:13px;line-height:1}
+.sn-tb.on{color:#00876e}
+
+/* The three flags rise in sequence and the list restarts on --cycle; each
+   .sn-st sets its own --d. Motion is opt-in, so a reduced-motion visitor
+   simply gets the finished list. */
+@keyframes sn-rise{0%{opacity:0;transform:translateY(10px)}5%,86%{opacity:1;transform:translateY(0)}94%,100%{opacity:0;transform:translateY(-7px)}}
+@media(prefers-reduced-motion:no-preference){
+  .sn-seq .sn-st{animation:sn-rise var(--cycle,10s) cubic-bezier(.22,.7,.3,1) var(--d,0s) infinite both}
+}
+
+.sn-figure{display:flex;flex-direction:column;align-items:center;gap:11px}
+.sn-caption{max-width:282px;text-align:center;font-size:9px;letter-spacing:.02em;color:#55788a}
+
+/* The phone and the summary card run as a pair: the card lists what the agent
+   checks, the phone shows what those checks leave behind. The card stretches
+   to the phone's height so the gate line settles on the same baseline. */
+.safety-tracker{display:grid;grid-template-columns:auto 1fr;gap:38px;align-items:center;margin-top:30px}
+.safety-tracker>.safety-card{align-self:stretch}
+@media(max-width:850px){
+  .safety-tracker{grid-template-columns:1fr;gap:26px}
+  .safety-tracker>.sn-figure{justify-self:center}
+}
+
+/* One card replaces the three that used to sit above, so the three checks
+   become rows inside it and each keeps its sample value. */
+.safety-summary h3{margin-bottom:0}
+.safety-checklist{list-style:none;margin:18px 0 20px;padding:0}
+.safety-checklist li{display:flex;gap:13px;padding-top:15px;margin-top:15px;border-top:1px solid #e8f0f1}
+.safety-checklist li:first-child{margin-top:0;padding-top:0;border-top:0}
+.safety-checklist>li>.icon{flex:none;width:19px;height:19px;margin-top:2px;color:#4d7f95}
+.safety-checklist strong{display:block;font-size:14px;font-weight:600;color:#122f47}
+.safety-checklist span{display:block;margin-top:4px;font-size:12.5px;line-height:1.7;color:#5b7183}
+.safety-checklist em{display:block;margin-top:7px;font-style:normal;font-size:10.5px;letter-spacing:.02em;color:#6f8b99}
+.safety-summary .safety-gate{margin-top:auto;font-size:11px;padding:13px 14px!important}
+@media(max-width:1000px){
+  .safety-checklist strong{font-size:13px}
+  .safety-checklist span{font-size:12px}
+}
+
+
+/* ---------------------------------------------------------------------------
+   Voice Scribe consult mock — the voice-only half of the .sn-* set.
+   Replaces the .product-phone that used to sit in .voice-product-art.
+--------------------------------------------------------------------------- */
+
+/* The device runs at its natural height and is styled off its own class, not
+   its parent, because the two pages frame it differently: index.html keeps the
+   art panel and lets the bottom of the phone clip behind the card, while
+   voice-scribe.html drops the panel and shows the whole thing. */
+.sn-voice{width:245px;border-radius:30px;transform:rotate(-4deg);box-shadow:0 18px 38px #153f4d20}
+
+.sn-appbar .sn-bk{font-size:14px;line-height:1;color:#5b7183}
+
+.sn-wavef{display:flex;align-items:center;justify-content:center;gap:4px;height:44px}
+.sn-wavef span{width:4px;height:24%;border-radius:3px;background:linear-gradient(#5ba8c9,#3f8f7e)}
+
+.sn-meta{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#6f8b99}
+.sn-meta span:first-child{color:#b3321a;font-weight:600}
+
+.sn-item>.sn-type{margin-top:0;font-style:italic;line-height:1.65}
+
+.sn-item.sn-med{display:flex;align-items:center;gap:10px}
+.sn-rx{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:#eef7f3;color:#0d6a55;font-size:14px;font-weight:700}
+
+.sn-acts{display:flex;gap:8px;padding:10px 11px 12px;border-top:1px solid #e6eef0;background:#fff}
+.sn-a{flex:1;border-radius:9px;padding:10px 8px;text-align:center;font-size:11px;font-weight:600}
+.sn-a.sn-manual{border:1px solid #dce7e9;background:#fff;color:#5b7183}
+.sn-a.sn-capture{background:#00876e;color:#fff}
+
+/* Bars breathe while recording; the transcript inks in left to right, which
+   survives line wrapping in a way a caret typewriter does not. Both are
+   opt-in, so reduced motion gets a still, fully inked screen. */
+@keyframes sn-wave{0%,100%{height:22%}50%{height:92%}}
+@keyframes sn-typing{0%{background-position:100% 0}42%,100%{background-position:0 0}}
+@media(prefers-reduced-motion:no-preference){
+  .sn-wavef span{animation:sn-wave 1.1s ease-in-out infinite}
+  .sn-type{background:linear-gradient(90deg,#3f5a6b 0 50%,#ccd8de 50%);background-size:220% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sn-typing var(--cycle,9s) steps(28) infinite}
+}
+
+
+/* ---------------------------------------------------------------------------
+   Patient-context pair — two .sn-* screens side by side.
+   Replaces the .source-paper + .product-phone composition in
+   .record-product-art on index.html and blogs.html.
+--------------------------------------------------------------------------- */
+
+/* The capture screen that used to sit beside this one is gone, so the record
+   screen stands alone and keeps the slight tilt the old phone had. */
+.record-product-art .sn-device{width:234px;border-radius:27px;transform:rotate(4deg);box-shadow:0 18px 38px #153f4d20}
+.record-product-art .sn-body{gap:8px;padding:12px 11px}
+@media(max-width:420px){.record-product-art .sn-device{width:206px}}
+
+/* Record screen: a profile header in place of the app bar, then a rail of
+   dated visits feeding the summary card at the foot of the list. */
+.sn-phdr{padding:10px 14px 13px;border-bottom:1px solid #e6eef0}
+.sn-row{display:flex;align-items:center;gap:10px}
+.sn-av{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#e8f0f7;color:#2f5f7f;font-size:13px;font-weight:700}
+.sn-nm{font-size:13px;font-weight:600;letter-spacing:-.02em;color:#122f47}
+.sn-mt{margin-top:2px;font-size:9.5px;color:#6f8b99}
+.sn-tl{display:flex;gap:10px}
+.sn-rail{position:relative;flex:none;display:flex;justify-content:center;width:9px}
+.sn-rail:before{content:'';position:absolute;top:11px;bottom:-9px;width:1px;background:#dbe7ea}
+.sn-tl .sn-dot{position:relative;width:9px;height:9px;margin-top:3px;border-radius:50%;background:#00876e}
+.sn-tl .sn-dot.old{background:#fff;border:2px solid #c2d6dc}
+.sn-tl .sn-n{font-size:11.5px;font-weight:700}
+.sn-tl .sn-d{font-size:10.5px}
+
+
+
+/* The phone cards borrow the story card's backdrop (.blog-art, blog.css).
+   The colours are that card's exactly; only the radial is given an explicit
+   size. Left at the default farthest-corner it rescales with the box, and
+   these cards are taller than the story card, which dragged the glow down
+   behind the phone and left the card looking washed out. Listed per class so
+   it also beats the blue .record-product-art tint. */
+.product-art,
+.voice-product-art,
+.record-product-art{background:radial-gradient(ellipse 62% 74% at 68% 82%,#bcdfd4,transparent 62%),linear-gradient(135deg,#edf7f5,#e4eff8)}
+
+
+/* ---------------------------------------------------------------------------
+   Capture screen in the CONNECTED CARE story card (blogs.html).
+   Replaces the .art-orbit + .blog-paper + .blog-record illustration.
+--------------------------------------------------------------------------- */
+
+/* .blog-art only sets a min-height, so centring the device lets the card grow
+   to fit it rather than clipping the Save bar off the bottom. */
+.blog-art-device{display:flex;align-items:center;justify-content:center;padding:30px 20px 48px}
+.blog-art-device .sn-device{width:234px;border-radius:27px;transform:rotate(-3deg);box-shadow:0 18px 38px #153f4d20}
+.blog-art-device .sn-body{gap:8px;padding:12px 11px}
+
+/* A viewfinder over the handwritten script; the scan line sweeps on the same
+   --cycle as the fields that resolve underneath it. */
+.sn-cam{position:relative;display:grid;place-items:center;height:110px;border-radius:10px;background:#f2efe6;overflow:hidden}
+.sn-hand{font-family:"Bradley Hand","Segoe Print",cursive;font-size:12.5px;line-height:1.5;text-align:center;color:#45648c}
+.sn-corner{position:absolute;width:13px;height:13px;border:2px solid #00876e}
+.sn-corner.c1{top:7px;left:7px;border-right:0;border-bottom:0}
+.sn-corner.c2{top:7px;right:7px;border-left:0;border-bottom:0}
+.sn-corner.c3{bottom:7px;left:7px;border-right:0;border-top:0}
+.sn-corner.c4{bottom:7px;right:7px;border-left:0;border-top:0}
+.sn-scan{position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,#00a98d,transparent)}
+
+@keyframes sn-scanline{0%{top:0;opacity:0}6%{opacity:1}38%{top:100%;opacity:1}44%,100%{top:100%;opacity:0}}
+@media(prefers-reduced-motion:no-preference){
+  .sn-scan{animation:sn-scanline var(--cycle,9s) ease-in-out infinite}
+}
+
+
+/* index.html's safety net now follows the Care Closure layout: copy left,
+   concept preview right. It sits inside .safety-section, which already draws
+   its own edges and padding, so the agent-detail rule's border-top and block
+   padding come off here. */
+.safety-split{border-top:0;padding-block:0}
+.safety-split+.safety-followup{margin-top:34px}
+@media(max-width:850px){.safety-split{gap:30px}}
