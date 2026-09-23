@@ -1,69 +1,182 @@
-
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <!-- SPA redirect handler for GitHub Pages -->
-    <script type="text/javascript">
-      (function(l) {
-        if (l.search[1] === '/') {
-          var decoded = l.search.slice(1).split('&').map(function(s) {
-            return s.replace(/~and~/g, '&')
-          }).join('?');
-          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
-        }
-      }(window.location))
-    </script>
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-    <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Santhica — Care That Connects | AI-Powered Healthcare for India</title>
-    <meta name="description" content="Santhica is building the data network India's healthcare system never had. AI that digitizes prescriptions, bridges labs, and connects pharmacies." />
-    <meta name="keywords" content="Santhica, healthcare AI India, prescription digitization, medical records, healthcare data network, digital prescriptions" />
+<head><script>/* Open each page at its top. Links are never intercepted, so a click navigates immediately; this only moves the view, instantly, as the new page parses. scrollIntoView is included because it is the only scroll that reaches the outer document when the site is viewed inside a frame. */(function(){if(location.hash&&location.hash!=='#')return;if(/[?&]product=/.test(location.search))return;if('scrollRestoration' in history)history.scrollRestoration='manual';var F;try{F=window.top!==window.self}catch(e){F=true}var M=false;['wheel','touchmove','keydown'].forEach(function(t){addEventListener(t,function(){M=true},{passive:true})});function g(){window.scrollTo({top:0,left:0,behavior:'instant'});if(F&&document.documentElement)document.documentElement.scrollIntoView({block:'start',behavior:'instant'})}g();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){if(!M)g()})})();</script><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="canonical" href="https://santhica.com/"><meta property="og:site_name" content="Santhica"><meta property="og:type" content="website"><meta property="og:url" content="https://santhica.com/"><meta property="og:title" content="Santhica — Care that connects"><meta property="og:description" content="Applied AI for healthcare: multilingual Voice Scribe, longitudinal patient context and clinical agents built around hospital workflows."><meta property="og:image" content="https://santhica.com/assets/img/ecosystem.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Santhica — Care that connects"><meta name="twitter:description" content="Applied AI for healthcare: multilingual Voice Scribe, longitudinal patient context and clinical agents built around hospital workflows."><meta name="twitter:image" content="https://santhica.com/assets/img/ecosystem.jpg"><meta name="theme-color" content="#ffffff"><title>Santhica — Care that connects</title><meta name="description" content="Applied AI for healthcare: multilingual Voice Scribe, longitudinal patient context and clinical agents built around hospital workflows."><link rel="icon" href="assets/img/favicon.png" type="image/png"><link rel="stylesheet" href="assets/css/site.css"><link rel="stylesheet" href="assets/css/landing.css?v=1"><script src="assets/js/navigation.js" defer></script><script src="assets/js/site.js?v=1" defer></script><link rel="stylesheet" href="assets/css/components.css?v=1"><script src="assets/js/tabs.js" defer></script></head><body><svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><symbol id="i-arrow" viewBox="0 0 24 24">
+<path d="M4 12h15m-6-6 6 6-6 6"/></symbol><symbol id="i-chevron" viewBox="0 0 24 24">
+<path d="m7 10 5 5 5-5"/></symbol><symbol id="i-spark" viewBox="0 0 24 24">
+<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/></symbol><symbol id="i-doc" viewBox="0 0 24 24">
+<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/>
+<path d="M14 3v6h6M8 13h8m-8 4h5"/></symbol><symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/>
+<path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/></symbol><symbol id="i-record" viewBox="0 0 24 24">
+<path d="M20 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3M8 7h5M2 12h5l2-3 4 7 2-4h7"/></symbol><symbol id="i-check" viewBox="0 0 24 24">
+<path d="m5 12 4 4L19 6"/></symbol><symbol id="i-shield" viewBox="0 0 24 24">
+<path d="m12 3 8 3v6c0 4-4 7-8 9-4-2-8-5-8-9V6l8-3Z"/>
+<path d="m8 12 3 3 5-6"/></symbol><symbol id="i-wifi" viewBox="0 0 24 24">
+<path d="M3 8a15 15 0 0 1 18 0M6 12a10 10 0 0 1 12 0m-9 4a5 5 0 0 1 6 0m-3 4h.01"/></symbol><symbol id="i-clinic" viewBox="0 0 24 24">
+<path d="M4 21V7l8-4 8 4v14H4Zm5 0v-6h6v6M9 9h6m-3-3v6"/></symbol><symbol id="i-hospital" viewBox="0 0 24 24">
+<path d="M7 21V3h10v18M7 9H3v12h18V9h-4M10 7h4m-2-2v4m-2 4h4m-4 4h4"/></symbol><symbol id="i-lab" viewBox="0 0 24 24">
+<path d="M9 3h6m-5 0v6L4 19a1.5 1.5 0 0 0 1 2h14a1.5 1.5 0 0 0 1-2L14 9V3M7 15h10"/></symbol><symbol id="i-pill" viewBox="0 0 24 24">
+<path d="m9 4-5 5a7 7 0 0 0 10 10l5-5A7 7 0 0 0 9 4Zm-3 3 11 11"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/>
+<path d="M12 7v5l3 2"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/>
+<path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 4v3"/></symbol><symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/>
+<path d="M10 5h4m-3 14h2"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/>
+<path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></symbol><symbol id="i-play" viewBox="0 0 24 24">
+<path d="m9 5 11 7-11 7V5Z"/></symbol><symbol id="i-plus" viewBox="0 0 24 24">
+<path d="M12 5v14M5 12h14"/></symbol><symbol id="i-android" viewBox="0 0 24 24"><path d="M5 9a7 7 0 0 1 14 0v8H5V9Zm0 0h14M8 3 6 1m10 2 2-2M8 17v4m8-4v4M2 10v6m20-6v6M8 6h.01M16 6h.01"/></symbol><symbol id="i-apple" viewBox="0 0 24 24"><path d="M16 2c0 3-2 4-4 4 0-2 1-4 4-4Zm-4 6c-3-3-8-1-8 4 0 4 3 9 5 9 1 0 2-1 3-1s2 1 3 1c2 0 4-3 5-5-3-1-4-5-1-7-2-3-5-2-7-1Z"/></symbol><symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol></defs></svg><a class="skip-link" href="#main">Skip to content</a>
+<div class="announcement"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> Paper. Voice. One connected patient record. <a href="#platform">Explore Santhica <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+<header class="site-header"><div class="container nav-inner"><a class="brand" href="index.html" aria-label="Santhica home"><img src="assets/img/santhica-mark.png" width="38" height="38" alt=""><span>santhica<span class="brand-dot">.</span></span></a><button class="menu-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Open navigation"><span></span><span></span></button><nav id="main-nav" class="main-nav" aria-label="Main navigation"><a href="index.html">Home</a><div class="nav-dropdown"><button class="dropdown-toggle" aria-expanded="false" aria-controls="product-menu">Platform <svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg></button><div class="dropdown-menu" id="product-menu" hidden><a href="platform.html"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><span>Healthcare AI OS overview<small>How the layers work together</small></span></a><a href="voice-scribe.html"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg><span>Santhica Voice Scribe<small>English · Hindi · Bengali</small></span></a><a href="agents.html"><svg class="icon" aria-hidden="true"><use href="#i-record"/></svg><span>Santhica Agents<small>Context, documentation and follow-up</small></span></a><a href="clinical-workflows.html"><svg class="icon" aria-hidden="true"><use href="#i-hospital"/></svg><span>Clinical workflows<small>Outpatient and inpatient care</small></span></a><a href="strategy.html"><svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg><span>Strategy<small>Our approach · coming soon</small></span></a></div></div><div class="nav-dropdown"><button class="dropdown-toggle" aria-expanded="false" aria-controls="company-menu">Company <svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg></button><div class="dropdown-menu" id="company-menu" hidden><a href="about.html"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg><span>About Santhica<small>The people and purpose behind the platform</small></span></a><a href="careers.html"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><span>Careers<small>Build connected care with us</small></span></a><a href="contact.html"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span>Contact<small>Talk through your hospital workflow</small></span></a></div></div><a href="blogs.html">Blogs</a><a class="button button-small nav-cta" href="contact.html">Get in touch <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></nav></div></header>
+<main id="main">
 
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="Santhica — Care That Connects" />
-    <meta property="og:description" content="Not another health app. The data backbone India's 1.4 billion people have been waiting for." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://santhica.com" />
+<section class="hero video-hero" aria-labelledby="hero-title">
+  <div class="hero-film" aria-hidden="true">
+    <video id="hero-video" class="hero-video is-active" data-scene="clinic-entry" muted playsinline preload="metadata" poster="assets/img/clinic-entry.jpg" tabindex="-1"><source src="assets/video/clinic-entry.mp4" type="video/mp4"></video>
+    <video class="hero-video" data-scene="hospital-reception" muted playsinline preload="none" poster="assets/img/hospital-reception.jpg" tabindex="-1"><source src="assets/video/hospital-reception.mp4" type="video/mp4"></video>
+    <video class="hero-video" data-scene="paper-photo" muted playsinline preload="none" poster="assets/img/paper-photo.jpg" tabindex="-1"><source src="assets/video/paper-photo.mp4" type="video/mp4"></video>
+  </div>
+  <div class="hero-shade" aria-hidden="true"></div>
+  <div class="container hero-content">
+    <span class="hero-kicker">SANTHICA · CARE THAT CONNECTS</span>
+    <h1 id="hero-title"><span class="hero-title-line">Applied AI</span><span class="hero-title-line hero-title-accent">for healthcare</span></h1>
+    <p class="hero-copy">Bring conversations, clinical data and patient history into one shared context.<br class="desktop-break"> Intelligence for your team. Continuity for your patients.</p>
+    <div class="hero-actions">
+      <div class="download-split"><a class="button download-primary" href="https://play.google.com/store/apps/details?id=com.santhica.app" target="_blank" rel="noopener noreferrer"><svg class="icon" aria-hidden="true"><use href="#i-android"/></svg> Download for Android<span class="sr-only"> (opens in a new tab)</span></a><button class="download-toggle" aria-label="More download options" aria-expanded="false" aria-controls="download-menu"><svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg></button>
+        <div id="download-menu" class="download-menu" hidden><a href="https://play.google.com/store/apps/details?id=com.santhica.app" target="_blank" rel="noopener noreferrer"><svg class="icon" aria-hidden="true"><use href="#i-android"/></svg><span>Download for Android<small>Get Santhica on Google Play</small></span></a><a href="https://apps.apple.com/us/app/santhica/id6760320017" target="_blank" rel="noopener noreferrer"><svg class="icon" aria-hidden="true"><use href="#i-apple"/></svg><span>Download for iPhone & iPad<small>Get Santhica on the App Store</small></span></a></div>
+      </div>
+      <a class="button button-secondary" href="#platform">Explore our products <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </div>
+    <a class="ios-shortcut" href="https://apps.apple.com/us/app/santhica/id6760320017" target="_blank" rel="noopener noreferrer"><svg class="icon" aria-hidden="true"><use href="#i-apple"/></svg> Also available for iPhone & iPad <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+  </div>
+  <!-- The rolling strip is commented out for the first launch. It ran care
+       settings, not customers, because the preview version used six invented
+       clinic names and publishing unverified hospital names undermines
+       credibility. Uncomment the block below to bring the strip back; the hero
+       re-centres itself automatically either way (see components.css). To show real
+       customers instead, swap each .care-setting for a .customer-wordmark with a
+       real name and written consent on file:
+       <div class="customer-wordmark"><svg class="icon" aria-hidden="true">
+       <use href="#i-clinic"/></svg><span><strong>Name</strong><small>TYPE</small></span></div>
 
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Santhica — Care That Connects" />
-    <meta name="twitter:description" content="Not another health app. The data backbone India's 1.4 billion people have been waiting for." />
+  <div class="customer-strip setting-strip" aria-label="Care settings Santhica is built for">
+    <div class="marquee-meta"><span>Built for the way care already happens</span><span class="sample-note">Care settings we design for</span></div>
+    <div class="marquee-mask"><div class="marquee-track"><div class="marquee-group"><div class="care-setting"><svg class="icon" aria-hidden="true"><use href="#i-clinic"/></svg><span><strong>OPD clinics</strong><small>EVERYDAY OUTPATIENT VOLUME</small></span></div><div class="care-setting"><svg class="icon" aria-hidden="true"><use href="#i-hospital"/></svg><span><strong>Nursing homes</strong><small>SMALL AND MID-SIZE HOSPITALS</small></span></div><div class="care-setting"><svg class="icon" aria-hidden="true"><use href="#i-record"/></svg><span><strong>Specialty centres</strong><small>COMPLEX, MULTI-VISIT CARE</small></span></div><div class="care-setting"><svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg><span><strong>Paper-first practices</strong><small>HANDWRITTEN PRESCRIPTIONS</small></span></div><div class="care-setting"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><span><strong>Inpatient wards</strong><small>MULTI-DAY TREATMENT CHARTS</small></span></div><div class="care-setting"><svg class="icon" aria-hidden="true"><use href="#i-lab"/></svg><span><strong>Diagnostics & labs</strong><small>REPORTS THAT NEED FOLLOW-UP</small></span></div></div><div class="marquee-group" aria-hidden="true"><div class="care-setting"><svg class="icon" aria-hidden="true"><use href="#i-clinic"/></svg><span><strong>OPD clinics</strong><small>EVERYDAY OUTPATIENT VOLUME</small></span></div><div class="care-setting"><svg class="icon" aria-hidden="true"><use href="#i-hospital"/></svg><span><strong>Nursing homes</strong><small>SMALL AND MID-SIZE HOSPITALS</small></span></div><div class="care-setting"><svg class="icon" aria-hidden="true"><use href="#i-record"/></svg><span><strong>Specialty centres</strong><small>COMPLEX, MULTI-VISIT CARE</small></span></div><div class="care-setting"><svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg><span><strong>Paper-first practices</strong><small>HANDWRITTEN PRESCRIPTIONS</small></span></div><div class="care-setting"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><span><strong>Inpatient wards</strong><small>MULTI-DAY TREATMENT CHARTS</small></span></div><div class="care-setting"><svg class="icon" aria-hidden="true"><use href="#i-lab"/></svg><span><strong>Diagnostics & labs</strong><small>REPORTS THAT NEED FOLLOW-UP</small></span></div></div></div></div>
+  </div>
+-->
 
-    <!-- Additional SEO Meta Tags -->
-    <meta name="robots" content="index, follow" />
-    <meta name="author" content="Santhica" />
-    <link rel="canonical" href="https://santhica.com" />
+</section>
+<section class="section platform-section" id="platform" aria-labelledby="platform-title"><div class="container"><div class="section-heading centered"><span class="eyebrow">THE SANTHICA PLATFORM</span><h2 id="platform-title">One platform.<br><span class="muted-heading">Context at every step.</span></h2><p>Start with the conversation. Build a record that grows with the patient.</p></div><div class="product-pair"><article class="product-card" id="voice-scribe"><div class="product-art voice-product-art"><div class="sn-device sn-voice" aria-hidden="true"><div class="sn-screen"><div class="sn-sbar"><span>9:41</span><span>◗ ▮▮ ▮</span></div><div class="sn-appbar"><span class="sn-bk">←</span><span class="sn-t">Voice consult</span><span class="sn-sp">⋮</span></div><div class="sn-body sn-seq" style="--cycle:9s"><div class="sn-wavef"><span style="animation-delay:0s"></span><span style="animation-delay:0.09s"></span><span style="animation-delay:0.18s"></span><span style="animation-delay:0.27s"></span><span style="animation-delay:0.36s"></span><span style="animation-delay:0.45s"></span><span style="animation-delay:0.54s"></span><span style="animation-delay:0.63s"></span><span style="animation-delay:0.72s"></span><span style="animation-delay:0.81s"></span><span style="animation-delay:0.9s"></span><span style="animation-delay:0.99s"></span></div><div class="sn-meta"><span>● Recording</span><span>01:12</span></div><div class="sn-item"><div class="sn-d sn-type" style="--cycle:9s">“…paracetamol 650 SOS for fever, review after one week…”</div></div><div class="sn-st" style="--d:4.2s"><div class="sn-item sn-med"><span class="sn-rx">℞</span><div><div class="sn-n">Paracetamol 650 mg</div><div class="sn-d">SOS · fever</div></div></div></div><div class="sn-st" style="--d:5.1s"><span class="sn-pill ok">Follow-up · 1 week</span></div></div><div class="sn-acts"><div class="sn-a sn-manual">Discard</div><div class="sn-a sn-capture">Save</div></div></div></div></div><div class="product-copy"><span class="eyebrow">01 / SANTHICA VOICE SCRIBE</span><h3>Speak naturally.<br>Let the record take shape.</h3><p>Turn consultations in English, Hindi and Bengali into a structured healthcare record: medication, dosage, frequency, duration and diagnoses as discrete, FHIR-aligned fields ready for your review, not free-form text.</p><a class="text-link" href="voice-scribe.html">Explore Voice Scribe <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div></article><article class="product-card" id="patient-context"><div class="product-art record-product-art"><div class="sn-device" aria-hidden="true"><div class="sn-screen"><div class="sn-sbar"><span>9:41</span><span>◗ ▮▮ ▮</span></div><div class="sn-phdr"><div class="sn-row"><div class="sn-av">P</div><div><div class="sn-nm">Patient record</div><div class="sn-mt">F · 32y · 6 visits · ABHA linked</div></div></div></div><div class="sn-body sn-seq" style="--cycle:10s"><div class="sn-hdr">Visit history</div><div class="sn-st" style="--d:.2s"><div class="sn-tl"><div class="sn-rail"><span class="sn-dot"></span></div><div><div class="sn-n">Today · Prescription</div><div class="sn-d">Amoxicillin, Paracetamol</div></div></div></div><div class="sn-st" style="--d:1.1s"><div class="sn-tl"><div class="sn-rail"><span class="sn-dot old"></span></div><div><div class="sn-n">12 Jun · Ward admission</div><div class="sn-d">7-day treatment chart</div></div></div></div><div class="sn-st" style="--d:2s"><div class="sn-tl"><div class="sn-rail"><span class="sn-dot old"></span></div><div><div class="sn-n">3 Mar · Consultation</div><div class="sn-d">Another clinic · shared on consent</div></div></div></div><div class="sn-st" style="--d:3s"><div class="sn-item"><div class="sn-n">Active medications · 3</div><div class="sn-d">Conditions · 2 · Allergies · 1</div></div></div></div><div class="sn-acts"><div class="sn-a sn-manual">✎ Manual</div><div class="sn-a sn-capture">◉ Capture</div></div><div class="sn-tabs"><div class="sn-tb"><i>⌂</i>Home</div><div class="sn-tb on"><i>👥</i>Patients</div><div class="sn-tb"><i>▤</i>Calendar</div><div class="sn-tb"><i>⚙</i>Settings</div></div></div></div></div><div class="product-copy"><span class="eyebrow">02 / LONGITUDINAL PATIENT CONTEXT</span><h3>Every visit.<br>One continuous patient story.</h3><p>Connect prescriptions, investigations, medications and past encounters into a patient record that stays useful over time.</p><a class="text-link" href="blog-longitudinal-patient-context.html">What is longitudinal patient context? <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div></article></div></div></section>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <!-- Schema.org Structured Data -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Santhica",
-      "description": "AI-powered healthcare data network for India — digitizing prescriptions, bridging labs, connecting pharmacies",
-      "url": "https://santhica.com",
-      "sameAs": [
-        "https://www.linkedin.com/company/santhica/"
-      ],
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "customer service",
-        "email": "support@santhica.com"
-      }
-    }
-    </script>
-    <script type="module" crossorigin src="/assets/index-DnJDEfJ3.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CvDEaLaJ.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
-</html>
+<section class="section intelligence-section" id="intelligence" aria-labelledby="intelligence-title"><div class="container intelligence-stage"><div class="section-heading heading-split"><div><h2 id="intelligence-title">Patient context.<br><span class="gradient-text">Agent Intelligence that supports action.</span></h2></div><p>Meet the Santhica agents: a shared patient context, purpose-built assistance, and human review at every clinical step.</p></div><div class="intelligence-grid"><article class="intelligence-card "><div class="intelligence-copy"><div class="agent-head"><span class="feature-icon blue"><svg class="icon" aria-hidden="true"><use href="#i-record"/></svg></span><span class="agent-name">Clinical Intelligence Agent</span></div><h3>The context behind your next decision.</h3><p>Bring relevant history, trends, medication context and missing information into view — and escalate the results that must not be missed, with the clinician in control.</p><a class="text-link" href="agents.html#clinical-intelligence">Learn more <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div><div class="agent-visual context-review"><span class="screen-label">PATIENT CONTEXT · SAMPLE</span><div><svg class="icon" aria-hidden="true"><use href="#i-record"/></svg><span>Previous visits & investigations</span><b>Connected</b></div><div><svg class="icon" aria-hidden="true"><use href="#i-pill"/></svg><span>Medication history & Drug interaction</span><b>Review</b></div><div><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg><span>Trends, risks & missing information</span><b>In context</b></div><div class="context-alert"><svg class="icon" aria-hidden="true"><use href="#i-lab"/></svg><span>Abnormal lab result</span><b>Escalated</b></div></div></article><article class="intelligence-card "><div class="intelligence-copy"><div class="agent-head"><span class="feature-icon teal"><svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg></span><span class="agent-name">Documentation Agent</span></div><h3>Your workflow. Structured information.</h3><p>Turn handwritten prescriptions, PDFs and lab reports into structured, FHIR-aligned information your team can review.</p><a class="text-link" href="agents.html#documentation">Learn more <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div><div class="agent-visual document-transform"><div class="input-chips"><span>Handwriting</span><span>PDFs</span><span>Reports</span></div><div class="transform-line"><svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg><span>AI structures the information</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></div><div class="structured-record"><strong>FHIR-aligned patient record</strong><span><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg> Clinician review before use</span></div></div></article><article class="intelligence-card intelligence-card-wide"><div class="intelligence-copy"><div class="agent-head"><span class="feature-icon violet"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><span class="agent-name">Care Closure Agent</span><span class="development-label">In development</span></div><h3>Keep the next step in sight.</h3><p>Designed to track investigations, referrals, follow-ups and pending actions, so care can move from reactive to proactive.</p><a class="text-link" href="agents.html#care-closure">Learn more <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div><div class="agent-visual closure-preview"><span class="screen-label">CARE CLOSURE · CONCEPT PREVIEW</span><div><span class="notification-dot"></span><strong>Investigation needs review</strong><b>Assigned</b></div><ol><li>Result received</li><li>Clinician review</li><li>Action recorded</li><li>Patient follow-up</li></ol></div></article></div></div></section>
+
+<section class="section safety-section" id="safety-net" aria-labelledby="safety-title"><div class="container"><div class="agent-detail safety-split"><div><span class="eyebrow">THE CLINICAL SAFETY NET</span><h2 id="safety-title">An abnormal result<br><span class="gradient-text">shouldn’t wait to be Escalated.</span></h2><p>Because the record is structured rather than free text, these checks can run at the moment of review! while the patient is still in the room.</p><p>Critical lab values are parsed against reference ranges, and every new prescription is checked against the allergies and medication history already held for that patient. Each flag is raised at the point of review and has to be acknowledged, overridden or acted on before review closes.</p></div><div class="agent-visual closure-preview"><span class="screen-label">CLINICAL SAFETY NET · SAMPLE</span><div><span class="notification-dot"></span><strong>Critical result flagged</strong><b>Escalated</b></div><ol><li>Result parsed against range</li><li>Flag raised at review</li><li>Clinician acknowledges</li><li>Action recorded</li></ol></div></div><div class="safety-followup"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><div><strong>Follow-up doesn’t stop at the alert.</strong><p>Patients with pending or abnormal investigations stay on a tracked list until the result is reviewed, the action is recorded and the patient has been followed up.</p></div><a class="text-link" href="agents.html#care-closure">See the Care Closure Agent <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div><p class="page-note">Illustrative examples with fictional sample data. These checks support clinical review and do not replace clinical judgement; the treating clinician makes every decision. Alerting behaviour is being developed and validated with clinical teams.</p></div></section>
+
+<section class="section workflow-section" id="workflows" aria-labelledby="workflow-title"><div class="container"><div class="section-heading centered"><span class="eyebrow">AGENT-ASSISTED CLINICAL WORKFLOWS</span><h2 id="workflow-title">Care continues.<br><span class="muted-heading">The context comes with it.</span></h2><p>Outpatient to inpatient and back again. Built around the way your hospital works.</p></div><div class="tabs" role="tablist" aria-label="Explore clinical workflows"><button id="tab-outpatient" role="tab" aria-selected="true" aria-controls="panel-outpatient" tabindex="0" data-tab="outpatient"><svg class="icon" aria-hidden="true"><use href="#i-clinic"/></svg>Outpatient care</button><button id="tab-inpatient" role="tab" aria-selected="false" aria-controls="panel-inpatient" tabindex="-1" data-tab="inpatient"><svg class="icon" aria-hidden="true"><use href="#i-hospital"/></svg>Inpatient care</button></div><div class="workflow-panel" id="panel-outpatient" role="tabpanel" aria-labelledby="tab-outpatient" tabindex="0" ><div><span class="eyebrow">OUTPATIENT CARE / WORKFLOW PREVIEW</span><h3>From the first visit to the next step.</h3><p>Connect consultation notes, investigation reports and the follow-up plan without asking your team to abandon its existing routine.</p><a class="text-link" href="clinical-workflows.html#outpatient">Explore the workflow <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div><ol class="care-steps"><li><span>01</span><strong>Registration & history</strong></li><li><span>02</span><strong>Consultation & orders</strong></li><li><span>03</span><strong>Investigations & review</strong></li><li><span>04</span><strong>Treatment & follow-up</strong></li></ol></div><div class="workflow-panel" id="panel-inpatient" role="tabpanel" aria-labelledby="tab-inpatient" tabindex="0" hidden><div><span class="eyebrow">INPATIENT CARE / WORKFLOW PREVIEW</span><h3>Carry context into the hospital.</h3><p>Admission records, daily rounds and treatment charts are multi-day and multi-author: doctor orders, nursing administration and vitals, each attributed and dated, in the same patient context. Each hospital’s chart format can differ.</p><a class="text-link" href="clinical-workflows.html#inpatient">Explore the workflow <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div><ol class="care-steps"><li><span>01</span><strong>Admission & assessment</strong></li><li><span>02</span><strong>Procedure documentation</strong></li><li><span>03</span><strong>Daily rounds & treatment charts</strong></li><li><span>04</span><strong>Discharge & follow-up</strong></li></ol></div></div></section>
+
+<section class="section why-section" id="why-santhica" aria-labelledby="why-title">
+<div class="container why-grid">
+<div class="why-visual">
+<div class="signal-orbit orbit-one">
+</div>
+<div class="signal-orbit orbit-two">
+</div>
+<div class="signal-orbit orbit-three">
+</div>
+<div class="phone">
+<div class="phone-notch">
+</div>
+<div class="phone-status"><span>9:41</span><span>▮▮▮ &nbsp; ▰</span>
+</div>
+<div class="phone-header"><strong>Santhica</strong><small>Healthcare, simplified.</small><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg>
+</div>
+<div class="phone-content">
+<div class="offline-notice"><svg class="icon" aria-hidden="true"><use href="#i-wifi"/></svg> Working offline <span>●</span>
+</div>
+<h4>Your practice, in your pocket.</h4>
+<div class="phone-tiles">
+<div><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg><span>Patients</span>
+</div>
+<div><svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg><span>Records</span>
+</div></div>
+<div class="phone-capture"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg> Capture a visit</div><span class="phone-label">RECENT ACTIVITY</span>
+<div class="phone-activity"><span class="mini-icon blue"><svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg></span>
+<div><strong>Prescription captured</strong><small>Saved on this device</small>
+</div></div>
+<div class="phone-activity"><span class="mini-icon teal"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>
+<div><strong>Patient record updated</strong><small>Ready to sync</small>
+</div></div>
+<div class="phone-sync"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg> Your work stays with you.</div>
+</div>
+<div class="phone-bottom"><svg class="icon" aria-hidden="true"><use href="#i-clinic"/></svg><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>
+</div></div>
+<div class="offline-float"><span class="mini-icon teal"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>
+<div><strong>Care doesn’t go offline.</strong><small>Your records shouldn’t either.</small>
+</div></div><span class="visual-disclaimer">Illustrative mobile experience</span>
+</div>
+<div class="why-copy"><span class="eyebrow">BUILT FOR REAL-WORLD INDIA</span>
+<h2 id="why-title">Great care shouldn’t<br>depend on <span class="gradient-text">a signal.</span></h2>
+<p>Busy clinics. Paper prescriptions. Unreliable connectivity. Santhica is designed for the conditions you work in, every day.</p>
+<div class="why-feature"><span class="mini-icon blue"><svg class="icon" aria-hidden="true"><use href="#i-wifi"/></svg></span>
+<div>
+<h3>Keep working offline</h3>
+<p>Capture visits and access local records. Sync when your connection returns.</p>
+</div></div>
+<div class="why-feature"><span class="mini-icon teal"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg></span>
+<div>
+<h3>Start with the phone you have</h3>
+<p>A mobile-first workflow that meets your practice where it is.</p>
+</div></div>
+<div class="why-feature"><span class="mini-icon violet"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg></span>
+<div>
+<h3>Keep consent at the centre</h3>
+<p>Share information deliberately, with patient consent built into the care journey.</p>
+</div></div>
+<p class="architecture-note">Designed for FHIR / ABDM interoperability.<br>ABDM certification is on our roadmap.</p>
+</div></div>
+</section>
+
+<section class="section app-section" id="download" aria-labelledby="download-title"><div class="container app-download-grid"><div><span class="eyebrow">YOUR PRACTICE, IN YOUR POCKET</span><h2 id="download-title">Connected care.<br><span class="muted-heading">Wherever you are.</span></h2><p>Spend more time with your patients. Start with the phone you already use, build longitudinal patient context, and keep the next step in care visible.</p><div class="store-badges"><a class="store-badge" href="https://play.google.com/store/apps/details?id=com.santhica.app" target="_blank" rel="noopener noreferrer"><svg class="icon" aria-hidden="true"><use href="#i-android"/></svg><span><small>GET IT ON</small><strong>Google Play</strong></span><span class="sr-only"> (opens in a new tab)</span></a><a class="store-badge" href="https://apps.apple.com/us/app/santhica/id6760320017" target="_blank" rel="noopener noreferrer"><svg class="icon" aria-hidden="true"><use href="#i-apple"/></svg><span><small>Download on the</small><strong>App Store</strong></span><span class="sr-only"> (opens in a new tab)</span></a></div><div class="download-trust"><span><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> Android & iOS</span><span><svg class="icon" aria-hidden="true"><use href="#i-wifi"/></svg> Offline-first workflow</span><span><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg> Clinician-reviewed</span></div></div><div class="app-art" aria-hidden="true"><div class="app-halo"></div><div class="app-logo-tile"><img src="assets/img/santhica-mark.png" alt="" width="110" height="110"></div><div class="app-art-label"><strong>santhica.</strong><span>care that connects</span></div><span class="app-float app-float-one"><svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg> Data to structured FHIR</span><span class="app-float app-float-two"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg> Voice to clinical context</span><span class="app-float app-float-three"><svg class="icon" aria-hidden="true"><use href="#i-record"/></svg> Longitudinal patient context</span></div></div></section>
+
+
+<section class="section faq-section" aria-labelledby="faq-title">
+<div class="container faq-layout">
+<div><span class="eyebrow">A LITTLE MORE CLARITY</span>
+<h2 id="faq-title">Good questions.<br><span class="muted-heading">Clear answers.</span></h2>
+<p>Want to talk through your specific workflow?</p><a class="text-link" href="contact.html">Let’s have a conversation <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+</div>
+<div class="faq-list">
+<details><summary>Do I have to stop using paper prescriptions?<svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></summary>
+<p>No. Santhica is designed to work with handwritten prescriptions. Capture a photo, review the extracted information, and add it to the patient record.</p>
+</details>
+<details><summary>What can I do without an internet connection?<svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></summary>
+<p>You can capture visits and work with records available on your device. Data syncs when connectivity returns. Cloud-based AI processing and sharing need a connection; we can walk through the exact workflow for your practice in a demo.</p>
+</details>
+<details><summary>Does AI make clinical decisions for me?<svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></summary>
+<p>No. Santhica assists with structuring information and surfacing relevant context. Clinicians review AI-generated content and remain responsible for clinical decisions.</p>
+</details>
+<details><summary>Is Santhica ABDM certified?<svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></summary>
+<p>ABDM certification is on our roadmap. The platform is designed around patient identity, consent, and FHIR / ABDM interoperability. We’ll discuss current integration availability for your organisation during a demo.</p>
+</details>
+<details><summary>How do I get started?<svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></summary>
+<p>Request a walkthrough on our contact page. Tell us about your clinic or organisation, and we’ll help you explore the relevant workflows, availability, onboarding, and pricing.</p>
+</details>
+</div></div>
+</section>
+
+
+</main>
+
+<footer class="site-footer">
+<div class="container">
+<div class="footer-top">
+<div class="footer-brand"><a class="brand" href="index.html" aria-label="Santhica home"><img src="assets/img/santhica-mark.png" width="38" height="38" alt=""><span>santhica<span class="brand-dot">.</span></span></a>
+<p>Care that connects.</p><span>Built for the patient’s whole journey.</span><div class="footer-downloads"><a class="store-badge" href="https://play.google.com/store/apps/details?id=com.santhica.app" target="_blank" rel="noopener noreferrer"><svg class="icon" aria-hidden="true"><use href="#i-android"/></svg><span><small>GET IT ON</small><strong>Google Play</strong></span><span class="sr-only"> (opens in a new tab)</span></a><a class="store-badge" href="https://apps.apple.com/us/app/santhica/id6760320017" target="_blank" rel="noopener noreferrer"><svg class="icon" aria-hidden="true"><use href="#i-apple"/></svg><span><small>Download on the</small><strong>App Store</strong></span><span class="sr-only"> (opens in a new tab)</span></a></div>
+</div>
+<div class="footer-column"><h3>Platform</h3><a href="platform.html">Healthcare AI OS overview</a><a href="voice-scribe.html">Santhica Voice Scribe</a><a href="agents.html">Santhica Agents</a><a href="clinical-workflows.html">Clinical workflows</a><a href="strategy.html">Strategy</a></div>
+<div class="footer-column"><h3>Company</h3><a href="about.html">About us</a><a href="careers.html">Careers</a><a href="blogs.html">Blogs</a><a href="contact.html">Contact</a></div>
+<div class="footer-column">
+<h3>Get in touch</h3><a href="mailto:support@santhica.com">support@santhica.com</a><a href="https://www.linkedin.com/company/santhica/" target="_blank" rel="noopener noreferrer">LinkedIn ↗<span class="sr-only"> (opens in a new tab)</span></a><span class="footer-tag"><span class="status-dot"></span> Care without boundaries</span>
+</div></div>
+<div class="footer-bottom"><span>© <span id="year">2026</span> Santhica, Inc. All rights reserved.</span>
+<div><a href="privacy-policy.html">Privacy Policy</a><a href="terms-of-service.html">Terms of Service</a>
+</div><a href="media-credits.html">Illustrative stock footage · Credits &amp; licence</a>
+</div></div>
+</footer></body></html>
